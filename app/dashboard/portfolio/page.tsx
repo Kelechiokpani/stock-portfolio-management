@@ -25,9 +25,9 @@ interface Portfolio {
 }
 
 export default function PortfolioManagementPage() {
-  const [showTypeModal, setShowTypeModal] = useState(false)
+  const [showTypeModal, setShowTypeModal] = useState(true)
   const [selectedPortfolioType, setSelectedPortfolioType] = useState<'inherit' | 'transfer' | null>(null)
-  
+
   const [portfolios, setPortfolios] = useState<Portfolio[]>([
     {
       id: '1',
@@ -194,9 +194,8 @@ export default function PortfolioManagementPage() {
                   <div
                     key={portfolio.id}
                     onClick={() => setSelectedPortfolio(portfolio)}
-                    className={`p-4 cursor-pointer transition ${
-                      selectedPortfolio?.id === portfolio.id ? 'bg-secondary' : 'hover:bg-secondary/50'
-                    }`}
+                    className={`p-4 cursor-pointer transition ${selectedPortfolio?.id === portfolio.id ? 'bg-secondary' : 'hover:bg-secondary/50'
+                      }`}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
@@ -215,9 +214,8 @@ export default function PortfolioManagementPage() {
                     </div>
                     <p className="text-sm font-semibold text-foreground">${portfolio.value.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
                     <p
-                      className={`text-xs font-semibold ${
-                        portfolio.change > 0 ? 'text-green-400' : 'text-red-400'
-                      }`}
+                      className={`text-xs font-semibold ${portfolio.change > 0 ? 'text-green-400' : 'text-red-400'
+                        }`}
                     >
                       {portfolio.change > 0 ? '+' : ''}{portfolio.change.toFixed(2)}%
                     </p>
