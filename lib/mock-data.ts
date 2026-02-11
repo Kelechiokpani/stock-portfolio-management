@@ -1,0 +1,594 @@
+// ========== TYPES ==========
+
+export type UserStatus = "pending_approval" | "approved" | "rejected" | "onboarding"
+
+export type PortfolioStatus = "active" | "pending" | "processing"
+
+export type RequestStatus = "pending" | "approved" | "rejected"
+
+export interface UserRequest {
+  id: string
+  fullName: string
+  email: string
+  phone: string
+  country: string
+  status: RequestStatus
+  requestDate: string
+  approvedDate?: string
+}
+
+export interface PaymentMethod {
+  id: string
+  type: string
+  details: string
+}
+
+export interface User {
+  id: string
+  fullName: string
+  email: string
+  phone: string
+  country: string
+  dateOfBirth: string
+  address: string
+  occupation: string
+  status: UserStatus
+  kycCompleted: boolean
+  agreementSigned: boolean
+  signatureType: "name" | "upload"
+  signatureUrl?: string
+  portfolios: Portfolio[]
+  createdAt: string
+  accountBalance: number
+  savedPaymentMethods: PaymentMethod[]
+  transactions: Transaction[]
+}
+
+export interface Portfolio {
+  id: string
+  name: string
+  uniqueIdentifier: string
+  authorizationCode: string
+  type: "new" | "inherited"
+  status: PortfolioStatus
+  totalValue: number
+  totalGain: number
+  gainPercent: number
+  holdings: Holding[]
+  createdAt: string
+  transferProgress?: number
+}
+
+export interface Holding {
+  id: string
+  symbol: string
+  name: string
+  shares: number
+  avgPrice: number
+  currentPrice: number
+  change: number
+  changePercent: number
+  value: number
+  market: string
+  purchaseDate: string
+  projectedReturnPercent: number
+  investmentDuration: number // in months
+  performanceHistory: PerformanceData[]
+}
+
+export interface PerformanceData {
+  date: string
+  value: number
+  gain: number
+}
+
+export type TransactionType = "deposit" | "withdrawal" | "transfer_sent" | "transfer_received" | "buy" | "sell"
+
+export interface PaymentMethod {
+  id: string
+  type: "bank_transfer" | "credit_card" | "debit_card" | "digital_wallet"
+  name: string
+  details: string // last 4 digits, account ending, etc.
+  isDefault: boolean
+}
+
+export interface Transaction {
+  id: string
+  type: TransactionType
+  amount: number
+  currency: string
+  date: string
+  description: string
+  paymentMethod?: string
+  status: "completed" | "pending" | "failed"
+  relatedUser?: string // for transfers
+}
+
+export interface InvestmentDuration {
+  startDate: string
+  endDate: string
+  months: number
+  status: "active" | "completed"
+}
+
+export interface PortfolioTransfer {
+  id: string
+  portfolioId: string
+  fromUserId: string
+  toUserId: string
+  status: "pending" | "accepted" | "rejected"
+  transferDate: string
+  completionDate?: string
+}
+
+export interface StockMarket {
+  id: string
+  name: string
+  symbol: string
+  country: string
+  currency: string
+}
+
+export interface Stock {
+  id: string
+  symbol: string
+  name: string
+  market: string
+  price: number
+  change: number
+  changePercent: number
+  volume: string
+  marketCap: string
+  sector: string
+}
+
+// ========== MOCK DATA ==========
+
+export const mockUserRequests: UserRequest[] = [
+  {
+    id: "req-001",
+    fullName: "James Thompson",
+    email: "james.thompson@email.com",
+    phone: "+1 (555) 123-4567",
+    country: "United States",
+    status: "pending",
+    requestDate: "2026-02-01",
+  },
+  {
+    id: "req-002",
+    fullName: "Sarah Mitchell",
+    email: "sarah.mitchell@email.com",
+    phone: "+44 7700 900123",
+    country: "United Kingdom",
+    status: "pending",
+    requestDate: "2026-02-03",
+  },
+  {
+    id: "req-003",
+    fullName: "Carlos Rivera",
+    email: "carlos.rivera@email.com",
+    phone: "+34 612 345 678",
+    country: "Spain",
+    status: "approved",
+    requestDate: "2026-01-20",
+    approvedDate: "2026-01-22",
+  },
+  {
+    id: "req-004",
+    fullName: "Aisha Patel",
+    email: "aisha.patel@email.com",
+    phone: "+91 98765 43210",
+    country: "India",
+    status: "rejected",
+    requestDate: "2026-01-15",
+  },
+  {
+    id: "req-005",
+    fullName: "Oliver Schmidt",
+    email: "oliver.schmidt@email.com",
+    phone: "+49 170 1234567",
+    country: "Germany",
+    status: "pending",
+    requestDate: "2026-02-05",
+  },
+]
+
+export const mockUsers: User[] = [
+  {
+    id: "user-001",
+    fullName: "Carlos Rivera",
+    email: "carlos.rivera@email.com",
+    phone: "+34 612 345 678",
+    country: "Spain",
+    dateOfBirth: "1985-06-15",
+    address: "123 Gran Via, Madrid, Spain",
+    occupation: "Software Engineer",
+    status: "approved",
+    kycCompleted: true,
+    agreementSigned: true,
+    signatureType: "name",
+    accountBalance: 15250.75,
+    savedPaymentMethods: [
+      {
+        id: "pm-001",
+        type: "bank_transfer",
+        name: "Banco Santander",
+        details: "ES91 2100 0418 4502 0005 1332",
+        isDefault: true,
+      },
+      {
+        id: "pm-002",
+        type: "credit_card",
+        name: "Visa Card",
+        details: "•••• 4242",
+        isDefault: false,
+      },
+      {
+        id: "pm-003",
+        type: "digital_wallet",
+        name: "PayPal",
+        details: "carlos.rivera@email.com",
+        isDefault: false,
+      },
+    ],
+    portfolios: [
+      {
+        id: "port-001",
+        name: "Growth Portfolio",
+        uniqueIdentifier: "VP-2026-GRW-001",
+        authorizationCode: "AUTH-XK9P2M",
+        type: "new",
+        status: "active",
+        totalValue: 48520.3,
+        totalGain: 3520.3,
+        gainPercent: 7.82,
+        createdAt: "2025-10-25",
+        holdings: [
+          {
+            id: "h-001",
+            symbol: "AAPL",
+            name: "Apple Inc.",
+            shares: 25,
+            avgPrice: 178.5,
+            currentPrice: 192.3,
+            change: 2.45,
+            changePercent: 1.29,
+            value: 4807.5,
+            market: "NASDAQ",
+            purchaseDate: "2025-10-25",
+            projectedReturnPercent: 12.5,
+            investmentDuration: 4,
+            performanceHistory: [
+              { date: "2025-10-25", value: 4462.5, gain: 0 },
+              { date: "2025-11-15", value: 4652.3, gain: 189.8 },
+              { date: "2025-12-15", value: 4756.2, gain: 293.7 },
+              { date: "2026-01-15", value: 4789.5, gain: 327.0 },
+              { date: "2026-02-10", value: 4807.5, gain: 345.0 },
+            ],
+          },
+          {
+            id: "h-002",
+            symbol: "MSFT",
+            name: "Microsoft Corp.",
+            shares: 15,
+            avgPrice: 380.2,
+            currentPrice: 412.6,
+            change: -1.8,
+            changePercent: -0.43,
+            value: 6189.0,
+            market: "NASDAQ",
+            purchaseDate: "2025-10-25",
+            projectedReturnPercent: 15.8,
+            investmentDuration: 4,
+            performanceHistory: [
+              { date: "2025-10-25", value: 5703.0, gain: 0 },
+              { date: "2025-11-15", value: 5845.2, gain: 142.2 },
+              { date: "2025-12-15", value: 6012.4, gain: 309.4 },
+              { date: "2026-01-15", value: 6145.7, gain: 442.7 },
+              { date: "2026-02-10", value: 6189.0, gain: 486.0 },
+            ],
+          },
+          {
+            id: "h-003",
+            symbol: "GOOGL",
+            name: "Alphabet Inc.",
+            shares: 20,
+            avgPrice: 145.0,
+            currentPrice: 168.9,
+            change: 3.12,
+            changePercent: 1.88,
+            value: 3378.0,
+            market: "NASDAQ",
+            purchaseDate: "2025-11-15",
+            projectedReturnPercent: 18.2,
+            investmentDuration: 3,
+            performanceHistory: [
+              { date: "2025-11-15", value: 2900.0, gain: 0 },
+              { date: "2025-12-15", value: 3045.8, gain: 145.8 },
+              { date: "2026-01-15", value: 3189.4, gain: 289.4 },
+              { date: "2026-02-10", value: 3378.0, gain: 478.0 },
+            ],
+          },
+        ],
+      },
+      {
+        id: "port-002",
+        name: "Conservative Portfolio",
+        uniqueIdentifier: "VP-2026-CON-002",
+        authorizationCode: "AUTH-XK9P2M",
+        type: "new",
+        status: "active",
+        totalValue: 32150.5,
+        totalGain: 1050.5,
+        gainPercent: 3.37,
+        createdAt: "2025-12-01",
+        holdings: [
+          {
+            id: "h-004",
+            symbol: "JNJ",
+            name: "Johnson & Johnson",
+            shares: 40,
+            avgPrice: 152.0,
+            currentPrice: 156.8,
+            change: 0.85,
+            changePercent: 0.54,
+            value: 6272.0,
+            market: "NYSE",
+            purchaseDate: "2025-12-01",
+            projectedReturnPercent: 8.5,
+            investmentDuration: 2,
+            performanceHistory: [
+              { date: "2025-12-01", value: 6080.0, gain: 0 },
+              { date: "2025-12-15", value: 6135.2, gain: 55.2 },
+              { date: "2026-01-15", value: 6198.4, gain: 118.4 },
+              { date: "2026-02-10", value: 6272.0, gain: 192.0 },
+            ],
+          },
+          {
+            id: "h-005",
+            symbol: "WMT",
+            name: "Walmart Inc.",
+            shares: 55,
+            avgPrice: 168.5,
+            currentPrice: 172.3,
+            change: 0.92,
+            changePercent: 0.54,
+            value: 9476.5,
+            market: "NYSE",
+            purchaseDate: "2025-12-01",
+            projectedReturnPercent: 7.2,
+            investmentDuration: 2,
+            performanceHistory: [
+              { date: "2025-12-01", value: 9267.5, gain: 0 },
+              { date: "2025-12-15", value: 9341.8, gain: 74.3 },
+              { date: "2026-01-15", value: 9408.2, gain: 140.7 },
+              { date: "2026-02-10", value: 9476.5, gain: 209.0 },
+            ],
+          },
+          {
+            id: "h-006",
+            symbol: "V",
+            name: "Visa Inc.",
+            shares: 12,
+            avgPrice: 283.0,
+            currentPrice: 287.5,
+            change: -0.45,
+            changePercent: -0.16,
+            value: 3450.0,
+            market: "NYSE",
+            purchaseDate: "2025-12-15",
+            projectedReturnPercent: 9.8,
+            investmentDuration: 2,
+            performanceHistory: [
+              { date: "2025-12-15", value: 3396.0, gain: 0 },
+              { date: "2026-01-15", value: 3412.5, gain: 16.5 },
+              { date: "2026-02-10", value: 3450.0, gain: 54.0 },
+            ],
+          },
+        ],
+      },
+    ],
+    transactions: [
+      {
+        id: "txn-001",
+        type: "deposit",
+        amount: 25000.0,
+        currency: "EUR",
+        date: "2025-10-15",
+        description: "Initial deposit",
+        paymentMethod: "Bank Transfer",
+        status: "completed",
+      },
+      {
+        id: "txn-002",
+        type: "buy",
+        amount: 4462.5,
+        currency: "EUR",
+        date: "2025-10-25",
+        description: "Bought 25 shares of AAPL",
+        status: "completed",
+      },
+      {
+        id: "txn-003",
+        type: "buy",
+        amount: 5703.0,
+        currency: "EUR",
+        date: "2025-10-25",
+        description: "Bought 15 shares of MSFT",
+        status: "completed",
+      },
+      {
+        id: "txn-004",
+        type: "deposit",
+        amount: 15000.0,
+        currency: "EUR",
+        date: "2025-11-10",
+        description: "Additional deposit",
+        paymentMethod: "Credit Card",
+        status: "completed",
+      },
+      {
+        id: "txn-005",
+        type: "buy",
+        amount: 2900.0,
+        currency: "EUR",
+        date: "2025-11-15",
+        description: "Bought 20 shares of GOOGL",
+        status: "completed",
+      },
+      {
+        id: "txn-006",
+        type: "deposit",
+        amount: 12000.0,
+        currency: "EUR",
+        date: "2025-11-28",
+        description: "Deposit via PayPal",
+        paymentMethod: "Digital Wallet",
+        status: "completed",
+      },
+      {
+        id: "txn-007",
+        type: "buy",
+        amount: 6080.0,
+        currency: "EUR",
+        date: "2025-12-01",
+        description: "Bought 40 shares of JNJ",
+        status: "completed",
+      },
+      {
+        id: "txn-008",
+        type: "buy",
+        amount: 9267.5,
+        currency: "EUR",
+        date: "2025-12-01",
+        description: "Bought 55 shares of WMT",
+        status: "completed",
+      },
+      {
+        id: "txn-009",
+        type: "buy",
+        amount: 3396.0,
+        currency: "EUR",
+        date: "2025-12-15",
+        description: "Bought 12 shares of V",
+        status: "completed",
+      },
+      {
+        id: "txn-010",
+        type: "withdrawal",
+        amount: 5000.0,
+        currency: "EUR",
+        date: "2026-01-20",
+        description: "Withdrawal to bank account",
+        paymentMethod: "Bank Transfer",
+        status: "completed",
+      },
+      {
+        id: "txn-011",
+        type: "deposit",
+        amount: 8000.0,
+        currency: "EUR",
+        date: "2026-02-05",
+        description: "Deposit via bank transfer",
+        paymentMethod: "Bank Transfer",
+        status: "completed",
+      },
+    ],
+    createdAt: "2025-10-22",
+  },
+  {
+    id: "user-002",
+    fullName: "Emily Watson",
+    email: "emily.watson@email.com",
+    phone: "+1 (555) 987-6543",
+    country: "United States",
+    dateOfBirth: "1990-03-22",
+    address: "456 Wall Street, New York, NY",
+    occupation: "Financial Analyst",
+    status: "pending_approval",
+    kycCompleted: true,
+    agreementSigned: true,
+    signatureType: "upload",
+    accountBalance: 5000.0,
+    savedPaymentMethods: [
+      {
+        id: "pm-004",
+        type: "bank_transfer",
+        name: "Chase Bank",
+        details: "****1234",
+        isDefault: true,
+      },
+    ],
+    portfolios: [],
+    transactions: [
+      {
+        id: "txn-012",
+        type: "deposit",
+        amount: 5000.0,
+        currency: "USD",
+        date: "2026-02-01",
+        description: "Initial deposit",
+        paymentMethod: "Bank Transfer",
+        status: "completed",
+      },
+    ],
+    createdAt: "2026-02-01",
+  },
+]
+
+export const mockStockMarkets: StockMarket[] = [
+  { id: "mkt-001", name: "NASDAQ", symbol: "NASDAQ", country: "United States", currency: "USD" },
+  { id: "mkt-002", name: "New York Stock Exchange", symbol: "NYSE", country: "United States", currency: "USD" },
+  { id: "mkt-003", name: "London Stock Exchange", symbol: "LSE", country: "United Kingdom", currency: "GBP" },
+  { id: "mkt-004", name: "Tokyo Stock Exchange", symbol: "TSE", country: "Japan", currency: "JPY" },
+  { id: "mkt-005", name: "Frankfurt Stock Exchange", symbol: "FRA", country: "Germany", currency: "EUR" },
+]
+
+export const mockStocks: Stock[] = [
+  // Technology
+  { id: "stk-001", symbol: "AAPL", name: "Apple Inc.", market: "NASDAQ", price: 192.30, change: 2.45, changePercent: 1.29, volume: "52.3M", marketCap: "2.98T", sector: "Technology" },
+  { id: "stk-002", symbol: "MSFT", name: "Microsoft Corp.", market: "NASDAQ", price: 412.60, change: -1.80, changePercent: -0.43, volume: "18.7M", marketCap: "3.07T", sector: "Technology" },
+  { id: "stk-003", symbol: "GOOGL", name: "Alphabet Inc.", market: "NASDAQ", price: 168.90, change: 3.12, changePercent: 1.88, volume: "24.1M", marketCap: "2.12T", sector: "Technology" },
+  { id: "stk-009", symbol: "NVDA", name: "NVIDIA Corp.", market: "NASDAQ", price: 878.40, change: 15.60, changePercent: 1.81, volume: "38.6M", marketCap: "2.17T", sector: "Technology" },
+  { id: "stk-015", symbol: "META", name: "Meta Platforms Inc.", market: "NASDAQ", price: 485.20, change: 12.30, changePercent: 2.60, volume: "32.1M", marketCap: "1.45T", sector: "Technology" },
+  { id: "stk-016", symbol: "ADBE", name: "Adobe Inc.", market: "NASDAQ", price: 625.40, change: 8.50, changePercent: 1.38, volume: "2.8M", marketCap: "285.3B", sector: "Technology" },
+  { id: "stk-017", symbol: "INTC", name: "Intel Corp.", market: "NASDAQ", price: 42.85, change: -1.25, changePercent: -2.84, volume: "45.2M", marketCap: "178.5B", sector: "Technology" },
+  { id: "stk-018", symbol: "AMD", name: "Advanced Micro Devices", market: "NASDAQ", price: 156.75, change: 3.20, changePercent: 2.08, volume: "28.9M", marketCap: "255.2B", sector: "Technology" },
+  // Consumer Cyclical
+  { id: "stk-004", symbol: "AMZN", name: "Amazon.com Inc.", market: "NASDAQ", price: 198.45, change: 4.67, changePercent: 2.41, volume: "41.2M", marketCap: "2.06T", sector: "Consumer Cyclical" },
+  { id: "stk-008", symbol: "TSLA", name: "Tesla Inc.", market: "NASDAQ", price: 248.90, change: -5.30, changePercent: -2.08, volume: "89.4M", marketCap: "791.5B", sector: "Consumer Cyclical" },
+  { id: "stk-019", symbol: "NKE", name: "Nike Inc.", market: "NYSE", price: 75.45, change: 1.20, changePercent: 1.62, volume: "6.5M", marketCap: "115.2B", sector: "Consumer Cyclical" },
+  { id: "stk-020", symbol: "MCD", name: "McDonald's Corp.", market: "NYSE", price: 289.30, change: 2.15, changePercent: 0.75, volume: "1.9M", marketCap: "210.4B", sector: "Consumer Cyclical" },
+  // Financial Services
+  { id: "stk-005", symbol: "JPM", name: "JPMorgan Chase", market: "NYSE", price: 198.30, change: 1.20, changePercent: 0.61, volume: "8.9M", marketCap: "571.2B", sector: "Financial Services" },
+  { id: "stk-006", symbol: "V", name: "Visa Inc.", market: "NYSE", price: 287.50, change: -0.45, changePercent: -0.16, volume: "5.6M", marketCap: "589.3B", sector: "Financial Services" },
+  { id: "stk-021", symbol: "BAC", name: "Bank of America", market: "NYSE", price: 34.75, change: 0.65, changePercent: 1.90, volume: "45.2M", marketCap: "312.5B", sector: "Financial Services" },
+  { id: "stk-022", symbol: "GS", name: "Goldman Sachs", market: "NYSE", price: 412.15, change: 3.45, changePercent: 0.84, volume: "1.8M", marketCap: "141.3B", sector: "Financial Services" },
+  { id: "stk-023", symbol: "AXP", name: "American Express", market: "NYSE", price: 285.60, change: 2.10, changePercent: 0.74, volume: "1.5M", marketCap: "221.8B", sector: "Financial Services" },
+  // Healthcare
+  { id: "stk-007", symbol: "JNJ", name: "Johnson & Johnson", market: "NYSE", price: 156.80, change: 0.85, changePercent: 0.54, volume: "6.2M", marketCap: "378.1B", sector: "Healthcare" },
+  { id: "stk-024", symbol: "UNH", name: "UnitedHealth Group", market: "NYSE", price: 515.75, change: 5.30, changePercent: 1.04, volume: "2.1M", marketCap: "496.2B", sector: "Healthcare" },
+  { id: "stk-025", symbol: "PFE", name: "Pfizer Inc.", market: "NYSE", price: 28.45, change: -0.85, changePercent: -2.90, volume: "28.5M", marketCap: "161.3B", sector: "Healthcare" },
+  { id: "stk-026", symbol: "MRK", name: "Merck & Co.", market: "NYSE", price: 72.30, change: 1.05, changePercent: 1.47, volume: "8.7M", marketCap: "183.2B", sector: "Healthcare" },
+  // Consumer Defensive
+  { id: "stk-010", symbol: "WMT", name: "Walmart Inc.", market: "NYSE", price: 172.30, change: 0.92, changePercent: 0.54, volume: "7.8M", marketCap: "464.2B", sector: "Consumer Defensive" },
+  { id: "stk-027", symbol: "KO", name: "The Coca-Cola Co.", market: "NYSE", price: 61.40, change: 0.45, changePercent: 0.74, volume: "12.3M", marketCap: "265.8B", sector: "Consumer Defensive" },
+  { id: "stk-028", symbol: "PG", name: "Procter & Gamble", market: "NYSE", price: 167.50, change: 1.20, changePercent: 0.72, volume: "5.6M", marketCap: "398.5B", sector: "Consumer Defensive" },
+  // Energy
+  { id: "stk-029", symbol: "XOM", name: "Exxon Mobil Corp.", market: "NYSE", price: 118.75, change: 2.30, changePercent: 1.98, volume: "15.2M", marketCap: "495.3B", sector: "Energy" },
+  { id: "stk-030", symbol: "CVX", name: "Chevron Corp.", market: "NYSE", price: 159.30, change: 1.85, changePercent: 1.17, volume: "8.9M", marketCap: "305.2B", sector: "Energy" },
+  // Industrials
+  { id: "stk-031", symbol: "BA", name: "Boeing Co.", market: "NYSE", price: 182.15, change: 4.50, changePercent: 2.53, volume: "5.4M", marketCap: "112.3B", sector: "Industrials" },
+  { id: "stk-032", symbol: "CAT", name: "Caterpillar Inc.", market: "NYSE", price: 345.20, change: 6.75, changePercent: 1.98, volume: "2.1M", marketCap: "185.7B", sector: "Industrials" },
+]
+
+export const mockPortfolioTransfers: PortfolioTransfer[] = [
+  {
+    id: "trf-001",
+    portfolioId: "port-001",
+    fromUserId: "user-001",
+    toUserId: "user-002",
+    status: "pending",
+    transferDate: "2026-02-10",
+  },
+]
