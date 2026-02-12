@@ -5,6 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Plus, Edit2, Trash2, TrendingUp, Eye, EyeOff, DollarSign, Percent } from 'lucide-react'
 import { PortfolioTypeModal } from '@/components/portfolio-type-modal'
+import { useRouter } from "next/navigation"
+import Link from 'next/link'
+import User_Portfolio from "@/components/Portfolio";
+
 
 interface Holding {
   id: string
@@ -27,6 +31,8 @@ interface Portfolio {
 export default function PortfolioManagementPage() {
   const [showTypeModal, setShowTypeModal] = useState(true)
   const [selectedPortfolioType, setSelectedPortfolioType] = useState<'inherit' | 'transfer' | null>(null)
+  const router = useRouter()
+
 
   const [portfolios, setPortfolios] = useState<Portfolio[]>([
     {
@@ -141,14 +147,21 @@ export default function PortfolioManagementPage() {
       <div className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-foreground">Portfolio Management</h1>
-          <Button onClick={() => setShowTypeModal(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+
+          <Link href="/dashboard/portfolio/new">
+          <Button  className="bg-primary hover:bg-primary/90 text-primary-foreground">
             <Plus className="w-4 h-4 mr-2" />
             New Portfolio
           </Button>
+          </Link>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+
+      <User_Portfolio/>
+
+      <div className="pt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Portfolio List */}
           <div className="lg:col-span-1">
@@ -384,9 +397,11 @@ export default function PortfolioManagementPage() {
         onSelectType={(type) => {
           setSelectedPortfolioType(type)
           if (type === 'inherit') {
-            setShowCreateForm(false)
+            router.push('/dashboard/portfolio/inherit')
+            // setShowCreateForm(false)
           } else if (type === 'transfer') {
-            setShowCreateForm(false)
+            router.push('/dashboard/transfer/')
+            // setShowCreateForm(false)
           }
         }}
       />

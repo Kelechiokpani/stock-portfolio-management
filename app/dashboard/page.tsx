@@ -1,11 +1,11 @@
 'use client'
 
 import Link from "next/link"
-
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { TrendingUp, Plus, Settings, LogOut, BarChart3, DollarSign, Target, Share2, Users, Copy, Eye, EyeOff } from 'lucide-react'
+import {CreatePortfolioModal} from "@/components/Modal-Layout/create-portfolio-modal";
 
 interface Portfolio {
   id: string
@@ -19,7 +19,7 @@ interface Portfolio {
 }
 
 export default function DashboardPage() {
-  const [showBalance, setShowBalance] = useState(true)
+  const [showCreateModal, setShowCreateModal] = useState(false)
   const [portfolios, setPortfolios] = useState<Portfolio[]>([
     {
       id: '1',
@@ -62,47 +62,47 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile Header */}
-      <div className="lg:hidden sticky top-0 z-50 bg-card border-b border-border">
-        <div className="px-4 py-3 flex items-center justify-between">
-          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <div className="flex items-center gap-2">
-            <Link href="/dashboard/settings">
-              <button className="p-2 hover:bg-secondary rounded-lg transition">
-                <Settings className="w-5 h-5 text-foreground" />
-              </button>
-            </Link>
-            <button className="p-2 hover:bg-secondary rounded-lg transition">
-              <LogOut className="w-5 h-5 text-foreground" />
-            </button>
-          </div>
-        </div>
-      </div>
+      {/*<div className="lg:hidden sticky top-0 z-50 bg-card border-b border-border">*/}
+      {/*  <div className="px-4 py-3 flex items-center justify-between">*/}
+      {/*    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">*/}
+      {/*      <TrendingUp className="w-5 h-5 text-primary-foreground" />*/}
+      {/*    </div>*/}
+      {/*    <div className="flex items-center gap-2">*/}
+      {/*      <Link href="/dashboard/profile">*/}
+      {/*        <button className="p-2 hover:bg-secondary rounded-lg transition">*/}
+      {/*          <Settings className="w-5 h-5 text-foreground" />*/}
+      {/*        </button>*/}
+      {/*      </Link>*/}
+      {/*      <button className="p-2 hover:bg-secondary rounded-lg transition">*/}
+      {/*        <LogOut className="w-5 h-5 text-foreground" />*/}
+      {/*      </button>*/}
+      {/*    </div>*/}
+      {/*  </div>*/}
+      {/*</div>*/}
 
-      {/* Desktop Header */}
-      <div className="hidden lg:block border-b border-border bg-card sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <h1 className="text-xl font-bold text-foreground">Invest</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard/settings">
-              <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-secondary bg-transparent">
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </Button>
-            </Link>
-            <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-secondary bg-transparent">
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </div>
+      {/*/!* Desktop Header *!/*/}
+      {/*<div className="hidden lg:block border-b border-border bg-card sticky top-0 z-50">*/}
+      {/*  <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">*/}
+      {/*    <div className="flex items-center gap-3">*/}
+      {/*      <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">*/}
+      {/*        <TrendingUp className="w-6 h-6 text-primary-foreground" />*/}
+      {/*      </div>*/}
+      {/*      <h1 className="text-xl font-bold text-foreground">Invest</h1>*/}
+      {/*    </div>*/}
+      {/*    <div className="flex items-center gap-4">*/}
+      {/*      <Link href="/dashboard/profile">*/}
+      {/*        <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-secondary bg-transparent">*/}
+      {/*          <Settings className="w-4 h-4 mr-2" />*/}
+      {/*          Settings*/}
+      {/*        </Button>*/}
+      {/*      </Link>*/}
+      {/*      <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-secondary bg-transparent">*/}
+      {/*        <LogOut className="w-4 h-4 mr-2" />*/}
+      {/*        Sign Out*/}
+      {/*      </Button>*/}
+      {/*    </div>*/}
+      {/*  </div>*/}
+      {/*</div>*/}
 
       {/* Main Content */}
       <div className="pb-24 lg:pb-0">
@@ -245,7 +245,10 @@ export default function DashboardPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-2xl font-bold text-foreground">Your Portfolios</h3>
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+
+              <Button
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                  onClick={() => setShowCreateModal(true)} >
                 <Plus className="w-4 h-4 mr-2" />
                 New Portfolio
               </Button>
@@ -320,6 +323,8 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      <CreatePortfolioModal open={showCreateModal} onOpenChange={setShowCreateModal} />
+
     </div>
   )
 }

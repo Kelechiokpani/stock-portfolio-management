@@ -1,12 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { useParams } from 'next/navigation'
+import {useParams, useRouter} from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ArrowLeft, TrendingUp, TrendingDown, DollarSign, Percent, BarChart3, Download, Copy, Settings, Eye, EyeOff, Zap, History, Sun, Moon } from 'lucide-react'
 import Link from 'next/link'
 import { useTheme } from '@/lib/theme-provider'
+import Funds from "@/components/Funds-Layout/Funds";
+
+
 
 interface StockHolding {
   id: string
@@ -37,6 +40,8 @@ interface Transaction {
 }
 
 export default function PortfolioDetailPage() {
+
+  const router = useRouter()
   const params = useParams()
   const portfolioId = params.id as string
   const { theme, toggleTheme, mounted } = useTheme()
@@ -51,7 +56,7 @@ export default function PortfolioDetailPage() {
   const [showCredentials, setShowCredentials] = useState(false)
   const [copiedId, setCopiedId] = useState(false)
   const [copiedCode, setCopiedCode] = useState(false)
-  const [activeTab, setActiveTab] = useState<'holdings' | 'transactions'>('holdings')
+  const [activeTab, setActiveTab] = useState<'holdings' | 'transactions' | 'funds'>('holdings')
   const [transactionFilter, setTransactionFilter] = useState<'all' | 'buy' | 'sell'>('all')
   const [holdingsSearch, setHoldingsSearch] = useState('')
 
@@ -88,7 +93,7 @@ export default function PortfolioDetailPage() {
   }
 
   const [selectedTicker, setSelectedTicker] = useState<StockHolding | null>(null)
-  const holdings = [
+  const holdings:any = [
     {
       id: '1',
       ticker: 'AAPL',
@@ -187,7 +192,7 @@ export default function PortfolioDetailPage() {
     }
   ]
 
-  const transactions = [
+  const transactions:any = [
     {
       id: '1',
       date: '2024-01-15',
@@ -262,11 +267,11 @@ export default function PortfolioDetailPage() {
       <div className="sticky top-0 z-40 border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard">
+            <button onClick={() => router.back()} >
               <Button variant="outline" size="sm" className="border-border hover:bg-secondary bg-transparent">
                 <ArrowLeft className="w-4 h-4" />
               </Button>
-            </Link>
+            </button>
             <div>
               <h1 className="text-2xl font-bold text-foreground">{portfolio.name}</h1>
               <p className="text-xs text-muted-foreground">Portfolio Details</p>
@@ -359,7 +364,7 @@ export default function PortfolioDetailPage() {
               }`}
           >
             <Zap className="w-4 h-4" />
-            Holdings
+            Portfolio Holdings
           </button>
           <button
             onClick={() => setActiveTab('transactions')}
@@ -369,7 +374,18 @@ export default function PortfolioDetailPage() {
               }`}
           >
             <History className="w-4 h-4" />
-            Transaction History
+           Portfolio Transaction History
+          </button>
+
+          <button
+            onClick={() => setActiveTab('funds')}
+            className={`pb-3 px-4 py-3 text-sm font-medium transition border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'funds'
+              ? 'text-primary border-primary'
+              : 'text-muted-foreground border-transparent hover:text-foreground'
+              }`}
+          >
+            <History className="w-4 h-4" />
+            Funds History / Management
           </button>
         </div>
 
@@ -377,7 +393,7 @@ export default function PortfolioDetailPage() {
         {activeTab === 'holdings' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground">Holdings</h3>
+              <h3 className="text-lg font-semibold text-foreground">Portfolio Holdings</h3>
               <Button onClick={() => setBuyMode('new')} className="bg-primary hover:bg-primary/90 text-primary-foreground text-sm h-9">
                 Buy New Ticker
               </Button>
@@ -402,7 +418,7 @@ export default function PortfolioDetailPage() {
 
             {/* Mobile View */}
             <div className="md:hidden space-y-3">
-              {holdings.filter(h => h.ticker.toLowerCase().includes(holdingsSearch.toLowerCase()) || h.name.toLowerCase().includes(holdingsSearch.toLowerCase())).map((holding) => (
+              {holdings.filter((h:any) => h.ticker.toLowerCase().includes(holdingsSearch.toLowerCase()) || h.name.toLowerCase().includes(holdingsSearch.toLowerCase())).map((holding:any) => (
                 <button key={holding.id} onClick={() => setSelectedTicker(holding)} className="w-full text-left">
                   <Card className="bg-card border-border p-4 hover:border-primary/50 transition cursor-pointer">
                     <div className="space-y-3">
@@ -465,7 +481,7 @@ export default function PortfolioDetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {holdings.filter(h => h.ticker.toLowerCase().includes(holdingsSearch.toLowerCase()) || h.name.toLowerCase().includes(holdingsSearch.toLowerCase())).map((holding) => (
+                  {holdings.filter((h:any) => h.ticker.toLowerCase().includes(holdingsSearch.toLowerCase()) || h.name.toLowerCase().includes(holdingsSearch.toLowerCase())).map((holding:any) => (
                     <tr key={holding.id} onClick={() => setSelectedTicker(holding)} className="border-b border-border hover:bg-secondary/50 transition cursor-pointer">
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-3">
@@ -504,7 +520,7 @@ export default function PortfolioDetailPage() {
         {activeTab === 'transactions' && (
           <Card className="bg-card border-border p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-              <h3 className="text-lg font-semibold text-foreground">Transaction History</h3>
+              <h3 className="text-lg font-semibold text-foreground">Portfolio Transaction History</h3>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setTransactionFilter('all')}
@@ -537,7 +553,7 @@ export default function PortfolioDetailPage() {
             </div>
 
             <div className="space-y-2">
-              {transactions.filter(tx => transactionFilter === 'all' || tx.type === transactionFilter).map((tx) => (
+              {transactions.filter((tx:any) => transactionFilter === 'all' || tx.type === transactionFilter).map((tx:any) => (
                 <button key={tx.id} onClick={() => setSelectedTransaction(tx)} className="w-full text-left hover:bg-secondary/50 transition rounded-lg p-2 -mx-2">
                   <div className="flex items-center justify-between py-3 px-2 border-b border-border last:border-0">
                     <div className="flex items-center gap-4 flex-1">
@@ -564,6 +580,10 @@ export default function PortfolioDetailPage() {
               ))}
             </div>
           </Card>
+        )}
+
+        {activeTab === 'funds' && (
+            <Funds/>
         )}
 
         {/* Ticker Detail Modal */}
@@ -641,7 +661,7 @@ export default function PortfolioDetailPage() {
                 <div>
                   <h3 className="font-semibold text-foreground mb-3">Recent Transactions</h3>
                   <div className="space-y-2">
-                    {transactions.filter(tx => tx.ticker === selectedTicker.ticker).map((tx) => (
+                    {transactions.filter((tx:any) => tx.ticker === selectedTicker.ticker).map((tx:any) => (
                       <div key={tx.id} className="flex items-center justify-between py-2 px-3 bg-secondary rounded">
                         <div>
                           <p className="text-sm font-semibold text-foreground">

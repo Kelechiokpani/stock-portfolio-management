@@ -32,16 +32,19 @@ export default function LandingPage() {
             </Link>
           </div>
           <div className="flex items-center gap-4">
+            <Link href="/login">
             <Button variant="ghost" className="text-foreground hover:bg-secondary">
               Sign In
             </Button>
-            <Button 
-              onClick={() => setIsModalOpen(true)}
+            </Link>
+            <Link href="/request-account">
+            <Button
               className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
-              Request Access
+              Request Account
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
+            </Link>
           </div>
         </div>
       </nav>
@@ -63,17 +66,20 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
-                onClick={() => setIsModalOpen(true)}
+              <Link href="/request-account">
+              <Button
                 size="lg" 
                 className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
-                Get Started
+                Request Account
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
+              </Link>
+              <Link href="/login">
               <Button size="lg" variant="outline" className="border-border text-foreground hover:bg-secondary bg-transparent">
-                Learn More
+                Sign In
               </Button>
+              </Link>
             </div>
             <div className="pt-8 border-t border-border">
               <p className="text-sm text-muted-foreground mb-4">Trusted by investors worldwide</p>
@@ -244,14 +250,15 @@ export default function LandingPage() {
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Join thousands of investors who are building wealth with our platform.
           </p>
-          <Button 
-            onClick={() => setIsModalOpen(true)}
+          <Link href="/request-account">
+          <Button
             size="lg" 
             className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
-            Request Access Now
+            Request Account
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
+          </Link>
         </div>
       </section>
 

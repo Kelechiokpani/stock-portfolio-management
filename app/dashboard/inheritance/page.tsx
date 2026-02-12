@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Share2, Send, CheckCircle2, XCircle, Clock, User, DollarSign, ArrowRight, Plus } from 'lucide-react'
+import Link from 'next/link'
+
+
 
 interface InheritanceRequest {
   id: string
@@ -121,10 +124,14 @@ export default function InheritanceFeaturePage() {
             <h1 className="text-2xl font-bold text-foreground">Portfolio Inheritance</h1>
             <p className="text-sm text-muted-foreground">Share and receive portfolios securely</p>
           </div>
-          <Button onClick={() => setShowCreateForm(!showCreateForm)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-            <Plus className="w-4 h-4 mr-2" />
-            New Transfer Request
-          </Button>
+
+          {/*/dashboard/portfolio/inherit*/}
+          <Link href="/dashboard/inheritance/inherit">
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Plus className="w-4 h-4 mr-2" />
+              Inherit Portfolio  Request
+            </Button>
+          </Link>
         </div>
       </div>
 
