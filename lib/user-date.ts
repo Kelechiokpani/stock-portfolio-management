@@ -398,3 +398,71 @@ export const mockUsers: User[] = [
         createdAt: "2026-02-01",
     },
 ]
+
+
+
+
+// ========== MOCK DATA ==========
+export type RequestStatus = "pending" | "approved" | "rejected"
+export interface UserRequest {
+    id: string
+    fullName: string
+    email: string
+    phone: string
+    country: string
+    status: RequestStatus
+    requestDate: string
+    approvedDate?: string
+}
+
+
+export const mockUserRequests: UserRequest[] = [
+    {
+        id: "req-001",
+        fullName: "James Thompson",
+        email: "james.thompson@email.com",
+        phone: "+1 (555) 123-4567",
+        country: "United States",
+        status: "pending",
+        requestDate: "2026-02-01",
+    },
+    {
+        id: "req-002",
+        fullName: "Sarah Mitchell",
+        email: "sarah.mitchell@email.com",
+        phone: "+44 7700 900123",
+        country: "United Kingdom",
+        status: "pending",
+        requestDate: "2026-02-03",
+    },
+    {
+        id: "req-003",
+        fullName: "Carlos Rivera",
+        email: "carlos.rivera@email.com",
+        phone: "+34 612 345 678",
+        country: "Spain",
+        status: "approved",
+        requestDate: "2026-01-20",
+        approvedDate: "2026-01-22",
+    },
+    {
+        id: "req-004",
+        fullName: "Aisha Patel",
+        email: "aisha.patel@email.com",
+        phone: "+91 98765 43210",
+        country: "India",
+        status: "rejected",
+        requestDate: "2026-01-15",
+    },
+    {
+        id: "req-005",
+        fullName: "Oliver Schmidt",
+        email: "oliver.schmidt@email.com",
+        phone: "+49 170 1234567",
+        country: "Germany",
+        status: "pending",
+        requestDate: "2026-02-05",
+    },
+]
+
+

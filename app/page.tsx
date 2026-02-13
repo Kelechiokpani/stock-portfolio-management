@@ -244,25 +244,32 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-20 border-t border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-            Ready to start investing?
+          {/*<h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">*/}
+          {/*  Ready to start investing?*/}
+          {/*</h2>*/}
+
+          {/*<p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">*/}
+          {/*  Join thousands of investors who are building wealth with our platform.*/}
+          {/*</p>*/}
+
+          <h2 className="text-2xl  font-bold text-foreground mb-6">
+            Open Admin Portal ---- just for testing purpose
           </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of investors who are building wealth with our platform.
-          </p>
-          <Link href="/request-account">
-          <Button
-            size="lg" 
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-          >
-            Request Account
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
+
+
+          <Link href="/admin">
+            <Button
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              Admin Account
+              <ArrowRight className="w-5 h-5 ml-2"/>
+            </Button>
           </Link>
         </div>
       </section>
 
-      <RequestAccessModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <RequestAccessModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}/>
 
       {/* Footer */}
       <footer className="py-12 border-t border-border">

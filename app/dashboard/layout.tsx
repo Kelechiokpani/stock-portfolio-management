@@ -2,7 +2,7 @@
 import React from "react"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
-import Header from "@/components/Layout/Header";
+import Header from "@/components/Layout/User/Header";
 
 
 export default function DashboardLayout({children,}: { children: React.ReactNode }) {

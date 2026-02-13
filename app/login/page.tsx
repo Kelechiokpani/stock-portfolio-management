@@ -50,59 +50,62 @@ export default function LoginPage() {
         </div>
 
         {/* Role toggle */}
-        <div className="mt-8 flex rounded-lg border border-border bg-muted p-1">
-          <button
-            type="button"
-            onClick={() => setIsAdmin(false)}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-              !isAdmin
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Investor
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsAdmin(true)}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-              isAdmin
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Administrator
-          </button>
-        </div>
+        {/*<div className="mt-8 flex rounded-lg border border-border bg-muted p-1">*/}
+        {/*  <button*/}
+        {/*    type="button"*/}
+        {/*    onClick={() => setIsAdmin(false)}*/}
+        {/*    className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${*/}
+        {/*      !isAdmin*/}
+        {/*        ? "bg-card text-foreground shadow-sm"*/}
+        {/*        : "text-muted-foreground hover:text-foreground"*/}
+        {/*    }`}*/}
+        {/*  >*/}
+        {/*    Investor*/}
+        {/*  </button>*/}
+        {/*  <button*/}
+        {/*    type="button"*/}
+        {/*    onClick={() => setIsAdmin(true)}*/}
+        {/*    className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${*/}
+        {/*      isAdmin*/}
+        {/*        ? "bg-card text-foreground shadow-sm"*/}
+        {/*        : "text-muted-foreground hover:text-foreground"*/}
+        {/*    }`}*/}
+        {/*  >*/}
+        {/*    Administrator*/}
+        {/*  </button>*/}
+        {/*</div>*/}
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              required
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={form.email}
+                onChange={(e) => setForm({...form, email: e.target.value})}
+                required
             />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
-              <button type="button" className="text-xs text-accent hover:underline">
-                Forgot password?
-              </button>
             </div>
             <Input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              required
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={form.password}
+                onChange={(e) => setForm({...form, password: e.target.value})}
+                required
             />
+          </div>
+
+          <div className="flex justify-end">
+            <button type="button" className="text-xs text-accent hover:underline">
+              Forgot password?
+            </button>
           </div>
 
           <Button type="submit" className="w-full" size="lg">
@@ -110,12 +113,12 @@ export default function LoginPage() {
           </Button>
 
           {!isAdmin && (
-            <p className="text-center text-sm text-muted-foreground">
-              {"Don't have an account? "}
-              <Link href="/request-account" className="font-medium text-primary hover:underline">
-                Request access
-              </Link>
-            </p>
+              <p className="text-center text-sm text-muted-foreground">
+                {"Don't have an account? "}
+                <Link href="/request-account" className="font-medium text-primary hover:underline">
+                  Request access
+                </Link>
+              </p>
           )}
         </form>
       </main>

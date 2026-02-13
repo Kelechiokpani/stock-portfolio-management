@@ -1,36 +1,28 @@
 "use client"
-
 import React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
     TrendingUp,
     LayoutDashboard,
-    Briefcase,
-    User,
     LogOut,
     Menu,
     X,
-    LineChart,
-    Wallet,
-    Send,
-    Globe,
+   ShieldCheck, UserCheck, Users,
 } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import Logo from "@/components/Layout/Logo";
+import {Badge} from "@/components/ui/badge";
+
 
 const navItems = [
-    { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-    { href: "/dashboard/portfolio", label: "Portfolios", icon: Briefcase },
-    { href: "/dashboard/transfer", label: "Transfers", icon: Send },
-
-    // { href: "/dashboard/stocks", label: "Stocks", icon: Globe },
-    // { href: "/dashboard/funds", label: "Funds", icon: Wallet },
-    // { href: "/dashboard/inheritance", label: "Inheritance", icon: LineChart },
-    // { href: "/dashboard/profile", label: "Profile", icon: User },
+    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/admin/requests", label: "Account Requests", icon: UserCheck, badge: 3 },
+    { href: "/admin/users", label: "Users", icon: Users },
 ]
 
-export default function Header( ) {
+export default function Admin_Header( ) {
 
     const pathname = usePathname()
     const [mobileNavOpen, setMobileNavOpen] = useState(false)
@@ -38,7 +30,7 @@ export default function Header( ) {
     return (
         <div className=" bg-background">
             {/* Top bar */}
-            <header className="sticky top-0 z-50 border-b border-border bg-card">
+            <header className="sticky top-0 z-50 border-b border-border bg-primary text-primary-foreground">
                 <div className="flex h-16 items-center justify-between px-4 lg:px-8">
                     <div className="flex items-center gap-4">
                         <button
@@ -49,29 +41,32 @@ export default function Header( ) {
                         >
                             {mobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                         </button>
-                        <Link href="/dashboard" className="flex items-center gap-2">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                                <TrendingUp className="h-5 w-5 text-primary-foreground" />
-                            </div>
-                            <span className="text-xl font-bold text-foreground tracking-tight">VaultStock</span>
-                        </Link>
+                        <Logo/>
+
                     </div>
 
                     <nav className="hidden items-center gap-1 lg:flex">
                         {navItems.map((item) => {
                             const isActive =
-                                item.href === "/dashboard"
-                                    ? pathname === "/dashboard"
+                                item.href === "/admin"
+                                    ? pathname === "/admin"
                                     : pathname.startsWith(item.href)
                             return (
                                 <Link key={item.href} href={item.href}>
                                     <Button
-                                        variant={isActive ? "secondary" : "ghost"}
+                                        variant="ghost"
                                         size="sm"
-                                        className="gap-2"
+                                        className={`gap-2 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground ${
+                                            isActive ? "bg-primary-foreground/10" : ""
+                                        }`}
                                     >
                                         <item.icon className="h-4 w-4" />
                                         {item.label}
+                                        {item.badge && (
+                                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground">
+                        {item.badge}
+                      </span>
+                                        )}
                                     </Button>
                                 </Link>
                             )
@@ -79,16 +74,14 @@ export default function Header( ) {
                     </nav>
 
                     <div className="flex items-center gap-3">
-                        <Link href="/dashboard/profile">
                         <div className="hidden items-center gap-2 sm:flex">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
-                                CR
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-foreground/10 text-sm font-semibold">
+                                <ShieldCheck className="h-4 w-4" />
                             </div>
-                            <span className="text-xs font-medium text-foreground">Carlos Rivera</span>
+                            <span className="text-sm font-medium">Admin</span>
                         </div>
-                        </Link>
                         <Link href="/login">
-                            <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
+                            <Button variant="ghost" size="sm" className="gap-1 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10">
                                 <LogOut className="h-4 w-4" />
                                 <span className="hidden sm:inline">Sign Out</span>
                             </Button>
@@ -96,14 +89,15 @@ export default function Header( ) {
                     </div>
                 </div>
             </header>
+
             {/* Mobile Nav */}
             {mobileNavOpen && (
                 <div className="border-b border-border bg-card p-4 lg:hidden">
                     <nav className="flex flex-col gap-1">
                         {navItems.map((item) => {
                             const isActive =
-                                item.href === "/dashboard"
-                                    ? pathname === "/dashboard"
+                                item.href === "/admin"
+                                    ? pathname === "/admin"
                                     : pathname.startsWith(item.href)
                             return (
                                 <Link key={item.href} href={item.href} onClick={() => setMobileNavOpen(false)}>
@@ -114,6 +108,11 @@ export default function Header( ) {
                                     >
                                         <item.icon className="h-4 w-4" />
                                         {item.label}
+                                        {item.badge && (
+                                            <Badge variant="destructive" className="ml-auto text-xs">
+                                                {item.badge}
+                                            </Badge>
+                                        )}
                                     </Button>
                                 </Link>
                             )

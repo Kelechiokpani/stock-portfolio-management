@@ -301,9 +301,12 @@ export default function DashboardPage() {
                   Create, edit, or delete portfolios and manage your holdings across multiple investment strategies.
                 </p>
               </div>
+
+              <Link href="/dashboard/portfolio/">
               <Button className="bg-primary hover:bg-primary/90 text-primary-foreground mt-4 w-full">
                 Go to Management
               </Button>
+              </Link>
             </Card>
 
             <Link href="/dashboard/transfer">
