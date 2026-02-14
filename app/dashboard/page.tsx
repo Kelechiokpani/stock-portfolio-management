@@ -181,30 +181,43 @@ export default function DashboardPage() {
 
           {/* Quick Actions */}
           <div className="grid grid-cols-2 gap-3">
-            <Button className="bg-secondary hover:bg-secondary/80 text-foreground h-12 rounded-lg font-medium">
-              <DollarSign className="w-4 h-4 mr-2" />
-              Deposit
-            </Button>
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 rounded-lg font-medium">
-              <Plus className="w-4 h-4 mr-2" />
-              Buy Stock
-            </Button>
+            <Link href="/dashboard/portfolio">
+              <Button className="bg-secondary hover:bg-secondary/80 text-foreground h-12 rounded-lg font-medium">
+                <DollarSign className="w-4 h-4 mr-2" />
+                Manage Portfolios
+              </Button>
+            </Link>
+
+            <Link href="/dashboard/transfer">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 rounded-lg font-medium">
+                <Plus className="w-4 h-4 mr-2" />
+                 Portfolios transfer
+              </Button>
+            </Link>
           </div>
 
           {/* Bottom Action Menu */}
-          <div className="grid grid-cols-3 gap-2 bg-card border-t border-border fixed bottom-0 left-0 right-0 p-3 lg:hidden">
+          <div
+              className="grid grid-cols-3 gap-2 bg-card border-t border-border fixed bottom-0 left-0 right-0 p-3 lg:hidden">
+            <Link href="/dashboard">
+              <button className="flex flex-col items-center gap-1 p-3 hover:bg-secondary rounded-lg transition">
+                <Target className="w-5 h-5 text-foreground"/>
+                <p className="text-xs text-muted-foreground">Home</p>
+              </button>
+            </Link>
+            <Link href="/dashboard/portfolio">
             <button className="flex flex-col items-center gap-1 p-3 hover:bg-secondary rounded-lg transition">
-              <Target className="w-5 h-5 text-foreground" />
-              <p className="text-xs text-muted-foreground">Make Limit</p>
+              <BarChart3 className="w-5 h-5 text-foreground"/>
+              <p className="text-xs text-muted-foreground">Portfolio</p>
             </button>
+            </Link>
+            <Link href="/dashboard/profile">
             <button className="flex flex-col items-center gap-1 p-3 hover:bg-secondary rounded-lg transition">
-              <Users className="w-5 h-5 text-foreground" />
-              <p className="text-xs text-muted-foreground">Invite</p>
+              <Users className="w-5 h-5 text-foreground"/>
+              <p className="text-xs text-muted-foreground">Profile</p>
             </button>
-            <button className="flex flex-col items-center gap-1 p-3 hover:bg-secondary rounded-lg transition">
-              <BarChart3 className="w-5 h-5 text-foreground" />
-              <p className="text-xs text-muted-foreground">More</p>
-            </button>
+            </Link>
+
           </div>
         </div>
 
