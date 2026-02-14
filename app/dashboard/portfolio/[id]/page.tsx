@@ -278,23 +278,21 @@ export default function PortfolioDetailPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {mounted && (
-              <Button onClick={toggleTheme} variant="outline" size="sm" className="border-border hover:bg-secondary bg-transparent md:flex hidden">
-                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </Button>
-            )}
+            {/*{mounted && (*/}
+            {/*  <Button onClick={toggleTheme} variant="outline" size="sm" className="border-border hover:bg-secondary bg-transparent md:flex hidden">*/}
+            {/*    {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}*/}
+            {/*  </Button>*/}
+            {/*)}*/}
             <div className="hidden md:flex items-center gap-2">
               <Button onClick={() => setShowCredentials(true)} variant="outline" size="sm" className="border-border text-foreground hover:bg-secondary bg-transparent">
                 <Copy className="w-4 h-4 mr-2" />
                 View Credentials
               </Button>
-              <Button variant="outline" size="sm" className="border-border hover:bg-secondary bg-transparent">
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
+           <Link href='/dashboard/profile'>
               <Button variant="outline" size="sm" className="border-border hover:bg-secondary bg-transparent">
                 <Settings className="w-4 h-4" />
               </Button>
+           </Link>
             </div>
             {mounted && (
               <Button onClick={toggleTheme} variant="outline" size="sm" className="border-border hover:bg-secondary bg-transparent md:hidden">

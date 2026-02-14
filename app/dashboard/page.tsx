@@ -184,14 +184,14 @@ export default function DashboardPage() {
             <Link href="/dashboard/portfolio">
               <Button className="bg-secondary hover:bg-secondary/80 text-foreground h-12 rounded-lg font-medium">
                 <DollarSign className="w-4 h-4 mr-2" />
-                Manage Portfolios
+                 Portfolios
               </Button>
             </Link>
 
             <Link href="/dashboard/transfer">
               <Button className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 rounded-lg font-medium">
                 <Plus className="w-4 h-4 mr-2" />
-                 Portfolios transfer
+                  transfer
               </Button>
             </Link>
           </div>

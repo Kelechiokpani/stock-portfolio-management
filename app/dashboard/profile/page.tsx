@@ -86,11 +86,11 @@ export default function SettingsPage() {
             <Settings className="w-6 h-6 text-primary" />
             <h1 className="text-2xl font-bold text-foreground">Settings</h1>
           </div>
-          {mounted && (
-            <button onClick={toggleTheme} className="p-2 hover:bg-secondary rounded-lg transition">
-              {theme === 'dark' ? <Sun className="w-5 h-5 text-foreground" /> : <Moon className="w-5 h-5 text-foreground" />}
-            </button>
-          )}
+          {/*{mounted && (*/}
+          {/*  <button onClick={toggleTheme} className="p-2 hover:bg-secondary rounded-lg transition">*/}
+          {/*    {theme === 'dark' ? <Sun className="w-5 h-5 text-foreground" /> : <Moon className="w-5 h-5 text-foreground" />}*/}
+          {/*  </button>*/}
+          {/*)}*/}
         </div>
       </div>
 
@@ -267,18 +267,18 @@ export default function SettingsPage() {
                   </div>
                 </Card>
 
-                <Card className="bg-card border-border p-6">
-                  <h2 className="text-xl font-semibold text-foreground mb-4">Account Actions</h2>
-                  <div className="space-y-3">
-                    <Button className="w-full bg-secondary hover:bg-secondary/80 text-foreground justify-start">
-                      <User className="w-4 h-4 mr-2" />
-                      Download My Data
-                    </Button>
-                    <Button className="w-full bg-secondary hover:bg-secondary/80 text-foreground justify-start">
-                      📧 Export Account
-                    </Button>
-                  </div>
-                </Card>
+                {/*<Card className="bg-card border-border p-6">*/}
+                {/*  <h2 className="text-xl font-semibold text-foreground mb-4">Account Actions</h2>*/}
+                {/*  <div className="space-y-3">*/}
+                {/*    <Button className="w-full bg-secondary hover:bg-secondary/80 text-foreground justify-start">*/}
+                {/*      <User className="w-4 h-4 mr-2" />*/}
+                {/*      📧*/}
+                {/*    </Button>*/}
+                {/*    <Button className="w-full bg-secondary hover:bg-secondary/80 text-foreground justify-start">*/}
+                {/*      📧*/}
+                {/*    </Button>*/}
+                {/*  </div>*/}
+                {/*</Card>*/}
 
                 <Button onClick={handleSave} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                   <Save className="w-4 h-4 mr-2" />
@@ -361,13 +361,13 @@ export default function SettingsPage() {
                   </div>
                 </Card>
 
-                <Card className="bg-red-500/10 border border-red-500/30 p-6">
-                  <h3 className="text-lg font-semibold text-red-400 mb-4">Active Sessions</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Currently logged in on 2 devices</p>
-                  <Button className="w-full bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30">
-                    Sign Out All Other Devices
-                  </Button>
-                </Card>
+                {/*<Card className="bg-red-500/10 border border-red-500/30 p-6">*/}
+                {/*  <h3 className="text-lg font-semibold text-red-400 mb-4">Active Sessions</h3>*/}
+                {/*  <p className="text-sm text-muted-foreground mb-4">Currently logged in on 2 devices</p>*/}
+                {/*  <Button className="w-full bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30">*/}
+                {/*    Sign Out All Other Devices*/}
+                {/*  </Button>*/}
+                {/*</Card>*/}
 
                 <Button onClick={handleSave} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                   <Save className="w-4 h-4 mr-2" />
@@ -384,10 +384,8 @@ export default function SettingsPage() {
                   <div className="space-y-4">
                     {[
                       { key: 'emailNotifications', label: 'Email Notifications', desc: 'Receive email updates on your account' },
-                      { key: 'priceAlerts', label: 'Price Alerts', desc: 'Get notified when stock prices change' },
+                      // { key: 'priceAlerts', label: 'Price Alerts', desc: 'Get notified when stock prices change' },
                       { key: 'portfolioUpdates', label: 'Portfolio Updates', desc: 'Daily portfolio performance summaries' },
-                      { key: 'newsDigest', label: 'News Digest', desc: 'Weekly market news and insights' },
-                      { key: 'weeklyReport', label: 'Weekly Report', desc: 'Comprehensive weekly investment report' },
                     ].map(({ key, label, desc }) => (
                       <div key={key} className="flex items-center justify-between py-3 border-b border-border last:border-0">
                         <div>
@@ -421,30 +419,30 @@ export default function SettingsPage() {
             {/* Preferences */}
             {activeTab === 'preferences' && (
               <div className="space-y-6">
-                <Card className="bg-card border-border p-6">
-                  <h2 className="text-xl font-semibold text-foreground mb-4">Display & Appearance</h2>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Theme</label>
-                      <select className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-foreground focus:outline-none focus:border-primary transition">
-                        <option>Dark Mode (Default)</option>
-                        <option>Light Mode</option>
-                        <option>Auto</option>
-                      </select>
-                    </div>
+                {/*<Card className="bg-card border-border p-6">*/}
+                {/*  <h2 className="text-xl font-semibold text-foreground mb-4">Display & Appearance</h2>*/}
+                {/*  <div className="space-y-4">*/}
+                {/*    <div>*/}
+                {/*      <label className="block text-sm font-medium text-foreground mb-2">Theme</label>*/}
+                {/*      <select className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-foreground focus:outline-none focus:border-primary transition">*/}
+                {/*        <option>Dark Mode (Default)</option>*/}
+                {/*        <option>Light Mode</option>*/}
+                {/*        <option>Auto</option>*/}
+                {/*      </select>*/}
+                {/*    </div>*/}
 
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Currency Display</label>
-                      <select className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-foreground focus:outline-none focus:border-primary transition">
-                        <option>USD ($)</option>
-                        <option>EUR (€)</option>
-                        <option>GBP (£)</option>
-                        <option>CAD (C$)</option>
-                        <option>AUD (A$)</option>
-                      </select>
-                    </div>
-                  </div>
-                </Card>
+                {/*    <div>*/}
+                {/*      <label className="block text-sm font-medium text-foreground mb-2">Currency Display</label>*/}
+                {/*      <select className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-foreground focus:outline-none focus:border-primary transition">*/}
+                {/*        <option>USD ($)</option>*/}
+                {/*        <option>EUR (€)</option>*/}
+                {/*        <option>GBP (£)</option>*/}
+                {/*        <option>CAD (C$)</option>*/}
+                {/*        <option>AUD (A$)</option>*/}
+                {/*      </select>*/}
+                {/*    </div>*/}
+                {/*  </div>*/}
+                {/*</Card>*/}
 
                 <Card className="bg-card border-border p-6">
                   <h2 className="text-xl font-semibold text-foreground mb-4">Privacy & Data</h2>
@@ -479,22 +477,22 @@ export default function SettingsPage() {
             )}
 
             {/* Danger Zone */}
-            <Card className="bg-red-500/10 border border-red-500/30 p-6 md:col-span-1 lg:col-span-3">
-              <h2 className="text-xl font-semibold text-red-400 mb-4">Danger Zone</h2>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
-                <Button
-                  onClick={() => setShowConfirmDelete(true)}
-                  className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Account
-                </Button>
-              </div>
-            </Card>
+            {/*<Card className="bg-red-500/10 border border-red-500/30 p-6 md:col-span-1 lg:col-span-3">*/}
+            {/*  <h2 className="text-xl font-semibold text-red-400 mb-4">Danger Zone</h2>*/}
+            {/*  <div className="flex flex-col sm:flex-row gap-3">*/}
+            {/*    <Button className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30">*/}
+            {/*      <LogOut className="w-4 h-4 mr-2" />*/}
+            {/*      Sign Out*/}
+            {/*    </Button>*/}
+            {/*    <Button*/}
+            {/*      onClick={() => setShowConfirmDelete(true)}*/}
+            {/*      className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30"*/}
+            {/*    >*/}
+            {/*      <Trash2 className="w-4 h-4 mr-2" />*/}
+            {/*      Delete Account*/}
+            {/*    </Button>*/}
+            {/*  </div>*/}
+            {/*</Card>*/}
           </div>
         </div>
       </div>

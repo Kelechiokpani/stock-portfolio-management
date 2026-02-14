@@ -361,7 +361,8 @@ export default function NewPortfolioPage() {
 
         {/* Review Step */}
         {step === "review" && (
-            <div className="mx-auto mt-8 max-w-2xl space-y-6">
+            <div className="mx-auto mt-6 sm:mt-8 max-w-2xl px-4 sm:px-0 space-y-6">
+
               <div className="space-y-2">
                 <Label htmlFor="portfolioName">Portfolio Name</Label>
                 <Input
@@ -376,55 +377,85 @@ export default function NewPortfolioPage() {
                 <CardHeader>
                   <CardTitle className="text-base">Selected Holdings</CardTitle>
                 </CardHeader>
+
                 <CardContent>
                   <div className="space-y-4">
+
                     {selectedStocks.map((stock) => (
-                        <div key={stock.id} className="flex items-center justify-between gap-4">
+                        <div
+                            key={stock.id}
+                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+                        >
+                          {/* Stock Info */}
                           <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold text-foreground">{stock.symbol}</span>
-                              <span className="text-sm text-muted-foreground">{stock.name}</span>
+                            <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-semibold text-foreground">
+                    {stock.symbol}
+                  </span>
+                              <span className="text-sm text-muted-foreground">
+                    {stock.name}
+                  </span>
                             </div>
+
                             <p className="text-sm text-muted-foreground">
                               ${stock.price.toFixed(2)} per share
                             </p>
                           </div>
-                          <div className="flex items-center gap-3">
+
+                          {/* Controls */}
+                          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                             <div className="flex items-center gap-2">
                               <Label htmlFor={`shares-${stock.id}`} className="sr-only">
                                 Shares
                               </Label>
+
                               <Input
                                   id={`shares-${stock.id}`}
                                   type="number"
                                   min={1}
                                   value={stock.shares}
-                                  onChange={(e) => updateShares(stock.id, parseInt(e.target.value) || 1)}
-                                  className="w-20 text-center"
+                                  onChange={(e) =>
+                                      updateShares(stock.id, parseInt(e.target.value) || 1)
+                                  }
+                                  className="w-16 sm:w-20 text-center"
                               />
-                              <span className="text-xs text-muted-foreground">shares</span>
+
+                              <span className="text-xs text-muted-foreground">
+                    shares
+                  </span>
                             </div>
-                            <p className="w-24 text-right font-medium text-foreground">
-                              ${(stock.price * stock.shares).toLocaleString("en-US", {minimumFractionDigits: 2})}
+
+                            <p className="min-w-[90px] text-right pl-2 font-medium text-foreground">
+                              ${(stock.price * stock.shares).toLocaleString("en-US", {
+                              minimumFractionDigits: 2,
+                            })}
                             </p>
+
                             <button
                                 type="button"
                                 onClick={() => removeStock(stock.id)}
-                                className="text-muted-foreground hover:text-destructive transition-colors"
+                                className="text-muted-foreground hover:text-destructive font-bold transition-colors"
                                 aria-label={`Remove ${stock.symbol}`}
                             >
-                              <X className="h-4 w-4"/>
+                              <X className="h-4 w-4 font-bold pl-2" />
                             </button>
                           </div>
                         </div>
                     ))}
+
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
-                    <span className="font-medium text-foreground">Total Portfolio Value</span>
-                    <span className="text-xl font-bold text-foreground">
-                  ${totalValue.toLocaleString("en-US", {minimumFractionDigits: 2})}
-                </span>
+                  {/* Total */}
+                  <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-t border-border pt-4">
+          <span className="font-medium text-foreground">
+            Total Portfolio Value
+          </span>
+
+                    <span className="text-lg sm:text-xl  font-bold text-foreground">
+            ${totalValue.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+          </span>
                   </div>
                 </CardContent>
               </Card>
@@ -437,8 +468,10 @@ export default function NewPortfolioPage() {
               >
                 Create Portfolio
               </Button>
+
             </div>
         )}
+
       </div>
   )
 }
