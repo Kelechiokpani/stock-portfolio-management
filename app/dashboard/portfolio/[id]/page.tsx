@@ -294,11 +294,11 @@ export default function PortfolioDetailPage() {
               </Button>
            </Link>
             </div>
-            {mounted && (
-              <Button onClick={toggleTheme} variant="outline" size="sm" className="border-border hover:bg-secondary bg-transparent md:hidden">
-                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </Button>
-            )}
+            {/*{mounted && (*/}
+            {/*  <Button onClick={toggleTheme} variant="outline" size="sm" className="border-border hover:bg-secondary bg-transparent md:hidden">*/}
+            {/*    {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}*/}
+            {/*  </Button>*/}
+            {/*)}*/}
           </div>
         </div>
       </div>
