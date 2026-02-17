@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {mockStockMarkets, mockStocks} from "@/components/market/mock-data";
 
 /* ============================= */
 /* Local Types & Mock Data       */
@@ -43,13 +44,13 @@ export interface Stock {
   volume: string
 }
 
-const mockStockMarkets = [
+const mockStockMarkets1 = [
   { id: "1", symbol: "NASDAQ", name: "NASDAQ Exchange" },
   { id: "2", symbol: "NYSE", name: "New York Stock Exchange" },
   { id: "3", symbol: "LSE", name: "London Stock Exchange" },
 ]
 
-const mockStocks: Stock[] = [
+const mockStocks1: Stock[] = [
   {
     id: "1",
     symbol: "AAPL",

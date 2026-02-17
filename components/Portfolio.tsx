@@ -15,12 +15,38 @@ interface Portfolio {
     status: 'active' | 'pending' | 'archived'
 }
 
-const User_Portfolio = () => {
+export const User_Portfolio = () => {
+
+    // Stocks
+    // Bonds
+    // ETFs
+    // Mutual Funds
+    // Gold
 
     const [portfolios] = useState<Portfolio[]>([
         {
+            id: '22',
+            name: 'Gold',
+            value: 15230.50,
+            change: 17.5,
+            holdings: 3,
+            lastUpdated: 'Today',
+            source: 'created',
+            status: 'active',
+        },
+        {
+            id: '11',
+            name: 'Mutual Funds',
+            value: 15230.50,
+            change: 17.5,
+            holdings: 3,
+            lastUpdated: 'Today',
+            source: 'created',
+            status: 'active',
+        },
+        {
             id: '1',
-            name: 'Growth Portfolio',
+            name: 'Stocks',
             value: 45230.50,
             change: 12.5,
             holdings: 8,
@@ -30,7 +56,7 @@ const User_Portfolio = () => {
         },
         {
             id: '2',
-            name: 'Tech Sector Focus',
+            name: 'Bonds',
             value: 32150.00,
             change: 18.3,
             holdings: 5,
@@ -40,7 +66,7 @@ const User_Portfolio = () => {
         },
         {
             id: '3',
-            name: 'Dividend Income',
+            name: 'ETFs',
             value: 28900.75,
             change: -2.1,
             holdings: 6,

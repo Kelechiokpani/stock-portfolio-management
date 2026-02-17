@@ -6,8 +6,6 @@ import { Card } from '@/components/ui/card'
 import { Share2, Send, CheckCircle2, XCircle, Clock, User, DollarSign, ArrowRight, Plus } from 'lucide-react'
 import Link from 'next/link'
 
-
-
 interface InheritanceRequest {
   id: string
   type: 'sent' | 'received'

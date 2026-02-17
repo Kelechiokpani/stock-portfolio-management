@@ -137,156 +137,156 @@ export default function PortfolioManagementPage() {
         <User_Portfolio />
 
         {/* Main Container */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/*<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">*/}
 
-          {/* Layout Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        {/*  /!* Layout Grid *!/*/}
+        {/*  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">*/}
 
-            {/* Portfolio List */}
-            <div className="lg:col-span-1 order-2 lg:order-1">
-              <Card className="bg-card border-border">
-                <div className="p-6 border-b border-border">
-                  <h2 className="text-lg font-semibold text-foreground">Your Portfolios</h2>
-                </div>
+        {/*    /!* Portfolio List *!/*/}
+        {/*    <div className="lg:col-span-1 order-2 lg:order-1">*/}
+        {/*      <Card className="bg-card border-border">*/}
+        {/*        <div className="p-6 border-b border-border">*/}
+        {/*          <h2 className="text-lg font-semibold text-foreground">Your Portfolios</h2>*/}
+        {/*        </div>*/}
 
-                {showCreateForm && (
-                    <div className="p-4 border-b border-border space-y-3">
-                      <input
-                          type="text"
-                          placeholder="Portfolio name"
-                          value={newPortfolio.name}
-                          onChange={(e) => setNewPortfolio({ ...newPortfolio, name: e.target.value })}
-                          className="w-full px-3 py-2 bg-secondary border border-border rounded text-foreground text-sm"
-                      />
-                      <textarea
-                          placeholder="Description"
-                          value={newPortfolio.description}
-                          onChange={(e) => setNewPortfolio({ ...newPortfolio, description: e.target.value })}
-                          className="w-full px-3 py-2 bg-secondary border border-border rounded text-foreground text-sm"
-                      />
-                      <div className="flex gap-2">
-                        <Button onClick={handleCreatePortfolio} size="sm" className="flex-1">Create</Button>
-                        <Button onClick={() => setShowCreateForm(false)} size="sm" variant="outline" className="flex-1">Cancel</Button>
-                      </div>
-                    </div>
-                )}
+        {/*        {showCreateForm && (*/}
+        {/*            <div className="p-4 border-b border-border space-y-3">*/}
+        {/*              <input*/}
+        {/*                  type="text"*/}
+        {/*                  placeholder="Portfolio name"*/}
+        {/*                  value={newPortfolio.name}*/}
+        {/*                  onChange={(e) => setNewPortfolio({ ...newPortfolio, name: e.target.value })}*/}
+        {/*                  className="w-full px-3 py-2 bg-secondary border border-border rounded text-foreground text-sm"*/}
+        {/*              />*/}
+        {/*              <textarea*/}
+        {/*                  placeholder="Description"*/}
+        {/*                  value={newPortfolio.description}*/}
+        {/*                  onChange={(e) => setNewPortfolio({ ...newPortfolio, description: e.target.value })}*/}
+        {/*                  className="w-full px-3 py-2 bg-secondary border border-border rounded text-foreground text-sm"*/}
+        {/*              />*/}
+        {/*              <div className="flex gap-2">*/}
+        {/*                <Button onClick={handleCreatePortfolio} size="sm" className="flex-1">Create</Button>*/}
+        {/*                <Button onClick={() => setShowCreateForm(false)} size="sm" variant="outline" className="flex-1">Cancel</Button>*/}
+        {/*              </div>*/}
+        {/*            </div>*/}
+        {/*        )}*/}
 
-                <div className="divide-y divide-border">
-                  {portfolios.map((portfolio) => (
-                      <div
-                          key={portfolio.id}
-                          onClick={() => setSelectedPortfolio(portfolio)}
-                          className="p-4 cursor-pointer hover:bg-secondary/50 transition"
-                      >
-                        <div className="flex justify-between mb-2">
-                          <div>
-                            <h3 className="font-semibold text-foreground">{portfolio.name}</h3>
-                            <p className="text-xs text-muted-foreground">{portfolio.holdings.length} holdings</p>
-                          </div>
+        {/*        <div className="divide-y divide-border">*/}
+        {/*          {portfolios.map((portfolio) => (*/}
+        {/*              <div*/}
+        {/*                  key={portfolio.id}*/}
+        {/*                  onClick={() => setSelectedPortfolio(portfolio)}*/}
+        {/*                  className="p-4 cursor-pointer hover:bg-secondary/50 transition"*/}
+        {/*              >*/}
+        {/*                <div className="flex justify-between mb-2">*/}
+        {/*                  <div>*/}
+        {/*                    <h3 className="font-semibold text-foreground">{portfolio.name}</h3>*/}
+        {/*                    <p className="text-xs text-muted-foreground">{portfolio.holdings.length} holdings</p>*/}
+        {/*                  </div>*/}
 
-                          <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleDeletePortfolio(portfolio.id)
-                              }}
-                              className="p-1 text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+        {/*                  <button*/}
+        {/*                      onClick={(e) => {*/}
+        {/*                        e.stopPropagation()*/}
+        {/*                        handleDeletePortfolio(portfolio.id)*/}
+        {/*                      }}*/}
+        {/*                      className="p-1 text-destructive"*/}
+        {/*                  >*/}
+        {/*                    <Trash2 className="w-4 h-4" />*/}
+        {/*                  </button>*/}
+        {/*                </div>*/}
 
-                        <p className="text-sm font-semibold text-foreground">
-                          ${portfolio.value.toLocaleString()}
-                        </p>
-                      </div>
-                  ))}
-                </div>
-              </Card>
-            </div>
+        {/*                <p className="text-sm font-semibold text-foreground">*/}
+        {/*                  ${portfolio.value.toLocaleString()}*/}
+        {/*                </p>*/}
+        {/*              </div>*/}
+        {/*          ))}*/}
+        {/*        </div>*/}
+        {/*      </Card>*/}
+        {/*    </div>*/}
 
-            {/* Portfolio Details */}
-            {selectedPortfolio && (
-                <div className="lg:col-span-2 order-1 lg:order-2">
+        {/*    /!* Portfolio Details *!/*/}
+        {/*    {selectedPortfolio && (*/}
+        {/*        <div className="lg:col-span-2 order-1 lg:order-2">*/}
 
-                  {/* Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
-                    <div>
-                      <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-                        {selectedPortfolio.name}
-                      </h2>
-                      <p className="text-muted-foreground">
-                        {selectedPortfolio.description}
-                      </p>
-                    </div>
+        {/*          /!* Header *!/*/}
+        {/*          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">*/}
+        {/*            <div>*/}
+        {/*              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">*/}
+        {/*                {selectedPortfolio.name}*/}
+        {/*              </h2>*/}
+        {/*              <p className="text-muted-foreground">*/}
+        {/*                {selectedPortfolio.description}*/}
+        {/*              </p>*/}
+        {/*            </div>*/}
 
-                    <Button
-                        onClick={() => setShowAddHolding(!showAddHolding)}
-                        className="w-full sm:w-auto"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Holding
-                    </Button>
-                  </div>
+        {/*            <Button*/}
+        {/*                onClick={() => setShowAddHolding(!showAddHolding)}*/}
+        {/*                className="w-full sm:w-auto"*/}
+        {/*            >*/}
+        {/*              <Plus className="w-4 h-4 mr-2" />*/}
+        {/*              Add Holding*/}
+        {/*            </Button>*/}
+        {/*          </div>*/}
 
-                  {/* Stats Cards */}
-                  <div className="flex flex-col lg:flex-row gap-4 mb-6">
-                    <Card className="p-4 flex-1">
-                      <p className="text-xs text-muted-foreground">Portfolio Value</p>
-                      <p className="text-xl font-bold">${selectedPortfolio.value.toLocaleString()}</p>
-                    </Card>
+        {/*          /!* Stats Cards *!/*/}
+        {/*          <div className="flex flex-col lg:flex-row gap-4 mb-6">*/}
+        {/*            <Card className="p-4 flex-1">*/}
+        {/*              <p className="text-xs text-muted-foreground">Portfolio Value</p>*/}
+        {/*              <p className="text-xl font-bold">${selectedPortfolio.value.toLocaleString()}</p>*/}
+        {/*            </Card>*/}
 
-                    <Card className="p-4 flex-1">
-                      <p className="text-xs text-muted-foreground">Total Holdings</p>
-                      <p className="text-xl font-bold">{selectedPortfolio.holdings.length}</p>
-                    </Card>
+        {/*            <Card className="p-4 flex-1">*/}
+        {/*              <p className="text-xs text-muted-foreground">Total Holdings</p>*/}
+        {/*              <p className="text-xl font-bold">{selectedPortfolio.holdings.length}</p>*/}
+        {/*            </Card>*/}
 
-                    <Card className="p-4 flex-1">
-                      <p className="text-xs text-muted-foreground">Change</p>
-                      <p className="text-xl font-bold">{selectedPortfolio.change}%</p>
-                    </Card>
-                  </div>
+        {/*            <Card className="p-4 flex-1">*/}
+        {/*              <p className="text-xs text-muted-foreground">Change</p>*/}
+        {/*              <p className="text-xl font-bold">{selectedPortfolio.change}%</p>*/}
+        {/*            </Card>*/}
+        {/*          </div>*/}
 
-                  {/* Holdings Table */}
-                  <Card className="overflow-hidden">
-                    <div className="p-6 border-b border-border">
-                      <h3 className="text-lg font-semibold">Holdings</h3>
-                    </div>
+        {/*          /!* Holdings Table *!/*/}
+        {/*          <Card className="overflow-hidden">*/}
+        {/*            <div className="p-6 border-b border-border">*/}
+        {/*              <h3 className="text-lg font-semibold">Holdings</h3>*/}
+        {/*            </div>*/}
 
-                    <div className="overflow-x-auto">
-                      <table className="w-full min-w-[700px]">
-                        <thead>
-                        <tr className="border-b border-border text-xs text-muted-foreground uppercase">
-                          <th className="px-6 py-3 text-left">Symbol</th>
-                          <th className="px-6 py-3 text-left">Quantity</th>
-                          <th className="px-6 py-3 text-left">Sector</th>
-                          <th className="px-6 py-3 text-right">Price</th>
-                          <th className="px-6 py-3 text-center">Action</th>
-                        </tr>
-                        </thead>
+        {/*            <div className="overflow-x-auto">*/}
+        {/*              <table className="w-full min-w-[700px]">*/}
+        {/*                <thead>*/}
+        {/*                <tr className="border-b border-border text-xs text-muted-foreground uppercase">*/}
+        {/*                  <th className="px-6 py-3 text-left">Symbol</th>*/}
+        {/*                  <th className="px-6 py-3 text-left">Quantity</th>*/}
+        {/*                  <th className="px-6 py-3 text-left">Sector</th>*/}
+        {/*                  <th className="px-6 py-3 text-right">Price</th>*/}
+        {/*                  <th className="px-6 py-3 text-center">Action</th>*/}
+        {/*                </tr>*/}
+        {/*                </thead>*/}
 
-                        <tbody>
-                        {selectedPortfolio.holdings.map((holding) => (
-                            <tr key={holding.id} className="border-b border-border">
-                              <td className="px-6 py-4 font-semibold">{holding.symbol}</td>
-                              <td className="px-6 py-4">{holding.quantity}</td>
-                              <td className="px-6 py-4">{holding.sector}</td>
-                              <td className="px-6 py-4 text-right">${holding.currentPrice}</td>
-                              <td className="px-6 py-4 text-center">
-                                <button onClick={() => handleDeleteHolding(holding.id)}>
-                                  <Trash2 className="w-4 h-4 text-destructive" />
-                                </button>
-                              </td>
-                            </tr>
-                        ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </Card>
+        {/*                <tbody>*/}
+        {/*                {selectedPortfolio.holdings.map((holding) => (*/}
+        {/*                    <tr key={holding.id} className="border-b border-border">*/}
+        {/*                      <td className="px-6 py-4 font-semibold">{holding.symbol}</td>*/}
+        {/*                      <td className="px-6 py-4">{holding.quantity}</td>*/}
+        {/*                      <td className="px-6 py-4">{holding.sector}</td>*/}
+        {/*                      <td className="px-6 py-4 text-right">${holding.currentPrice}</td>*/}
+        {/*                      <td className="px-6 py-4 text-center">*/}
+        {/*                        <button onClick={() => handleDeleteHolding(holding.id)}>*/}
+        {/*                          <Trash2 className="w-4 h-4 text-destructive" />*/}
+        {/*                        </button>*/}
+        {/*                      </td>*/}
+        {/*                    </tr>*/}
+        {/*                ))}*/}
+        {/*                </tbody>*/}
+        {/*              </table>*/}
+        {/*            </div>*/}
+        {/*          </Card>*/}
 
-                </div>
-            )}
-          </div>
-        </div>
+        {/*        </div>*/}
+        {/*    )}*/}
+        {/*  </div>*/}
+        {/*</div>*/}
 
         <PortfolioTypeModal
             isOpen={showTypeModal}

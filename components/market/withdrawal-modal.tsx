@@ -11,31 +11,40 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import type { PaymentMethod } from "@/lib/mock-data"
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
-import {PaymentMethod} from "@/components/market/mock-data";
 
-
-
-interface DepositModalProps {
+interface WithdrawalModalProps {
   isOpen: boolean
   onClose: () => void
+  availableBalance: number
   paymentMethods: PaymentMethod[]
 }
 
-export function DepositModal({
+export function WithdrawalModal({
   isOpen,
   onClose,
+  availableBalance,
   paymentMethods,
-}: DepositModalProps) {
+}: WithdrawalModalProps) {
   const [step, setStep] = useState<"amount" | "method" | "review" | "success">(
     "amount"
   )
   const [amount, setAmount] = useState("")
-  const [selectedMethod, setSelectedMethod] = useState(paymentMethods[0]?.id || "")
+  const [selectedMethod, setSelectedMethod] = useState(
+    paymentMethods.find((m) => m.isDefault)?.id || paymentMethods[0]?.id || ""
+  )
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleDeposit = async () => {
+  const handleWithdraw = async () => {
     setIsLoading(true)
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 2000))
@@ -46,9 +55,12 @@ export function DepositModal({
   const handleClose = () => {
     setStep("amount")
     setAmount("")
-    setSelectedMethod(paymentMethods[0]?.id || "")
     onClose()
   }
+
+  const amountNum = parseFloat(amount) || 0
+  const fee = amountNum > 0 ? Math.max(5, amountNum * 0.01) : 0
+  const totalWithFee = amountNum + fee
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -56,38 +68,58 @@ export function DepositModal({
         {step === "amount" && (
           <>
             <DialogHeader>
-              <DialogTitle>Deposit Funds</DialogTitle>
+              <DialogTitle>Withdraw Funds</DialogTitle>
               <DialogDescription>
-                Enter the amount you want to deposit to your account
+                Enter the amount you want to withdraw from your account
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
+              <div className="rounded-lg bg-accent/50 border border-border p-3">
+                <p className="text-sm text-muted-foreground">Available Balance</p>
+                <p className="text-2xl font-bold text-foreground">
+                  €{availableBalance.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
               <div className="space-y-2">
-                <Label htmlFor="amount">Amount (EUR)</Label>
+                <Label htmlFor="withdrawal-amount">Amount (EUR)</Label>
                 <Input
-                  id="amount"
+                  id="withdrawal-amount"
                   placeholder="0.00"
                   type="number"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   className="text-lg"
+                  max={availableBalance}
                 />
               </div>
-              <div className="space-y-3">
-                <Label>Suggested Amounts</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {[100, 500, 1000, 2500, 5000, 10000].map((val) => (
-                    <Button
-                      key={val}
-                      variant={amount === val.toString() ? "default" : "outline"}
-                      onClick={() => setAmount(val.toString())}
-                      className="text-sm"
-                    >
-                      €{val}
-                    </Button>
-                  ))}
+              {amountNum > 0 && (
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <div className="flex justify-between">
+                    <span>Amount:</span>
+                    <span className="font-medium text-foreground">
+                      €{amountNum.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Processing Fee:</span>
+                    <span className="font-medium text-foreground">
+                      €{fee.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="border-t border-border pt-1 flex justify-between text-foreground font-medium">
+                    <span>Total to Withdraw:</span>
+                    <span>
+                      €{totalWithFee.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             <div className="flex gap-3">
               <Button variant="outline" onClick={handleClose} className="flex-1 bg-transparent">
@@ -95,7 +127,9 @@ export function DepositModal({
               </Button>
               <Button
                 onClick={() => setStep("method")}
-                disabled={!amount || parseFloat(amount) <= 0}
+                disabled={
+                  !amount || amountNum <= 0 || amountNum > availableBalance
+                }
                 className="flex-1"
               >
                 Continue
@@ -107,29 +141,31 @@ export function DepositModal({
         {step === "method" && (
           <>
             <DialogHeader>
-              <DialogTitle>Select Payment Method</DialogTitle>
+              <DialogTitle>Select Destination</DialogTitle>
               <DialogDescription>
-                Choose how you want to deposit funds
+                Where do you want to receive the funds?
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <RadioGroup value={selectedMethod} onValueChange={setSelectedMethod}>
-                {paymentMethods.map((method) => (
-                  <div key={method.id} className="flex items-center space-x-2">
-                    <RadioGroupItem value={method.id} id={method.id} />
-                    <Label
-                      htmlFor={method.id}
-                      className="flex cursor-pointer items-center gap-3 flex-1 p-2 rounded-lg border border-transparent hover:border-border hover:bg-accent/50"
-                    >
-                      <div>
-                        <p className="font-medium">{method.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {method.details}
-                        </p>
-                      </div>
-                    </Label>
-                  </div>
-                ))}
+                {paymentMethods
+                  .filter((m) => m.type === "bank_transfer")
+                  .map((method) => (
+                    <div key={method.id} className="flex items-center space-x-2">
+                      <RadioGroupItem value={method.id} id={method.id} />
+                      <Label
+                        htmlFor={method.id}
+                        className="flex cursor-pointer items-center gap-3 flex-1 p-2 rounded-lg border border-transparent hover:border-border hover:bg-accent/50"
+                      >
+                        <div>
+                          <p className="font-medium">{method.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {method.details}
+                          </p>
+                        </div>
+                      </Label>
+                    </div>
+                  ))}
               </RadioGroup>
             </div>
             <div className="flex gap-3">
@@ -150,9 +186,9 @@ export function DepositModal({
         {step === "review" && (
           <>
             <DialogHeader>
-              <DialogTitle>Review Deposit</DialogTitle>
+              <DialogTitle>Review Withdrawal</DialogTitle>
               <DialogDescription>
-                Confirm your deposit details
+                Confirm your withdrawal details
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -160,13 +196,19 @@ export function DepositModal({
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Amount</span>
                   <span className="font-semibold">
-                    €{parseFloat(amount).toLocaleString("en-US", {
+                    €{amountNum.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Payment Method</span>
+                  <span className="text-muted-foreground">Processing Fee</span>
+                  <span className="font-semibold">
+                    €{fee.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Destination</span>
                   <span className="font-semibold">
                     {paymentMethods.find((m) => m.id === selectedMethod)?.name}
                   </span>
@@ -174,16 +216,16 @@ export function DepositModal({
                 <div className="border-t border-border pt-3 flex justify-between">
                   <span className="font-medium">Total</span>
                   <span className="text-lg font-bold">
-                    €{parseFloat(amount).toLocaleString("en-US", {
+                    €{totalWithFee.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
                   </span>
                 </div>
               </div>
-              <div className="rounded-lg bg-info/10 border border-info/20 p-3 flex gap-2">
-                <AlertCircle className="h-5 w-5 text-info flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-info">
-                  Your deposit will be processed within 1-2 business days
+              <div className="rounded-lg bg-warning/10 border border-warning/20 p-3 flex gap-2">
+                <AlertCircle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-warning">
+                  Withdrawals take 2-3 business days to process
                 </p>
               </div>
             </div>
@@ -197,12 +239,12 @@ export function DepositModal({
                 Back
               </Button>
               <Button
-                onClick={handleDeposit}
+                onClick={handleWithdraw}
                 className="flex-1"
                 disabled={isLoading}
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isLoading ? "Processing..." : "Confirm Deposit"}
+                {isLoading ? "Processing..." : "Confirm Withdrawal"}
               </Button>
             </div>
           </>
@@ -211,7 +253,7 @@ export function DepositModal({
         {step === "success" && (
           <>
             <DialogHeader>
-              <DialogTitle>Deposit Successful</DialogTitle>
+              <DialogTitle>Withdrawal Submitted</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="flex justify-center">
@@ -221,22 +263,26 @@ export function DepositModal({
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-foreground">
-                  €{parseFloat(amount).toLocaleString("en-US", {
+                  €{totalWithFee.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                   })}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  has been deposited to your account
+                  Withdrawal is being processed
                 </p>
               </div>
               <div className="rounded-lg bg-accent/50 border border-border p-3 space-y-2 text-sm">
                 <p>
                   <span className="text-muted-foreground">Transaction ID:</span>{" "}
-                  <span className="font-mono font-medium">TXN-202602-1847</span>
+                  <span className="font-mono font-medium">WTH-202602-5024</span>
                 </p>
                 <p>
                   <span className="text-muted-foreground">Status:</span>{" "}
-                  <span className="font-medium text-success">Processing</span>
+                  <span className="font-medium text-warning">Pending</span>
+                </p>
+                <p>
+                  <span className="text-muted-foreground">Expected:</span>{" "}
+                  <span className="font-medium">2-3 business days</span>
                 </p>
               </div>
             </div>

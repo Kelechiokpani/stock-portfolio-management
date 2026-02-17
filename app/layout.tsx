@@ -1,6 +1,8 @@
 import React from "react"
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import NextTopLoader from "nextjs-toploader";
+
 
 import './globals.css'
 import { ThemeProvider } from '@/lib/theme-provider'
@@ -21,7 +23,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="font-sans antialiased dark">
+      <body className="font-sans antialiased dark" suppressHydrationWarning>
+      <NextTopLoader
+          color="#0CB055"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={true}
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px #2299DD,0 0 5px #2299DD"
+      />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

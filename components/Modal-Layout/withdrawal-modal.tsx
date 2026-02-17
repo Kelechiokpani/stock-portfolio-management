@@ -1,5 +1,4 @@
 "use client"
-
 import { useState } from "react"
 import {
   Dialog,
@@ -14,7 +13,7 @@ import { Label } from "@/components/ui/label"
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
-import {PaymentMethod} from "@/lib/user-date";
+import {PaymentMethod} from "@/components/market/mock-data";
 
 
 

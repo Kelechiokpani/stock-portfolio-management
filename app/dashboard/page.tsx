@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { TrendingUp, Plus, Settings, LogOut, BarChart3, DollarSign, Target, Share2, Users, Copy, Eye, EyeOff } from 'lucide-react'
 import {CreatePortfolioModal} from "@/components/Modal-Layout/create-portfolio-modal";
+import User_Portfolio from "@/components/Portfolio";
 
 interface Portfolio {
   id: string
@@ -68,7 +69,7 @@ export default function DashboardPage() {
       {/*      <TrendingUp className="w-5 h-5 text-primary-foreground" />*/}
       {/*    </div>*/}
       {/*    <div className="flex items-center gap-2">*/}
-      {/*      <Link href="/dashboard/profile">*/}
+      {/*      <Link href="/dashboard/settings">*/}
       {/*        <button className="p-2 hover:bg-secondary rounded-lg transition">*/}
       {/*          <Settings className="w-5 h-5 text-foreground" />*/}
       {/*        </button>*/}
@@ -90,7 +91,7 @@ export default function DashboardPage() {
       {/*      <h1 className="text-xl font-bold text-foreground">Invest</h1>*/}
       {/*    </div>*/}
       {/*    <div className="flex items-center gap-4">*/}
-      {/*      <Link href="/dashboard/profile">*/}
+      {/*      <Link href="/dashboard/settings">*/}
       {/*        <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-secondary bg-transparent">*/}
       {/*          <Settings className="w-4 h-4 mr-2" />*/}
       {/*          Settings*/}
@@ -267,42 +268,7 @@ export default function DashboardPage() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
-              {portfolios.map((portfolio) => (
-                <Link key={portfolio.id} href={`/dashboard/portfolio/${portfolio.id}`}>
-                  <Card className="bg-card border-border p-6 hover:border-primary/50 transition cursor-pointer h-full">
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold text-foreground">{portfolio.name}</h4>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className={`text-xs px-2 py-1 rounded ${portfolio.source === 'created' ? 'bg-primary/20 text-primary' : 'bg-blue-500/20 text-blue-400'}`}>
-                            {portfolio.source === 'created' ? 'Created by You' : 'Transferred'}
-                          </span>
-                          <span className={`text-xs px-2 py-1 rounded ${portfolio.status === 'active' ? 'bg-green-500/20 text-green-400' : portfolio.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-500/20 text-gray-400'}`}>
-                            {portfolio.status.charAt(0).toUpperCase() + portfolio.status.slice(1)}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-2">{portfolio.holdings} holdings</p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">Value</p>
-                        <p className="text-2xl font-bold text-foreground">${portfolio.value.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-4 border-t border-border">
-                        <p className={`text-sm font-semibold ${portfolio.change > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {portfolio.change > 0 ? '▲' : '▼'} {Math.abs(portfolio.change).toFixed(2)}%
-                        </p>
-                        <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-secondary bg-transparent">
-                          View →
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+            {/*<User_Portfolio />*/}
           </div>
 
           {/* Management Cards */}
