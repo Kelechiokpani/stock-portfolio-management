@@ -22,11 +22,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { mockStocks, mockStockMarkets } from "@/components/market/mock-data"
-
+import { useRouter } from "next/navigation"
 
 
 
 export default function StocksPage() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedMarket, setSelectedMarket] = useState("all")
   const [selectedSector, setSelectedSector] = useState("all")
@@ -34,6 +35,7 @@ export default function StocksPage() {
 
   // Get unique sectors
   const sectors = Array.from(new Set(mockStocks.map((s) => s.sector))).sort()
+
 
   // Filter and sort stocks
   const filteredStocks = useMemo(() => {
@@ -319,7 +321,10 @@ export default function StocksPage() {
                           Today
                         </p>
                       </div>
-                      <Button size="sm" variant="default">
+                      <Button
+                          size="sm"
+                          onClick={() => router.push(`/dashboard/stocks/${stock.symbol}`)}
+                      >
                         View Details
                       </Button>
                     </div>

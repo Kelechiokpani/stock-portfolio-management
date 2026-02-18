@@ -22,8 +22,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="font-sans antialiased dark" suppressHydrationWarning>
+      <html lang="en" suppressHydrationWarning>
+      <body className="bg-white dark:bg-darkbg">
+      {/*<body className="font-sans antialiased  bg-[#0b0f17]" suppressHydrationWarninging>*/}
       <NextTopLoader
           color="#0CB055"
           initialPosition={0.08}
@@ -35,8 +36,8 @@ export default function RootLayout({
           speed={200}
           shadow="0 0 10px #2299DD,0 0 5px #2299DD"
       />
-        <ThemeProvider>{children}</ThemeProvider>
+      <ThemeProvider>{children}</ThemeProvider>
       </body>
-    </html>
-  )
+      </html>
+)
 }

@@ -17,10 +17,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
     const savedTheme = (localStorage.getItem('theme') as Theme) || 'dark'
     setTheme(savedTheme)
     document.documentElement.classList.toggle('dark', savedTheme === 'dark')
+    setMounted(true)
   }, [])
 
   const toggleTheme = () => {
@@ -31,16 +31,62 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, mounted }}>
-      {children}
-    </ThemeContext.Provider>
+      <ThemeContext.Provider value={{ theme, toggleTheme, mounted }}>
+        {children}
+      </ThemeContext.Provider>
   )
 }
 
-export function useTheme(): ThemeContextType {
+export function useTheme() {
   const context = useContext(ThemeContext)
-  if (!context) {
-    throw new Error('useTheme must be used within ThemeProvider')
-  }
+  if (!context) throw new Error('useTheme must be used within ThemeProvider')
   return context
 }
+
+
+// 'use client'
+//
+// import React, { createContext, useContext, useEffect, useState } from 'react'
+//
+// type Theme = 'light' | 'dark'
+//
+// interface ThemeContextType {
+//   theme: Theme
+//   toggleTheme: () => void
+//   mounted: boolean
+// }
+//
+// const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+//
+// export function ThemeProvider({ children }: { children: React.ReactNode }) {
+//   const [theme, setTheme] = useState<Theme>('dark')
+//   const [mounted, setMounted] = useState(false)
+//
+//   useEffect(() => {
+//     setMounted(true)
+//     const savedTheme = (localStorage.getItem('theme') as Theme) || 'dark'
+//     setTheme(savedTheme)
+//     document.documentElement.classList.toggle('dark', savedTheme === 'dark')
+//   }, [])
+//
+//   const toggleTheme = () => {
+//     const newTheme = theme === 'light' ? 'dark' : 'light'
+//     setTheme(newTheme)
+//     localStorage.setItem('theme', newTheme)
+//     document.documentElement.classList.toggle('dark', newTheme === 'dark')
+//   }
+//
+//   return (
+//     <ThemeContext.Provider value={{ theme, toggleTheme, mounted }}>
+//       {children}
+//     </ThemeContext.Provider>
+//   )
+// }
+//
+// export function useTheme(): ThemeContextType {
+//   const context = useContext(ThemeContext)
+//   if (!context) {
+//     throw new Error('useTheme must be used within ThemeProvider')
+//   }
+//   return context
+// }

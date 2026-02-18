@@ -13,6 +13,7 @@ import {
 } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { Holding } from "@/components/market/mock-data"
+import InvestedStockChart from "@/components/market/Chart/InvestedStockChart";
 
 interface InvestmentDetailChartProps {
   holding: Holding
@@ -69,8 +70,8 @@ export function InvestmentDetailChart({
         <CardHeader>
           <div className="flex items-start justify-between">
             <div>
-              <CardTitle className="text-white">Performance History & Projection</CardTitle>
-              <p className="text-white mt-1 text-sm">
+              <CardTitle className="">Performance History & Projection</CardTitle>
+              <p className=" mt-1 text-sm">
                 Historical performance and projected future value
               </p>
             </div>
@@ -78,7 +79,7 @@ export function InvestmentDetailChart({
               <p className="text-2xl font-bold text-green-600">
                 €{latestValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </p>
-              <p className="text-sm font-semibold text-white">
+              <p className="text-sm font-semibold ">
                 {latestGain >= 0 ? "+" : ""}€
                 {latestGain.toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </p>
@@ -86,83 +87,28 @@ export function InvestmentDetailChart({
           </div>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={400}>
-            <ComposedChart
-                data={allData}
-                margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-              <XAxis
-                  dataKey="date"
-                  stroke="white"
-                  style={{ fontSize: "12px" }}
-              />
-              {/*<YAxis*/}
-              {/*    stroke="white"*/}
-              {/*    style={{ fontSize: "12px" }}*/}
-              {/*    formatter={(value:any) => `€${(value / 1000).toFixed(0)}k`}*/}
-              {/*/>*/}
-              <YAxis
-                  stroke="white"
-                  style={{ fontSize: "12px" }}
-                  tickFormatter={(value: number) => `€${(value / 1000).toFixed(0)}k`}
-              />
-              <Tooltip
-                  contentStyle={{
-                    backgroundColor: "var(--color-background)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "8px",
-                    color: "white",
-                  }}
-                  formatter={(value: number, name: string) => {
-                    if (name === "value") {
-                      return [
-                        `€${value.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
-                        "Position Value",
-                      ];
-                    } else if (name === "gain") {
-                      return [
-                        `€${value.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
-                        "Total Gain",
-                      ];
-                    }
-                    return value;
-                  }}
-                  labelStyle={{ color: "white" }}
-              />
-              <Legend wrapperStyle={{ color: "white" }} />
-              <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke="white"
-                  strokeWidth={2}
-                  dot={{ fill: "white", r: 4 }}
-                  activeDot={{ r: 6 }}
-                  name="Position Value"
-                  isAnimationActive={true}
-              />
-              <Bar dataKey="gain" fill="white" opacity={0.6} name="Total Gain" />
-            </ComposedChart>
-          </ResponsiveContainer>
+          <InvestedStockChart
+              holding={holding}
+          />
 
           <div className="mt-6 grid sm:grid-cols-2 gap-4">
             <div className="rounded-lg border border-border p-4 bg-accent/50">
-              <p className="text-sm text-white mb-1">Current Performance</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-sm  mb-1">Current Performance</p>
+              <p className="text-2xl font-bold ">
                 €{latestValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </p>
-              <p className="text-sm mt-1 text-white">
+              <p className="text-sm mt-1 ">
                 {latestGain >= 0 ? "+" : ""}€
                 {latestGain.toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </p>
             </div>
 
             <div className="rounded-lg border border-border p-4 bg-accent/50">
-              <p className="text-sm text-white mb-1">Projected at Target</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-sm  mb-1">Projected at Target</p>
+              <p className="text-2xl font-bold ">
                 €{projectedValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </p>
-              <p className="text-sm mt-1 text-white">
+              <p className="text-sm mt-1 ">
                 +€
                 {(projectedValue - holding.avgPrice * holding.shares).toLocaleString(
                     "en-US",

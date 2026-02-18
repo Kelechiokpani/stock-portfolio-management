@@ -189,6 +189,8 @@ export default function InvestmentDetailPage() {
           holding={holding}
           projectedValue={projectedFutureValue}
         />
+
+
       </div>
 
       {/* Investment Timeline */}

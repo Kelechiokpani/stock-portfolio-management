@@ -4,6 +4,9 @@ import Link from "next/link"
 import { Menu, LogOut, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Logo from "@/components/Layout/Logo"
+import {useTheme} from "@/lib/theme-provider";
+import { Sun, Moon } from 'lucide-react'
+
 
 interface HeaderProps {
     onMenuClick: () => void
@@ -11,6 +14,10 @@ interface HeaderProps {
 
 
 export default function Header({ onMenuClick }: HeaderProps) {
+
+    const { theme, toggleTheme, mounted } = useTheme()
+
+
     return (
         <header className="sticky top-0 z-40 w-full border-b bg-card">
             <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -53,6 +60,19 @@ export default function Header({ onMenuClick }: HeaderProps) {
                     >
                         <User className="h-5 w-5" />
                     </Link>
+
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={toggleTheme}
+                        className="border-gray-700 dark:border-gray-600"
+                    >
+                        {theme === 'dark' ? (
+                            <Sun className="h-4 w-4" />
+                        ) : (
+                            <Moon className="h-4 w-4" />
+                        )}
+                    </Button>
 
                     {/* Logout */}
                     <Link href="/login">

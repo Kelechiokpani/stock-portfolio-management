@@ -9,11 +9,14 @@ import {
   Clock,
   AlertCircle,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { mockUsers } from "@/components/market/mock-data"
 import { InvestmentChart } from "@/components/market/investment-chart"
+import StockDetailChart from "@/components/market/Chart/StockDetailChart";
+import TotalInvestmentChart from "@/components/market/Chart/TotalInvestmentChart";
+
+
 
 export default function InvestmentsPage() {
   const user = mockUsers[0]
@@ -162,9 +165,12 @@ export default function InvestmentsPage() {
 
       {/* Performance Chart */}
       {performanceData.length > 0 && (
-        <div className="mt-8">
-          <InvestmentChart data={performanceData} />
-        </div>
+          <CardContent className="h-full mt-8 rounded-lg border">
+          {/*<StockDetailChart stock={performanceData} />*/}
+          {/*<InvestmentChart data={performanceData} />*/}
+          <TotalInvestmentChart userId={user?.id} />
+
+        </CardContent>
       )}
 
       {/* Holdings Grid */}

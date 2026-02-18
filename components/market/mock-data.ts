@@ -145,7 +145,20 @@ export interface Stock {
   peRatio?: number
   dividend?: number
   marketTrend?: "bullish" | "bearish" | "neutral"
+
+
+
+
+  founded?: number
+  ceo?: string
+  pastCeo?: string
+  description?: string
 }
+
+
+
+
+
 
 export interface Bond {
   id: string
