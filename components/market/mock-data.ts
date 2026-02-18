@@ -2,7 +2,7 @@
 
 export type UserStatus = "pending_approval" | "approved" | "rejected" | "onboarding"
 
-export type PortfolioStatus = "active" | "pending" | "processing"
+export type PortfolioStatus = "active" | "pending" | "processing" | "transferred"
 
 export type RequestStatus = "pending" | "approved" | "rejected"
 
@@ -69,6 +69,7 @@ export interface Holding {
   avgPrice: number
   currentPrice: number
   change: number
+  quantity: number
   changePercent: number
   value: number
   market: string
@@ -367,6 +368,7 @@ export const mockUsers: User[] = [
             purchaseDate: "2025-10-25",
             projectedReturnPercent: 12.5,
             investmentDuration: 4,
+            quantity: 1,
             performanceHistory: [
               { date: "2025-10-25", value: 4462.5, gain: 0 },
               { date: "2025-11-15", value: 4652.3, gain: 189.8 },
@@ -388,6 +390,7 @@ export const mockUsers: User[] = [
             market: "NASDAQ",
             purchaseDate: "2025-10-25",
             projectedReturnPercent: 15.8,
+            quantity: 1,
             investmentDuration: 4,
             performanceHistory: [
               { date: "2025-10-25", value: 5703.0, gain: 0 },
@@ -411,6 +414,7 @@ export const mockUsers: User[] = [
             purchaseDate: "2025-11-15",
             projectedReturnPercent: 18.2,
             investmentDuration: 3,
+            quantity: 1,
             performanceHistory: [
               { date: "2025-11-15", value: 2900.0, gain: 0 },
               { date: "2025-12-15", value: 3045.8, gain: 145.8 },
@@ -445,6 +449,7 @@ export const mockUsers: User[] = [
             market: "NYSE",
             purchaseDate: "2025-12-01",
             projectedReturnPercent: 8.5,
+            quantity: 2,
             investmentDuration: 2,
             performanceHistory: [
               { date: "2025-12-01", value: 6080.0, gain: 0 },
@@ -466,6 +471,7 @@ export const mockUsers: User[] = [
             market: "NYSE",
             purchaseDate: "2025-12-01",
             projectedReturnPercent: 7.2,
+            quantity: 2,
             investmentDuration: 2,
             performanceHistory: [
               { date: "2025-12-01", value: 9267.5, gain: 0 },
@@ -487,6 +493,7 @@ export const mockUsers: User[] = [
             market: "NYSE",
             purchaseDate: "2025-12-15",
             projectedReturnPercent: 9.8,
+            quantity: 2,
             investmentDuration: 2,
             performanceHistory: [
               { date: "2025-12-15", value: 3396.0, gain: 0 },

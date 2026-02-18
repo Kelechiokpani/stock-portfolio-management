@@ -1,6 +1,5 @@
 // Types
-type PortfolioStatus = "active" | "pending" | "transferred"
-
+type PortfolioStatus = "active" | "pending" | "processing" | "transferred"
 
 
 export interface Portfolio {

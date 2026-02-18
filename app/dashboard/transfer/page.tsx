@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {mockPortfolioTransfers} from "@/lib/transfer-data";
 import {TransferPortfolioModal} from "@/components/Modal-Layout/transfer-portfolio-modal";
-import {mockUsers} from "@/lib/user-date";
+import {mockUsers} from "@/components/market/mock-data";
 
 
 

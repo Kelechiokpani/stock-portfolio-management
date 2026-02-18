@@ -29,6 +29,7 @@ interface TransferPortfolioModalProps {
   portfolios: Portfolio[]
 }
 
+
 export function TransferPortfolioModal({
                                          isOpen,
                                          onClose,
