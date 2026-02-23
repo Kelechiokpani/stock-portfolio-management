@@ -5,15 +5,18 @@ import React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { TrendingUp, ArrowLeft } from "lucide-react"
+import {TrendingUp, ArrowLeft, Sun, Moon} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {useTheme} from "@/lib/theme-provider";
+import Header from "@/components/Layout/User/Header";
 
 export default function LoginPage() {
   const router = useRouter()
   const [form, setForm] = useState({ email: "", password: "" })
   const [isAdmin, setIsAdmin] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -26,22 +29,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-8">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <TrendingUp className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-foreground tracking-tight">VaultStock</span>
-          </Link>
-          <Link href="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-      </header>
+      <Header onMenuClick={() => setSidebarOpen(false)} />
+
 
       <main className="mx-auto max-w-md px-4 py-16 lg:py-24">
         <div className="text-center">
@@ -116,7 +105,7 @@ export default function LoginPage() {
               <p className="text-center text-sm text-muted-foreground">
                 {"Don't have an account? "}
                 <Link href="/request-account" className="font-medium text-primary hover:underline">
-                  Request access
+                  Request new account
                 </Link>
               </p>
           )}

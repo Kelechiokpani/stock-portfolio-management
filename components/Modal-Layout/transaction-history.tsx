@@ -6,128 +6,153 @@ import {
   Share2,
   TrendingDown,
   TrendingUp,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Banknote,
+  Wallet
 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import {Transaction} from "@/lib/user-date";
+import { CashMovement, TransactionStatus } from "@/components/data/user-data"
+
+
 
 interface TransactionHistoryProps {
-  transactions: Transaction[]
+  // We use the CashMovement type from your data file
+  transactions: CashMovement[]
+  baseCurrency: string
 }
 
 export function TransactionHistory({
-  transactions,
-}: TransactionHistoryProps) {
-  const getTransactionIcon = (type: Transaction["type"]) => {
+                                     transactions,
+                                     baseCurrency = "EUR",
+                                   }: TransactionHistoryProps) {
+
+  const getMovementConfig = (type: CashMovement["type"]) => {
     switch (type) {
       case "deposit":
-        return <ArrowDownLeft className="h-5 w-5 text-success" />
+        return {
+          icon: <ArrowDownLeft className="h-4 w-4" />,
+          label: "Inward Remittance",
+          color: "text-emerald-500",
+          bg: "bg-emerald-500/10",
+          prefix: "+"
+        }
       case "withdrawal":
-        return <ArrowUpRight className="h-5 w-5 text-destructive" />
-      case "transfer_sent":
-        return <Share2 className="h-5 w-5 text-warning" />
-      case "transfer_received":
-        return <Share2 className="h-5 w-5 text-success" />
-      case "buy":
-        return <TrendingUp className="h-5 w-5 text-primary" />
-      case "sell":
-        return <TrendingDown className="h-5 w-5 text-warning" />
+        return {
+          icon: <ArrowUpRight className="h-4 w-4" />,
+          label: "Outward Settlement",
+          color: "text-foreground",
+          bg: "bg-secondary",
+          prefix: "-"
+        }
       default:
-        return null
+        return {
+          icon: <Wallet className="h-4 w-4" />,
+          label: "Adjustment",
+          color: "text-muted-foreground",
+          bg: "bg-muted",
+          prefix: ""
+        }
     }
   }
 
-  const getTransactionColor = (type: Transaction["type"]) => {
-    switch (type) {
-      case "deposit":
-      case "transfer_received":
-      case "sell":
-        return "text-success"
-      case "withdrawal":
-      case "transfer_sent":
-      case "buy":
-        return "text-destructive"
-      default:
-        return "text-muted-foreground"
-    }
-  }
-
-  const getStatusColor = (status: Transaction["status"]) => {
+  const getStatusBadge = (status: TransactionStatus) => {
     switch (status) {
       case "completed":
-        return "bg-success/10 text-success"
+        return (
+            <Badge variant="outline" className="border-emerald-500/20 bg-emerald-500/5 text-emerald-600 text-[10px] font-bold uppercase tracking-tighter">
+              <CheckCircle2 className="mr-1 h-3 w-3" /> Settled
+            </Badge>
+        )
       case "pending":
-        return "bg-warning/10 text-warning"
+        return (
+            <Badge variant="outline" className="border-amber-500/20 bg-amber-500/5 text-amber-600 text-[10px] font-bold uppercase tracking-tighter">
+              <Clock className="mr-1 h-3 w-3" /> Pending
+            </Badge>
+        )
       case "failed":
-        return "bg-destructive/10 text-destructive"
-      default:
-        return "bg-muted text-muted-foreground"
+        return (
+            <Badge variant="outline" className="border-rose-500/20 bg-rose-500/5 text-rose-600 text-[10px] font-bold uppercase tracking-tighter">
+              <XCircle className="mr-1 h-3 w-3" /> Declined
+            </Badge>
+        )
     }
   }
 
-  // Sort transactions by date (newest first)
-  const sortedTransactions = [...transactions].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  // Newest transactions first
+  const sortedMovements = [...transactions].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   )
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Transaction History</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          {sortedTransactions.map((txn) => (
-            <div
-              key={txn.id}
-              className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors"
-            >
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent">
-                  {getTransactionIcon(txn.type)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-foreground truncate">
-                    {txn.description}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(txn.date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 ml-2">
-                <div className="text-right">
-                  <p
-                    className={`font-semibold text-sm ${getTransactionColor(txn.type)}`}
-                  >
-                    {txn.type === "deposit" || txn.type === "transfer_received"
-                      ? "+"
-                      : "-"}
-                    €{txn.amount.toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                    })}
-                  </p>
-                  <Badge
-                    variant="secondary"
-                    className={`text-xs ${getStatusColor(txn.status)}`}
-                  >
-                    {txn.status}
-                  </Badge>
-                </div>
-              </div>
+      <Card className="border-none shadow-sm ring-1 ring-border/40">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="font-serif text-xl font-bold">Capital Movements</CardTitle>
+              <CardDescription className="text-xs uppercase tracking-widest font-semibold mt-1">
+                Audit-ready cash flow records
+              </CardDescription>
             </div>
-          ))}
-          {sortedTransactions.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">No transactions yet</p>
+            <div className="h-10 w-10 rounded-xl bg-primary/5 flex items-center justify-center border border-primary/10">
+              <Banknote className="h-5 w-5 text-primary" />
             </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          <div className="space-y-3">
+            {sortedMovements.map((txn) => {
+              const config = getMovementConfig(txn.type)
+
+              return (
+                  <div
+                      key={txn.id}
+                      className="group flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card/30 hover:bg-muted/50 transition-all"
+                  >
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border/50 ${config.bg} ${config.color}`}>
+                        {config.icon}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold text-foreground leading-none">
+                          {config.label}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground mt-1.5 font-medium">
+                          {txn.method} • {new Date(txn.date).toLocaleDateString("en-DE", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-end gap-2 ml-4">
+                      <p className={`font-bold text-sm tracking-tight tabular-nums ${config.color}`}>
+                        {config.prefix}{new Intl.NumberFormat("en-DE", {
+                        style: "currency",
+                        currency: txn.currency || baseCurrency,
+                      }).format(txn.amount)}
+                      </p>
+                      {getStatusBadge(txn.status)}
+                    </div>
+                  </div>
+              )
+            })}
+
+            {sortedMovements.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-border/50 rounded-2xl">
+                  <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center mb-3">
+                    <Wallet className="h-6 w-6 text-muted-foreground/50" />
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground">No ledger entries detected</p>
+                </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
   )
 }

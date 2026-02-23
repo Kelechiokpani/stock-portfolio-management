@@ -3,11 +3,15 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowRight, TrendingUp, Shield, Zap, BarChart3, Users, CheckCircle2 } from 'lucide-react'
+import {ArrowRight, TrendingUp, Shield, Zap, BarChart3, Users, CheckCircle2, Sun, Moon} from 'lucide-react'
 import { RequestAccessModal } from '@/components/request-access-modal'
+import {useTheme} from "@/lib/theme-provider";
 
 export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { theme, toggleTheme, mounted } = useTheme()
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-card">
@@ -45,6 +49,21 @@ export default function LandingPage() {
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             </Link>
+            {/* THEME TOGGLE (Always Visible) */}
+            {mounted && (
+                <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={toggleTheme}
+                    className="h-9 w-9 rounded-full border-border/40 bg-background/50 backdrop-blur-sm hover:border-primary/50 hover:text-primary transition-all shadow-sm"
+                >
+                  {theme === 'dark' ? (
+                      <Sun className="h-[1.1rem] w-[1.1rem]" />
+                  ) : (
+                      <Moon className="h-[1.1rem] w-[1.1rem]" />
+                  )}
+                </Button>
+            )}
           </div>
         </div>
       </nav>

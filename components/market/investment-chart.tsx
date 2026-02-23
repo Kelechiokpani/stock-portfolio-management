@@ -20,6 +20,7 @@ interface InvestmentChartProps {
   data: PerformancePoint[]
 }
 
+
 export function InvestmentChart({ data }: InvestmentChartProps) {
   if (!data || data.length === 0) {
     return (

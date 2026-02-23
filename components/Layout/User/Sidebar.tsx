@@ -52,15 +52,15 @@ export default function Sidebar({ open, onClose }: Props) {
             <aside
                 className={`
                           fixed lg:static top-0 left-0 z-50
-                          h-screen bg-card border-r border-border
+                          h-screen bg-card  border-border
                           transition-all duration-300
-                          ${collapsed ? "w-20" : "w-44"}
+                          ${collapsed ? "w-20" : "w-56"}
                           ${open ? "block" : "hidden"} 
                           lg:block `}
             >
                 {/*     ${collapsed ? "w-20" : "w-64"} */}
                 {/* Header */}
-                <div className="flex items-center justify-between h-16 px-4 border-b">
+                <div className="flex items-center justify-between h-16 px-4 ">
                     {!collapsed && <span className="text-xl font-bold text-foreground tracking-tight">VaultStock</span>}
 
                     {/*{!collapsed && <Logo />}*/}

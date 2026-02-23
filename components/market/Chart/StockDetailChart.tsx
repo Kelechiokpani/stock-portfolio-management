@@ -1,161 +1,103 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
     ResponsiveContainer,
-    AreaChart,
-    Area,
     XAxis,
     YAxis,
     Tooltip,
-    CartesianGrid,
-    BarChart,
+    Area,
     Bar,
-    ComposedChart
+    ComposedChart,
+    CartesianGrid,
 } from "recharts";
 
-type StockSnapshot = {
-    id: string;
-    symbol: string;
-    name: string;
-    market: string;
-    price: number;
-    change: number;
-    changePercent: number;
-    volume: string;
-    marketCap: string;
-    sector: string;
-};
-
-type ChartPoint = {
-    date: string;
-    price: number;
-    volume: number;
-};
-
-export default function StockDetailChart({ stock }: { stock: StockSnapshot }) {
-    const [range, setRange] = useState("YTD");
-
-    // generate demo history from snapshot
-    const chartData: ChartPoint[] = useMemo(() => {
-        const days = 30;
-        const basePrice = stock.price - stock.change;
-
-        return Array.from({ length: days }, (_, i) => {
-            const date = new Date();
-            date.setDate(date.getDate() - (days - i));
-
-            return {
-                date: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-                price: basePrice + Math.sin(i / 3) * 5 + i * 0.4,
-                volume: Math.random() * 10 + 2
-            };
-        });
+export default function StockDetailChart({ stock }: { stock: any }) {
+    const chartData = useMemo(() => {
+        const days = 40;
+        const basePrice = stock.price;
+        return Array.from({ length: days }, (_, i) => ({
+            // Show few labels to keep it clean like the reference
+            date: i === 5 ? "Jan 12" : i === 20 ? "Jan 26" : i === 35 ? "Feb 9" : "",
+            price: basePrice + Math.sin(i / 5) * 8 + (i * 0.5),
+            volume: Math.random() * 5 + 2,
+        }));
     }, [stock]);
 
+    const isPositive = stock.changePercent >= 0;
+
+    // We use CSS variables for the line color so it's consistent with your UI theme
+    const chartLineColor = isPositive ? "var(--chart-2, #22c55e)" : "var(--chart-5, #ef4444)";
+
     return (
-        // <div className="w-full bg-[#0b0f17] text-white rounded-xl p-4">
-        <div className="w-full   rounded-xl p-4">
+        <div className="w-full h-full p-6 select-none outline-none">
+            <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                    <defs>
+                        <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={chartLineColor} stopOpacity={0.3} />
+                            <stop offset="95%" stopColor={chartLineColor} stopOpacity={0} />
+                        </linearGradient>
+                    </defs>
 
-            {/* HEADER */}
-            <div className="mb-4">
-                <h2 className="text-lg font-semibold">{stock.name}</h2>
+                    {/* Stroke uses the border variable from your theme */}
+                    <CartesianGrid
+                        vertical={true}
+                        horizontal={false}
+                        stroke="hsl(var(--border))"
+                        strokeOpacity={0.5}
+                    />
 
-                <div className="flex items-center gap-3 flex-wrap">
+                    <XAxis
+                        dataKey="date"
+                        axisLine={false}
+                        tickLine={false}
+                        // Uses muted-foreground for text color
+                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11, fontWeight: 500 }}
+                        interval={0}
+                        dy={10}
+                    />
 
-          <div className="text-3xl font-bold">
-            ${stock.price.toFixed(2)}
-          </div>
+                    <YAxis
+                        orientation="left"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11, fontWeight: 500 }}
+                        domain={['auto', 'auto']}
+                    />
 
-                    <span
-                        className={`text-lg font-semibold ${
-                            stock.change >= 0 ? "text-green-400" : "text-red-400"
-                        }`}
-                    >
-            {stock.change >= 0 ? "+" : ""}
-                        {stock.changePercent}%
-          </span>
-                </div>
+                    <Tooltip
+                        cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
+                        contentStyle={{
+                            backgroundColor: "hsl(var(--popover))",
+                            border: "1px solid hsl(var(--border))",
+                            borderRadius: "12px",
+                            color: "hsl(var(--popover-foreground))",
+                            fontSize: "12px",
+                            fontWeight: "bold"
+                        }}
+                        itemStyle={{ color: chartLineColor }}
+                    />
 
-                <p className="text-gray-400 text-sm mt-1">
-                    {stock.market} • Vol {stock.volume} • {stock.sector}
-                </p>
-            </div>
+                    {/* Volume bars use the muted color of the current theme */}
+                    <Bar
+                        dataKey="volume"
+                        fill="hsl(var(--muted-foreground))"
+                        fillOpacity={0.2}
+                        barSize={6}
+                    />
 
-            {/* CHART */}
-            <div className="w-full h-[360px]">
-                <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={chartData}>
-                        <CartesianGrid stroke="#1f2937" strokeDasharray="3 3"/>
-
-                        <XAxis
-                            dataKey="date"
-                            stroke="#9ca3af"
-                            tick={{fontSize: 12}}
-                        />
-
-                        {/* Price axis */}
-                        <YAxis
-                            yAxisId="price"
-                            stroke="#9ca3af"
-                            tick={{fontSize: 12}}
-                            domain={["dataMin - 5", "dataMax + 5"]}
-                        />
-
-                        {/* Volume axis (hidden) */}
-                        <YAxis
-                            yAxisId="volume"
-                            orientation="right"
-                            hide
-                        />
-
-                        <Tooltip/>
-
-                        {/* Volume bars */}
-                        <Bar
-                            dataKey="volume"
-                            fill="#1f2937"
-                            barSize={6}
-                            yAxisId="volume"
-                        />
-
-                        {/* Price area */}
-                        <Area
-                            type="monotone"
-                            dataKey="price"
-                            stroke="#22c55e"
-                            strokeWidth={2}
-                            fill="url(#priceGradient)"
-                            dot={false}
-                            yAxisId="price"
-                        />
-
-                        <defs>
-                            <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#22c55e" stopOpacity={0.4} />
-                                <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
-                            </linearGradient>
-                        </defs>
-                    </ComposedChart>
-                </ResponsiveContainer>
-            </div>
-
-            {/* TIME RANGE BUTTONS */}
-            <div className="flex gap-2 mt-4 flex-wrap">
-                {["1D", "5D", "1M", "6M", "YTD", "1Y", "5Y", "MAX"].map((r) => (
-                    <button
-                        key={r}
-                        onClick={() => setRange(r)}
-                        className={`px-3 py-1 rounded-lg text-sm ${
-                            range === r
-                                ? "bg-gray-700 text-white"
-                                : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-                        }`}
-                    >
-                        {r}
-                    </button>
-                ))}
-            </div>
+                    <Area
+                        type="monotone"
+                        dataKey="price"
+                        stroke={chartLineColor}
+                        strokeWidth={2.5}
+                        fillOpacity={1}
+                        fill="url(#chartGradient)"
+                        animationDuration={1500}
+                    />
+                </ComposedChart>
+            </ResponsiveContainer>
         </div>
     );
 }

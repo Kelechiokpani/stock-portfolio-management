@@ -1,312 +1,249 @@
-'use client'
+"use client"
 
-import Link from "next/link"
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { TrendingUp, Plus, Settings, LogOut, BarChart3, DollarSign, Target, Share2, Users, Copy, Eye, EyeOff } from 'lucide-react'
-import {CreatePortfolioModal} from "@/components/Modal-Layout/create-portfolio-modal";
-import User_Portfolio from "@/components/Portfolio";
+import {
+  TrendingUp,
+  Wallet,
+  ArrowUpRight,
+  ArrowDownRight,
+  Clock,
+  ShieldCheck,
+  CreditCard,
+  ChevronRight,
+  MoreHorizontal,
+  ArrowRightLeft,
+  PieChart
+} from "lucide-react"
 
-interface Portfolio {
-  id: string
-  name: string
-  value: number
-  change: number
-  holdings: number
-  lastUpdated: string
-  source: 'created' | 'transferred'
-  status: 'active' | 'pending' | 'archived'
-}
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
 
-export default function DashboardPage() {
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [portfolios, setPortfolios] = useState<Portfolio[]>([
-    {
-      id: '1',
-      name: 'Growth Portfolio',
-      value: 45230.50,
-      change: 12.5,
-      holdings: 8,
-      lastUpdated: 'Today',
-      source: 'created',
-      status: 'active',
-    },
-    {
-      id: '2',
-      name: 'Tech Sector Focus',
-      value: 32150.00,
-      change: 18.3,
-      holdings: 5,
-      lastUpdated: 'Today',
-      source: 'created',
-      status: 'active',
-    },
-    {
-      id: '3',
-      name: 'Dividend Income',
-      value: 28900.75,
-      change: -2.1,
-      holdings: 6,
-      lastUpdated: 'Yesterday',
-      source: 'transferred',
-      status: 'active',
-    },
-  ])
+// Use Julian's actual data structure
+import { mockUsers } from "@/components/data/user-data"
+import Link from "next/link";
 
+export default function OverviewPage() {
+  const user = mockUsers[0]
+  if (!user) return null
 
-  const totalAssets = portfolios.reduce((sum, p) => sum + p.holdings, 0)
-  const totalValue = portfolios.reduce((sum, p) => sum + p.value, 0)
-  const averageChange =
-    portfolios.reduce((sum, p) => sum + p.change, 0) / portfolios.length
+  const formatCurrency = (val: number) =>
+      new Intl.NumberFormat("en-DE", {
+        style: "currency",
+        currency: user.settings.baseCurrency,
+      }).format(val)
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Mobile Header */}
-      {/*<div className="lg:hidden sticky top-0 z-50 bg-card border-b border-border">*/}
-      {/*  <div className="px-4 py-3 flex items-center justify-between">*/}
-      {/*    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">*/}
-      {/*      <TrendingUp className="w-5 h-5 text-primary-foreground" />*/}
-      {/*    </div>*/}
-      {/*    <div className="flex items-center gap-2">*/}
-      {/*      <Link href="/dashboard/settings">*/}
-      {/*        <button className="p-2 hover:bg-secondary rounded-lg transition">*/}
-      {/*          <Settings className="w-5 h-5 text-foreground" />*/}
-      {/*        </button>*/}
-      {/*      </Link>*/}
-      {/*      <button className="p-2 hover:bg-secondary rounded-lg transition">*/}
-      {/*        <LogOut className="w-5 h-5 text-foreground" />*/}
-      {/*      </button>*/}
-      {/*    </div>*/}
-      {/*  </div>*/}
-      {/*</div>*/}
+      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-700">
 
-      {/*/!* Desktop Header *!/*/}
-      {/*<div className="hidden lg:block border-b border-border bg-card sticky top-0 z-50">*/}
-      {/*  <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">*/}
-      {/*    <div className="flex items-center gap-3">*/}
-      {/*      <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">*/}
-      {/*        <TrendingUp className="w-6 h-6 text-primary-foreground" />*/}
-      {/*      </div>*/}
-      {/*      <h1 className="text-xl font-bold text-foreground">Invest</h1>*/}
-      {/*    </div>*/}
-      {/*    <div className="flex items-center gap-4">*/}
-      {/*      <Link href="/dashboard/settings">*/}
-      {/*        <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-secondary bg-transparent">*/}
-      {/*          <Settings className="w-4 h-4 mr-2" />*/}
-      {/*          Settings*/}
-      {/*        </Button>*/}
-      {/*      </Link>*/}
-      {/*      <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-secondary bg-transparent">*/}
-      {/*        <LogOut className="w-4 h-4 mr-2" />*/}
-      {/*        Sign Out*/}
-      {/*      </Button>*/}
-      {/*    </div>*/}
-      {/*  </div>*/}
-      {/*</div>*/}
-
-      {/* Main Content */}
-      <div className="pb-24 lg:pb-0">
-        {/* Mobile Layout */}
-        <div className="lg:hidden space-y-4 p-4">
-          {/* Balance Card */}
-          <div className="bg-gradient-to-br from-primary/30 via-primary/10 to-card border border-primary/20 rounded-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground font-medium">Total Assets</p>
-                <h2 className="text-3xl font-bold text-foreground mt-1">
-                  {totalAssets}
-                </h2>
-              </div>
-            </div>
-            <div className="flex items-center justify-between pt-4 border-t border-primary/10">
-              <div>
-                <p className="text-xs text-muted-foreground">24h Change</p>
-                <p className={`text-lg font-semibold ${averageChange > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {averageChange > 0 ? '+' : ''}{averageChange.toFixed(2)}%
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Active Portfolios</p>
-                <p className="text-lg font-semibold text-foreground">{portfolios.length}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Holdings</p>
-                <p className="text-lg font-semibold text-foreground">{portfolios.reduce((sum, p) => sum + p.holdings, 0)}</p>
-              </div>
-            </div>
+        {/* 1. WELCOME & QUICK ACTIONS */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-serif font-bold tracking-tight">
+              Welcome back, {user.profile.firstName}
+            </h1>
+            <p className="text-muted-foreground flex items-center gap-2 mt-1">
+              <ShieldCheck className="h-4 w-4 text-emerald-500"/>
+              {user.settings.accountType.toUpperCase()} Account
+            </p>
           </div>
-
-          {/* Promotion Banner */}
-          <div className="bg-gradient-to-r from-primary/20 to-transparent border border-primary/30 rounded-xl p-4">
-            <p className="text-xs text-primary font-semibold uppercase tracking-wider">New & Improved</p>
-            <h3 className="text-lg font-bold text-foreground mt-1">Smart Portfolio Assistant</h3>
-            <p className="text-xs text-muted-foreground mt-1">Introducing lower fees and smarter rebalancing</p>
-          </div>
-
-          {/* Your Favorites */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Your Portfolios</h3>
-            {portfolios.slice(0, 3).map((portfolio) => (
-              <Link key={portfolio.id} href={`/dashboard/portfolio/${portfolio.id}`}>
-                <div className="bg-card border border-border rounded-lg p-4 space-y-3 hover:border-primary/50 transition cursor-pointer">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-foreground text-sm">{portfolio.name}</h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-xs px-2 py-1 rounded ${portfolio.source === 'created' ? 'bg-primary/20 text-primary' : 'bg-blue-500/20 text-blue-400'}`}>
-                          {portfolio.source === 'created' ? 'Created by You' : 'Transferred'}
-                        </span>
-                        <span className={`text-xs px-2 py-1 rounded ${portfolio.status === 'active' ? 'bg-green-500/20 text-green-400' : portfolio.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-500/20 text-gray-400'}`}>
-                          {portfolio.status.charAt(0).toUpperCase() + portfolio.status.slice(1)}
-                        </span>
-                      </div>
-                    </div>
-                    <p className={`text-xs font-semibold ${portfolio.change > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {portfolio.change > 0 ? '▲' : '▼'} {Math.abs(portfolio.change).toFixed(2)}%
-                    </p>
-                  </div>
-                  <div className="flex items-end justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Value</p>
-                      <p className="text-xl font-bold text-foreground">${(portfolio.value / 1000).toFixed(1)}k</p>
-                    </div>
-                    <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground h-8 text-xs">
-                      View →
-                    </Button>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {/* Quick Actions */}
-          <div className="grid grid-cols-2 gap-3">
-            <Link href="/dashboard/portfolio">
-              <Button className="bg-secondary hover:bg-secondary/80 text-foreground h-12 rounded-lg font-medium">
-                <DollarSign className="w-4 h-4 mr-2" />
-                 Portfolios
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard/transfer" passHref>
+              <Button variant="outline" className="rounded-xl border-border/60">
+                <ArrowRightLeft className="mr-2 h-4 w-4"/> Transfer
               </Button>
             </Link>
 
-            <Link href="/dashboard/transfer">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 rounded-lg font-medium">
-                <Plus className="w-4 h-4 mr-2" />
-                  transfer
+            <Link href="/dashboard/market" passHref>
+              <Button
+                  className="rounded-xl shadow-lg shadow-primary/20 bg-foreground text-background hover:bg-foreground/90">
+                Invest Cash
               </Button>
             </Link>
           </div>
+        </header>
 
-          {/* Bottom Action Menu */}
-          <div
-              className="grid grid-cols-3 gap-2 bg-card border-t border-border fixed bottom-0 left-0 right-0 p-3 lg:hidden">
-            <Link href="/dashboard">
-              <button className="flex flex-col items-center gap-1 p-3 hover:bg-secondary rounded-lg transition">
-                <Target className="w-5 h-5 text-foreground"/>
-                <p className="text-xs text-muted-foreground">Home</p>
-              </button>
-            </Link>
-            <Link href="/dashboard/portfolio">
-            <button className="flex flex-col items-center gap-1 p-3 hover:bg-secondary rounded-lg transition">
-              <BarChart3 className="w-5 h-5 text-foreground"/>
-              <p className="text-xs text-muted-foreground">Portfolio</p>
-            </button>
-            </Link>
-            <Link href="/dashboard/profile">
-            <button className="flex flex-col items-center gap-1 p-3 hover:bg-secondary rounded-lg transition">
-              <Users className="w-5 h-5 text-foreground"/>
-              <p className="text-xs text-muted-foreground">Profile</p>
-            </button>
-            </Link>
-
-          </div>
+        {/* 2. TOP TIER KPIS */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <MetricCard
+              label="Total Net Worth"
+              value={formatCurrency(user.totalBalance)}
+              trend="+12.5%"
+              isPositive={true}
+          />
+          <MetricCard
+              label="Available Liquidity"
+              value={formatCurrency(user.availableCash)}
+              trend="Ready"
+              icon={<Wallet className="h-4 w-4" />}
+          />
+          <MetricCard
+              label="Risk Profile"
+              value={user.settings.riskTolerance.toUpperCase()}
+              icon={<ActivityIcon />}
+          />
+          <MetricCard
+              label="Connected Nodes"
+              value={user.connectedAccounts.length}
+              trend="Active"
+              icon={<CreditCard className="h-4 w-4" />}
+          />
         </div>
 
-        {/* Desktop Layout */}
-        <div className="hidden lg:block max-w-7xl mx-auto px-6 py-8 space-y-8">
-          {/* Balance Section */}
-          <div className="grid grid-cols-4 gap-6">
-            <Card className="bg-gradient-to-br from-primary/30 to-card border-primary/30 p-6 col-span-2">
-              <div>
-                <p className="text-sm text-muted-foreground font-medium mb-2">Total Assets</p>
-                <h2 className="text-4xl font-bold text-foreground">
-                  {totalAssets}
-                </h2>
-              </div>
-            </Card>
+        <div className="grid gap-8 lg:grid-cols-3">
 
-            <Card className="bg-card border-border p-6">
-              <p className="text-sm text-muted-foreground mb-2">24h Change</p>
-              <p className={`text-3xl font-bold ${averageChange > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {averageChange > 0 ? '+' : ''}{averageChange.toFixed(2)}%
-              </p>
-            </Card>
-
-            <Card className="bg-card border-border p-6">
-              <p className="text-sm text-muted-foreground mb-2">Holdings</p>
-              <p className="text-3xl font-bold text-foreground">{portfolios.reduce((sum, p) => sum + p.holdings, 0)}</p>
-            </Card>
-          </div>
-
-          {/* Promotion Banner */}
-          <div className="bg-gradient-to-r from-primary/20 to-transparent border border-primary/30 rounded-2xl p-8">
-            <p className="text-sm text-primary font-semibold uppercase tracking-wider">New & Improved</p>
-            <h3 className="text-3xl font-bold text-foreground mt-2">Smart Portfolio Assistant</h3>
-            <p className="text-muted-foreground mt-2 max-w-lg">Introducing lower fees and smarter rebalancing. Get started today and optimize your investment strategy.</p>
-          </div>
-
-          {/* Portfolios Section */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-2xl font-bold text-foreground">Your Portfolios</h3>
-
-              <Button
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                  onClick={() => setShowCreateModal(true)} >
-                <Plus className="w-4 h-4 mr-2" />
-                New Portfolio
-              </Button>
-            </div>
-
-            {/*<User_Portfolio />*/}
-          </div>
-
-          {/* Management Cards */}
-          <div className="grid grid-cols-2 gap-6">
-            <Card className="bg-gradient-to-br from-primary/20 to-transparent border-primary/30 p-8 flex flex-col justify-between">
-              <div>
-                <h4 className="text-xl font-semibold text-foreground mb-2">Manage Portfolios</h4>
-                <p className="text-muted-foreground">
-                  Create, edit, or delete portfolios and manage your holdings across multiple investment strategies.
-                </p>
-              </div>
-
-              <Link href="/dashboard/portfolio/">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground mt-4 w-full">
-                Go to Management
-              </Button>
-              </Link>
-            </Card>
-
-            <Link href="/dashboard/transfer">
-              <Card className="bg-gradient-to-br from-primary/20 to-transparent border-primary/30 p-8 flex flex-col justify-between h-full">
+          {/* 3. PORTFOLIO ALLOCATION (LEFT/CENTER) */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="border-none shadow-sm ring-1 ring-border/40 overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <h4 className="text-xl font-semibold text-foreground mb-2">Portfolio Transfer</h4>
-                  <p className="text-muted-foreground">
-                    Share or inherit portfolios with other investors on the platform securely.
+                  <CardTitle className="font-serif text-xl">Primary Holdings</CardTitle>
+                  <CardDescription>Asset distribution for {user.portfolios[0].name}</CardDescription>
+                </div>
+                <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+              </CardHeader>
+              <CardContent className="px-0">
+                <div className="space-y-1">
+                  {user.portfolios[0].holdings.map((asset) => (
+                      <div key={asset.id} className="group flex items-center justify-between p-4 hover:bg-secondary/30 transition-colors cursor-pointer border-b border-border/10 last:border-0">
+                        <div className="flex items-center gap-4">
+                          <div className="h-10 w-10 rounded-xl bg-secondary/50 flex items-center justify-center font-bold text-xs">
+                            {asset.symbol}
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm leading-none">{asset.name}</p>
+                            <p className="text-[11px] text-muted-foreground mt-1.5 uppercase font-medium tracking-tighter">
+                              {asset.shares} Units • {asset.portfolioType}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-black tabular-nums">{formatCurrency(asset.value)}</p>
+                          <p className={`text-[11px] font-bold mt-1 ${asset.change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                            {asset.change >= 0 ? '+' : ''}{asset.changePercent}%
+                          </p>
+                        </div>
+                      </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* RECENT CASH ACTIVITY */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-sm uppercase tracking-widest text-muted-foreground">Recent Movements</h3>
+                <Button variant="link" className="text-xs text-primary p-0 h-auto">View All Ledger</Button>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {user.cashMovements.slice(0, 2).map((tx) => (
+                    <Card key={tx.id} className="border-none ring-1 ring-border/40 bg-card/50">
+                      <CardContent className="p-4 flex items-center gap-4">
+                        <div className={`p-2 rounded-lg ${tx.type === 'deposit' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-blue-500/10 text-blue-500'}`}>
+                          {tx.type === 'deposit' ? <ArrowDownRight className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold truncate">{tx.method}</p>
+                          <p className="text-[10px] text-muted-foreground">{new Date(tx.date).toLocaleDateString()}</p>
+                        </div>
+                        <p className="text-xs font-black tabular-nums">{formatCurrency(tx.amount)}</p>
+                      </CardContent>
+                    </Card>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 4. SIDEBAR ASSET SUMMARY (RIGHT) */}
+          <div className="space-y-6">
+            <Card className="border-none bg-foreground text-background shadow-xl rounded-3xl overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-8 opacity-10">
+                <PieChart className="h-32 w-32" />
+              </div>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium opacity-70 uppercase tracking-widest">Global Allocation</CardTitle>
+                <div className="pt-2">
+                  <p className="text-4xl font-serif font-bold tracking-tight">{formatCurrency(user.totalBalance)}</p>
+                  <p className="text-xs text-emerald-400 font-bold mt-2 flex items-center gap-1">
+                    <TrendingUp className="h-3 w-3" /> +€4,120.44 This Month
                   </p>
                 </div>
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground mt-4 w-full">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Manage Transfers
+              </CardHeader>
+              <CardContent className="space-y-4 relative pt-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-tighter opacity-70">
+                    <span>Crypto Exposure</span>
+                    <span>69%</span>
+                  </div>
+                  <Progress value={69} className="h-1.5 bg-white/10" indicatorClassName="bg-emerald-400" />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-tighter opacity-70">
+                    <span>Equities / Growth</span>
+                    <span>31%</span>
+                  </div>
+                  <Progress value={31} className="h-1.5 bg-white/10" indicatorClassName="bg-blue-400" />
+                </div>
+                <Button className="w-full mt-4 bg-white text-black hover:bg-white/90 rounded-xl font-bold text-xs uppercase tracking-widest h-10">
+                  Detailed Audit
                 </Button>
-              </Card>
-            </Link>
+              </CardContent>
+            </Card>
+
+            {/* CONNECTED INSTITUTIONS */}
+            <Card className="border-none bg-secondary/20 ring-1 ring-border/40 shadow-inner">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Connected Settlement Nodes</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {user.connectedAccounts.map((acc) => (
+                    <div key={acc.id} className="flex items-center justify-between group cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                        <div>
+                          <p className="text-xs font-bold leading-none">{acc.provider}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">****{acc.lastFour}</p>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all" />
+                    </div>
+                ))}
+              </CardContent>
+            </Card>
           </div>
+
         </div>
       </div>
-      <CreatePortfolioModal open={showCreateModal} onOpenChange={setShowCreateModal} />
+  )
+}
 
-    </div>
+/** SUB-COMPONENTS **/
+
+function MetricCard({ label, value, trend, isPositive, icon }: any) {
+  return (
+      <Card className="border-none shadow-sm ring-1 ring-border/40 overflow-hidden relative">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{label}</p>
+            <div className="text-primary/40">{icon}</div>
+          </div>
+          <div className="flex items-end justify-between">
+            <p className="text-2xl font-serif font-bold tracking-tight tabular-nums">{value}</p>
+            {trend && (
+                <Badge variant="outline" className={`text-[10px] font-black border-none ${isPositive ? 'text-emerald-500' : 'text-muted-foreground'}`}>
+                  {trend}
+                </Badge>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+  )
+}
+
+function ActivityIcon() {
+  return (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+      </svg>
   )
 }

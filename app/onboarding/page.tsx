@@ -34,6 +34,15 @@ const steps = [
   { id: 4, label: "Signature", icon: PenTool },
 ]
 
+const SOURCE_OF_FUNDS_OPTIONS = [
+  { value: "employment", label: "Employment Income" },
+  { value: "business", label: "Business Income" },
+  { value: "investments", label: "Investment Returns" },
+  { value: "inheritance", label: "Inheritance" },
+  { value: "savings", label: "Personal Savings" },
+  { value: "other", label: "Other" },
+];
+
 export default function OnboardingPage() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
@@ -172,7 +181,7 @@ export default function OnboardingPage() {
                 <Label htmlFor="fullName">Full Name</Label>
                 <Input id="fullName" value={personalInfo.fullName}
                        onChange={(e) =>
-                           setPersonalInfo({ ...personalInfo, fullName: e.target.value })
+                           setPersonalInfo({...personalInfo, fullName: e.target.value})
                        }
                 />
               </div>
@@ -180,7 +189,7 @@ export default function OnboardingPage() {
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" value={personalInfo.email}
                        onChange={(e) =>
-                           setPersonalInfo({ ...personalInfo, email: e.target.value })
+                           setPersonalInfo({...personalInfo, email: e.target.value})
                        }
                 />
               </div>
@@ -189,7 +198,7 @@ export default function OnboardingPage() {
                 <Input id="phone" value={personalInfo.phone}
 
                        onChange={(e) =>
-                           setPersonalInfo({ ...personalInfo, phone: e.target.value })
+                           setPersonalInfo({...personalInfo, phone: e.target.value})
                        }
                 />
               </div>
@@ -197,88 +206,94 @@ export default function OnboardingPage() {
                 <Label htmlFor="country">Country</Label>
                 <Input id="country" value={personalInfo.country}
                        onChange={(e) =>
-                           setPersonalInfo({ ...personalInfo, country: e.target.value })
+                           setPersonalInfo({...personalInfo, country: e.target.value})
                        }
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="dob">Date of Birth</Label>
                 <Input
-                  id="dob"
-                  type="date"
-                  value={personalInfo.dateOfBirth}
-                  onChange={(e) =>
-                    setPersonalInfo({ ...personalInfo, dateOfBirth: e.target.value })
-                  }
-                  required
+                    id="dob"
+                    type="date"
+                    value={personalInfo.dateOfBirth}
+                    onChange={(e) =>
+                        setPersonalInfo({...personalInfo, dateOfBirth: e.target.value})
+                    }
+                    required
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="occupation">Occupation</Label>
                 <Input
-                  id="occupation"
-                  placeholder="e.g., Software Engineer"
-                  value={personalInfo.occupation}
-                  onChange={(e) =>
-                    setPersonalInfo({ ...personalInfo, occupation: e.target.value })
-                  }
-                  required
+                    id="occupation"
+                    placeholder="e.g., Software Engineer"
+                    value={personalInfo.occupation}
+                    onChange={(e) =>
+                        setPersonalInfo({...personalInfo, occupation: e.target.value})
+                    }
+                    required
                 />
               </div>
               <div className="sm:col-span-2 space-y-2">
                 <Label htmlFor="address">Street Address</Label>
                 <Input
-                  id="address"
-                  placeholder="123 Main Street"
-                  value={personalInfo.address}
-                  onChange={(e) =>
-                    setPersonalInfo({ ...personalInfo, address: e.target.value })
-                  }
-                  required
+                    id="address"
+                    placeholder="123 Main Street"
+                    value={personalInfo.address}
+                    onChange={(e) =>
+                        setPersonalInfo({...personalInfo, address: e.target.value})
+                    }
+                    required
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="city">City</Label>
                 <Input
-                  id="city"
-                  placeholder="New York"
-                  value={personalInfo.city}
-                  onChange={(e) =>
-                    setPersonalInfo({ ...personalInfo, city: e.target.value })
-                  }
-                  required
+                    id="city"
+                    placeholder="New York"
+                    value={personalInfo.city}
+                    onChange={(e) =>
+                        setPersonalInfo({...personalInfo, city: e.target.value})
+                    }
+                    required
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="postalCode">Postal Code</Label>
                 <Input
-                  id="postalCode"
-                  placeholder="10001"
-                  value={personalInfo.postalCode}
-                  onChange={(e) =>
-                    setPersonalInfo({ ...personalInfo, postalCode: e.target.value })
-                  }
-                  required
+                    id="postalCode"
+                    placeholder="10001"
+                    value={personalInfo.postalCode}
+                    onChange={(e) =>
+                        setPersonalInfo({...personalInfo, postalCode: e.target.value})
+                    }
+                    required
                 />
               </div>
               <div className="sm:col-span-2 space-y-2">
                 <Label htmlFor="sourceOfFunds">Source of Funds</Label>
                 <Select
-                  value={personalInfo.sourceOfFunds}
-                  onValueChange={(value) =>
-                    setPersonalInfo({ ...personalInfo, sourceOfFunds: value })
-                  }
+                    value={personalInfo.sourceOfFunds}
+                    onValueChange={(value) =>
+                        setPersonalInfo({...personalInfo, sourceOfFunds: value})
+                    }
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select source of funds" />
+                  <SelectTrigger
+                      className="w-full h-12 rounded-lg border-muted-foreground/20 bg-background focus:ring-0">
+                    <SelectValue placeholder="Select source of funds"/>
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="employment">Employment Income</SelectItem>
-                    <SelectItem value="business">Business Income</SelectItem>
-                    <SelectItem value="investments">Investment Returns</SelectItem>
-                    <SelectItem value="inheritance">Inheritance</SelectItem>
-                    <SelectItem value="savings">Personal Savings</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+
+                  <SelectContent
+                      className="z-50 bg-white dark:bg-zinc-950 text-popover-foreground border-border shadow-2xl min-w-[14rem] rounded-xl overflow-hidden p-1 border opacity-100">
+                    {SOURCE_OF_FUNDS_OPTIONS.map((option) => (
+                        <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            className="relative flex w-full cursor-pointer select-none items-start flex-col py-3 px-4 mt-1 outline-none rounded-md transition-all focus:bg-zinc-100 dark:focus:bg-zinc-800 data-[state=checked]:bg-primary/5 data-[state=checked]:text-primary"
+                        >
+                          {option.label}
+                        </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -288,25 +303,27 @@ export default function OnboardingPage() {
 
         {/* Step 2: KYC Documents */}
         {currentStep === 2 && (
-          <div className="rounded-xl border border-border bg-card p-6 lg:p-8">
-            <h2 className="font-serif text-2xl font-bold text-foreground">KYC Verification</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Upload your identity documents for verification. All documents are encrypted and stored securely.
-            </p>
+            <div className="rounded-xl border border-border bg-card p-6 lg:p-8">
+              <h2 className="font-serif text-2xl font-bold text-foreground">KYC Verification</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Upload your identity documents for verification. All documents are encrypted and stored securely.
+              </p>
 
-            <div className="mt-8 space-y-6">
-              {/* ID Front */}
-              <div className="space-y-2">
-                <Label>Government ID (Front)</Label>
-                <p className="text-xs text-muted-foreground">
-                  Upload the front of your passport, driver license, or national ID card.
-                </p>
-                <div
-                  onClick={() => kycFrontRef.current?.click()}
-                  onKeyDown={(e) => { if (e.key === "Enter") kycFrontRef.current?.click() }}
-                  role="button"
-                  tabIndex={0}
-                  className={`flex cursor-pointer items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors hover:border-accent/50 ${
+              <div className="mt-8 space-y-6">
+                {/* ID Front */}
+                <div className="space-y-2">
+                  <Label>Government ID (Front)</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Upload the front of your passport, driver license, or national ID card.
+                  </p>
+                  <div
+                      onClick={() => kycFrontRef.current?.click()}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") kycFrontRef.current?.click()
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      className={`flex cursor-pointer items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors hover:border-accent/50 ${
                     kycFiles.idFront
                       ? "border-success bg-success/5"
                       : "border-border"
