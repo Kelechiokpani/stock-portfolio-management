@@ -218,7 +218,7 @@ export default function RequestAccountPage() {
                 </div>
 
                 <Button variant="outline" className="mt-10 w-full max-w-[200px] rounded-xl" asChild>
-                  <Link href="/">Exit Screen</Link>
+                  <Link href="/">Home</Link>
                 </Button>
               </div>
           )}
