@@ -22,9 +22,9 @@ import React, { useState } from "react";
 const adminNavItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/region", label: "Regional Settings ", icon: UserCheck },
-  { href: "/admin/market", label: "System Markets", icon: FileText },
-
   { href: "/admin/users", label: "Manage Users", icon: Users },
+
+  { href: "/admin/market", label: "System Markets", icon: FileText },
   { href: "/admin/requests", label: "Account Requests", icon: ClipboardList },
 
   { href: "/admin/kyc", label: "Compliance/KYC", icon: ShieldCheck },

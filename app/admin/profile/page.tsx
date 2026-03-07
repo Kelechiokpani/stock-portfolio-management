@@ -18,17 +18,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useGetMeQuery } from "@/app/services/features/auth/authApi";
+import GlobalLoader from "@/components/GlobalLoader";
 
 export default function ProfilePage() {
   const { data, isLoading } = useGetMeQuery();
 
-  if (isLoading) {
+  if (isLoading)
     return (
-      <div className="h-[60vh] w-full flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <GlobalLoader
+        message="Retrieving Identity"
+        subtext="Fetching profile credentials from the secure vault..."
+      />
     );
-  }
 
   // Early return if data or the user object isn't present
   if (!data || !data.user) return null;
