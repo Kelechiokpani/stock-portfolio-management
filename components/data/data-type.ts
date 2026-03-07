@@ -75,6 +75,7 @@ export interface ConnectedAccount {
 }
 
 export interface User {
+    user: any;
     id: string;
     profile: {
         firstName: string;

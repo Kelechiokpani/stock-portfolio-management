@@ -23,6 +23,7 @@ export default function RegisterPage() {
     governmentId: null as File | null,
     proofOfAddress: null as File | null,
   })
+  
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
