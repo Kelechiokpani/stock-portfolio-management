@@ -142,6 +142,7 @@ export default function KYC_Workbench() {
       />
     );
 
+    
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 lg:p-8 transition-colors duration-300">
       <div className="mx-auto max-w-[1600px] space-y-6">

@@ -71,7 +71,6 @@ export default function GeneralAdminSettings() {
   if (isLoading || !formData)
     return (
       <GlobalLoader
-        type="settings"
         message="Initializing Environment"
         subtext="Syncing your personalized interface configurations..."
       />
@@ -170,7 +169,7 @@ export default function GeneralAdminSettings() {
             sub="Public sign-ups"
             icon={Globe}
             checked={formData?.allowedRegistrations}
-            onChange={(val) => handleInputChange("allowedRegistrations", val)}
+            onChange={(val:any) => handleInputChange("allowedRegistrations", val)}
             colorClass="bg-emerald-500"
           />
 
@@ -180,7 +179,7 @@ export default function GeneralAdminSettings() {
             sub="Instant verification"
             icon={UserCheck}
             checked={formData?.kycAutoApproval}
-            onChange={(val) => handleInputChange("kycAutoApproval", val)}
+            onChange={(val:any) => handleInputChange("kycAutoApproval", val)}
             colorClass="bg-blue-600"
           />
         </div>
