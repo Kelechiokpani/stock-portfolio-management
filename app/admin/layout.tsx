@@ -18,20 +18,27 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-
   // 2. SET TO TRUE ON MOUNT
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
 
   const { data, isLoading, error } = useGetMeQuery(undefined, {
     refetchOnMountOrArgChange: false,
     skip: !isMounted, // 3. SKIP THE QUERY UNTIL MOUNTED
   });
 
+  useEffect(() => {
+    if (!isLoading && data?.user) {
+      if (data.user.role !== "admin") {
+        router.push("/dashboard");
+      }
+    }
+  }, [data, isLoading, router]);
 
   if (!isMounted) return <GlobalLoader />;
+
+  if (isLoading) return <GlobalLoader />;
 
   const errorMessage =
     error && "data" in error
@@ -60,17 +67,6 @@ export default function DashboardLayout({
       </div>
     );
   }
-
-  useEffect(() => {
-    if (!isLoading && data?.user) {
-      if (data.user.role !== "admin") {
-        router.push("/dashboard");
-      }
-    }
-  }, [data, isLoading, router]);
-
-  
-  if (isLoading) return <GlobalLoader />;
 
   return (
     <div className="h-screen flex overflow-hidden bg-background ">
