@@ -18,29 +18,51 @@ export const adminApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["KYC", "Market", "Settings", "Requests"],
+  tagTypes: ["Overview", "Users", "KYC", "Market", "Settings", "Requests"],
 
   endpoints: (builder) => ({
+    getAdminOverview: builder.query<any, void>({
+      query: () => "/admin/overview",
+      providesTags: ["Overview"],
+    }),
+
+    getAllUsers: builder.query<any, void>({
+      query: () => "/users",
+      providesTags: ["Users"],
+    }),
+
     // --- MARKET DATA CONTROL ---
     getMarketAssets: builder.query<any, void>({
       query: () => "/market/stocks",
-      providesTags: ["Market"],
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.stocks.map(({ _id }: any) => ({
+                type: "Market" as const,
+                id: _id,
+              })),
+              { type: "Market", id: "LIST" },
+            ]
+          : [{ type: "Market", id: "LIST" }],
+      // providesTags: ["Market"],
     }),
-
-    createMarketAsset: builder.mutation<any, any>({
-      query: (newAsset) => ({
-        url: "/market/stocks",
-        method: "POST",
-        body: newAsset,
-      }),
-      invalidatesTags: ["Market"],
-    }),
-
     updateMarketAsset: builder.mutation<any, { id: string; data: any }>({
       query: ({ id, data }) => ({
         url: `/market/stocks/${id}`,
         method: "PUT",
         body: data,
+      }),
+      // This ensures the UI refetches the specific stock immediately
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Market", id },
+        "Market",
+      ],
+    }),
+
+    deleteMarketAsset: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/market/stocks/${id}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["Market"],
     }),
@@ -52,7 +74,18 @@ export const adminApi = createApi({
       providesTags: ["KYC"],
     }),
 
-    updateKycStatus: builder.mutation< any, { id: string; status: string; field?: string }>({
+    updateKycStatus: builder.mutation<
+      any,
+      {
+        id: string;
+        status?: string;
+        field?: string;
+        kycStatus?: string;
+        kycVerified?: boolean;
+        accountStatus?: string;
+        reason?: string;
+      }
+    >({
       query: ({ id, ...body }) => ({
         url: `/kyc/${id}`,
         method: "PUT",
@@ -82,7 +115,10 @@ export const adminApi = createApi({
       providesTags: ["Requests"],
     }),
 
-    reviewRequest: builder.mutation< any,  { id: string; action: "approve" | "reject" }>({
+    reviewRequest: builder.mutation<
+      any,
+      { id: string; action: "approve" | "reject" }
+    >({
       query: ({ id, action }) => ({
         url: `/requests/${id}`,
         method: "PUT",
@@ -94,12 +130,15 @@ export const adminApi = createApi({
 });
 
 export const {
+  useGetAdminOverviewQuery,
+  useGetAllUsersQuery,
+
   useGetKycListQuery,
   useUpdateKycStatusMutation,
 
   useGetMarketAssetsQuery,
-  useCreateMarketAssetMutation,
   useUpdateMarketAssetMutation,
+  useDeleteMarketAssetMutation,
 
   useGetGlobalSettingsQuery,
   useUpdateGlobalSettingsMutation,

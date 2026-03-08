@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-white dark:bg-darkbg" suppressHydrationWarning>
+      <body className="bg-white dark:bg-darkbg">
         <NextTopLoader
           color="#0CB055"
           initialPosition={0.08}

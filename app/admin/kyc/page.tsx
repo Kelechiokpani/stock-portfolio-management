@@ -38,7 +38,6 @@ export default function KYC_Workbench() {
   const [searchTerm, setSearchTerm] = useState("");
 
   // --- DATA NORMALIZATION ---
-  // Ensure we are working with the 'users' array from your response
   const usersList = useMemo(
     () => (Array.isArray(usersData) ? usersData : []),
     [usersData]
@@ -71,14 +70,12 @@ export default function KYC_Workbench() {
   }, [usersList, selectedUserId]);
 
   // --- STEPPER MAPPING ---
-  // Adjusted to look into the 'documents' object from your response
   const userSteps = useMemo(() => {
     if (!selectedUser) return [];
     return [
       {
         id: 1,
         name: "ID Document",
-        // Accessing the first item in the kyc array if it exists
         doc: selectedUser.documents?.kyc?.[0]?.url || null,
         status: selectedUser.documents?.kyc?.[0]?.status || "pending",
         field: "kyc",
@@ -119,18 +116,57 @@ export default function KYC_Workbench() {
     [userSteps, activeStepId]
   );
 
+  // --- API HANDLERS ---
+
   const handleApproveStep = async () => {
-    if (!selectedUserId || !currentStepData?.field) return;
+    if (!selectedUserId) return;
+
     try {
+      let payload;
+
+      if (activeStepId === 5) {
+        payload = {
+          kycStatus: "verified",
+          kycVerified: true,
+          accountStatus: "active",
+        };
+      } else {
+        payload = {
+          status: "approved",
+          // Use ?? undefined to convert null to undefined for TS compatibility
+          field: currentStepData?.field ?? undefined,
+        };
+      }
+
       await updateStatus({
         id: selectedUserId,
-        status: "approved",
-        field: currentStepData.field,
+        ...payload,
       }).unwrap();
-      toast.success(`${currentStepData.name} approved`);
+
+      toast.success(`${currentStepData?.name} updated`);
       if (activeStepId < userSteps.length) setActiveStepId((prev) => prev + 1);
     } catch (err) {
       toast.error("Failed to update status");
+    }
+  };
+
+  const handleDeclineStep = async () => {
+    if (!selectedUserId) return;
+
+    const reason = prompt("Reason for decline:", "The uploaded ID is expired.");
+    if (!reason) return;
+
+    try {
+      await updateStatus({
+        id: selectedUserId,
+        status: "rejected",
+        kycStatus: "rejected",
+        reason: reason,
+      }).unwrap();
+
+      toast.success("KYC declined and user notified");
+    } catch (err) {
+      toast.error("Failed to reject KYC");
     }
   };
 
@@ -142,7 +178,6 @@ export default function KYC_Workbench() {
       />
     );
 
-    
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 lg:p-8 transition-colors duration-300">
       <div className="mx-auto max-w-[1600px] space-y-6">
@@ -243,7 +278,9 @@ export default function KYC_Workbench() {
                   <div
                     className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold
                     ${
-                      step.status === "approved" || step.status === "complete"
+                      step.status === "approved" ||
+                      step.status === "complete" ||
+                      step.status === "active"
                         ? "bg-emerald-500 text-white"
                         : activeStepId === step.id
                         ? "bg-blue-600 text-white"
@@ -251,7 +288,8 @@ export default function KYC_Workbench() {
                     }`}
                   >
                     {step.status === "approved" ||
-                    step.status === "complete" ? (
+                    step.status === "complete" ||
+                    step.status === "active" ? (
                       <Check className="w-3 h-3" />
                     ) : (
                       step.id
@@ -308,6 +346,8 @@ export default function KYC_Workbench() {
                 <div className="p-4 bg-white dark:bg-slate-900 border-t dark:border-slate-800 flex justify-between">
                   <Button
                     variant="ghost"
+                    onClick={handleDeclineStep}
+                    disabled={isUpdating}
                     className="text-xs text-rose-500 hover:bg-rose-100"
                   >
                     Flag for Revision
@@ -315,14 +355,17 @@ export default function KYC_Workbench() {
                   <Button
                     disabled={
                       isUpdating ||
-                      !currentStepData?.field ||
-                      currentStepData?.status === "approved"
+                      (activeStepId !== 5 && !currentStepData?.field) ||
+                      currentStepData?.status === "approved" ||
+                      currentStepData?.status === "active"
                     }
                     onClick={handleApproveStep}
-                    className="bg-slate-900 dark:bg-blue-600 text-white px-8 h-10 shadow-lg"
+                    className="bg-slate-900 dark:bg-blue-600 text-white px-8 h-10 shadow-lg font-bold"
                   >
                     {isUpdating ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : activeStepId === 5 ? (
+                      "Verify & Activate Account"
                     ) : (
                       `Approve ${currentStepData?.name}`
                     )}
