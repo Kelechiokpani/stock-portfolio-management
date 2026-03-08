@@ -46,6 +46,7 @@ export const adminApi = createApi({
           : [{ type: "Market", id: "LIST" }],
       // providesTags: ["Market"],
     }),
+    
     updateMarketAsset: builder.mutation<any, { id: string; data: any }>({
       query: ({ id, data }) => ({
         url: `/market/stocks/${id}`,

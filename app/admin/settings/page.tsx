@@ -37,8 +37,9 @@ export default function GeneralAdminSettings() {
     isLoading,
     refetch,
   } = useGetGlobalSettingsQuery();
-  const [updateSettings, { isLoading: isUpdating }] =
-    useUpdateGlobalSettingsMutation();
+
+
+  const [updateSettings, { isLoading: isUpdating }] =  useUpdateGlobalSettingsMutation();
   const [formData, setFormData] = useState<any>(null);
 
   useEffect(() => {

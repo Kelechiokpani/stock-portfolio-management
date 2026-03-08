@@ -94,20 +94,20 @@ export default function KYC_Workbench() {
         status: selectedUser.documents?.selfie?.status || "pending",
         field: "selfie",
       },
-      {
-        id: 4,
-        name: "Sanctions/AML",
-        doc: null,
-        status: "complete",
-        field: null,
-      },
-      {
-        id: 5,
-        name: "Final Account Status",
-        doc: null,
-        status: selectedUser.accountStatus,
-        field: "accountStatus",
-      },
+      // {
+      //   id: 4,
+      //   name: "Sanctions/AML",
+      //   doc: null,
+      //   status: "complete",
+      //   field: null,
+      // },
+      // {
+      //   id: 5,
+      //   name: "Final Account Status",
+      //   doc: null,
+      //   status: selectedUser.accountStatus,
+      //   field: "accountStatus",
+      // },
     ];
   }, [selectedUser]);
 
@@ -218,7 +218,7 @@ export default function KYC_Workbench() {
             </div>
 
             <Card className="border-none shadow-sm dark:bg-slate-900 overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800">
-              <ScrollArea className="h-[calc(100vh-280px)]">
+              <ScrollArea className="h-[calc(100vh-260px)]">
                 {filteredUsers.map((user: any) => (
                   <div
                     key={user._id}
@@ -261,9 +261,9 @@ export default function KYC_Workbench() {
           </div>
 
           {/* MAIN WORKSPACE */}
-          <div className="lg:col-span-9 space-y-6">
+          <div className="lg:col-span-9 space-y-6 px-6">
             {/* STEPPER BAR */}
-            <div className="flex items-center justify-between gap-2 p-2 bg-white dark:bg-slate-900 rounded-xl ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm overflow-x-auto">
+            <div className="flex items-center justify-between gap-2 p-2 bg-white dark:bg-slate-900 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm overflow-x-auto">
               {userSteps.map((step: any) => (
                 <button
                   key={step.id}
@@ -276,7 +276,7 @@ export default function KYC_Workbench() {
                     }`}
                 >
                   <div
-                    className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold
+                    className={`h-8 w-8 rounded-full flex items-center justify-center text-[10px] font-bold
                     ${
                       step.status === "approved" ||
                       step.status === "complete" ||
