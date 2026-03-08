@@ -20,8 +20,7 @@ export default function DashboardLayout({
 
   // Hook 1: useState (isMounted)
   // Hook 2: useGetMeQuery
-  const { data, isLoading, error } = useGetMeQuery(undefined, {
-    refetchOnMountOrArgChange: false,
+  const { data, isLoading, isError } = useGetMeQuery(undefined, {
     skip: !isMounted,
   });
 
