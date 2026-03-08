@@ -32,17 +32,13 @@ export default function DashboardLayout({
 
   // Hook 4: useEffect (Redirect logic)
   useEffect(() => {
-    if (isMounted && !isLoading && data?.user) {
-      if (error || !data?.user) {
-        router.push("/login");
-        return;
-      }
-
-      if (data.user.role !== "admin") {
-        router.push("/dashboard");
+    if (isMounted && !isLoading) {
+      // If the API fails or the user is NOT an admin, bounce them
+      if (isError || data?.user?.role !== "admin") {
+        router.replace("/dashboard");
       }
     }
-  }, [data, isLoading, router, isMounted]);
+  }, [data, isLoading, isError, router, isMounted]);
 
   // --- ALL CONDITIONAL RETURNS MUST GO BELOW THIS LINE ---
 
