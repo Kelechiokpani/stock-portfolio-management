@@ -16,10 +16,22 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+
+  // 2. SET TO TRUE ON MOUNT
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
 
   const { data, isLoading, error } = useGetMeQuery(undefined, {
     refetchOnMountOrArgChange: false,
+    skip: !isMounted, // 3. SKIP THE QUERY UNTIL MOUNTED
   });
+
+
+  if (!isMounted) return <GlobalLoader />;
 
   const errorMessage =
     error && "data" in error
@@ -57,6 +69,7 @@ export default function DashboardLayout({
     }
   }, [data, isLoading, router]);
 
+  
   if (isLoading) return <GlobalLoader />;
 
   return (
