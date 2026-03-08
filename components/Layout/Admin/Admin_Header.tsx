@@ -8,14 +8,16 @@ import { useTheme } from "@/lib/theme-provider";
 // import { mockUsers } from "@/components/data/user-data";
 import { Loader2 } from "lucide-react";
 import { useGetMeQuery } from "@/app/services/features/auth/authApi";
+import { useLogout } from "../User/Logout";
 
 interface HeaderProps {
   onMenuClick: () => void;
 }
 
-
 export default function Admin_Header({ onMenuClick }: HeaderProps) {
   const { theme, toggleTheme, mounted } = useTheme();
+  const handleLogout = useLogout();
+
   const { data, isLoading } = useGetMeQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
@@ -31,10 +33,7 @@ export default function Admin_Header({ onMenuClick }: HeaderProps) {
   // Early return if data or the user object isn't present
   if (!data || !data.user) return null;
 
-
-
   const isAuthenticated = !!data; // If user exists, show profile; otherwise show guest nav
-
 
   // Extract Initials (e.g., Carlos Rivera -> CR)
   const initials = data.user
@@ -111,6 +110,7 @@ export default function Admin_Header({ onMenuClick }: HeaderProps) {
                   size="icon"
                   className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                   title="Sign Out"
+                  onClick={handleLogout}
                 >
                   <LogOut className="h-4 w-4" />
                 </Button>
