@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { User } from "@/components/data/data-type";
 import { authApi } from "./authApi";
+import Cookies from "js-cookie";
 
 interface AuthState {
   user: User | null;
@@ -11,11 +12,15 @@ interface AuthState {
 
 const isBrowser = typeof window !== "undefined";
 
+const savedToken = isBrowser
+  ? Cookies.get("token") || localStorage.getItem("token")
+  : null;
+
 // Check localStorage so user stays logged in on page refresh
 const initialState: AuthState = {
   user: null,
-  token: isBrowser ? localStorage.getItem("token") : null,
-  isAuthenticated: isBrowser ? !!localStorage.getItem("token") : false,
+  token: savedToken,
+  isAuthenticated: !!savedToken,
   onboardingStep: 1,
 };
 
@@ -33,7 +38,23 @@ const authSlice = createSlice({
       state.user = user;
       state.token = token;
       state.isAuthenticated = true;
+
+      // Sync both storage types
       localStorage.setItem("token", token);
+      Cookies.set("token", token, { expires: 7, secure: true });
+    },
+
+    /**
+     * Clears everything on Logout
+     */
+    logout: (state) => {
+      state.user = null;
+      state.token = null;
+      state.isAuthenticated = false;
+
+      // Clear both storage types
+      localStorage.removeItem("token");
+      Cookies.remove("token");
     },
 
     /**
@@ -44,22 +65,13 @@ const authSlice = createSlice({
     },
 
     /**
-     * Clears everything on Logout
-     */
-    logout: (state) => {
-      state.user = null;
-      state.token = null;
-      state.isAuthenticated = false;
-      localStorage.removeItem("token");
-    },
-
-    /**
      * Specific reducer to track the 15-step journey
      */
     setStep: (state, action: PayloadAction<number>) => {
       state.onboardingStep = action.payload;
     },
   },
+
   extraReducers: (builder) => {
     builder.addMatcher(
       authApi.endpoints.login.matchFulfilled,
@@ -67,7 +79,10 @@ const authSlice = createSlice({
         state.user = payload.user;
         state.token = payload.token;
         state.isAuthenticated = true;
+
+        // Match the cookie name used in your middleware.ts
         localStorage.setItem("token", payload.token);
+        Cookies.set("token", payload.token, { expires: 7 });
       }
     );
 
@@ -80,7 +95,6 @@ const authSlice = createSlice({
     );
   },
 });
-
 
 export const { setCredentials, logout, updateUser, setStep } =
   authSlice.actions;
