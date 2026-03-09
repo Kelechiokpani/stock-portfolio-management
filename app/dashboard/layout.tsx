@@ -1,20 +1,31 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/Layout/User/Sidebar";
 import Header from "@/components/Layout/User/Header";
 import { useGetMeQuery } from "../services/features/auth/authApi";
+import GlobalLoader from "@/components/GlobalLoader";
+import { useRouter } from "next/navigation";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { data, isLoading } = useGetMeQuery();
+
+  const { data, isLoading, isError } = useGetMeQuery(undefined, {
+    // skip: typeof window === "undefined", // Skip on server-side
+  });
+
+  // --- ALL CONDITIONAL RETURNS MUST GO BELOW THIS LINE ---
+
+  if (isLoading) {
+    return <GlobalLoader />;
+  }
 
   console.log(data, "User data in DashboardLayout...");
-
- 
 
   return (
     <div className="h-screen flex overflow-hidden bg-background ">

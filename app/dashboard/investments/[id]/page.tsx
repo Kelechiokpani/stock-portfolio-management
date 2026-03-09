@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   TrendingUp,
@@ -9,246 +9,344 @@ import {
   Target,
   Clock,
   Euro,
-  Info
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { mockUsers } from "@/components/data/user-data"
-// Importing the chart we refined earlier
-import TotalInvestmentChart from "@/components/market/Chart/TotalInvestmentChart"
+  Info,
+  ShieldCheck,
+  Zap,
+  Activity,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import GlobalLoader from "@/components/GlobalLoader";
+
+// API & Chart
+import { useGetMeQuery } from "@/app/services/features/auth/authApi";
+import InvestmentHoldingsChart from "@/components/market/Chart/InvestmentHoldings";
+import { useMemo } from "react";
 
 export default function InvestmentDetailPage() {
-  const router = useRouter()
-  const params = useParams()
-  const holdingId = params.id as string
+  const router = useRouter();
+  const params = useParams();
+  const holdingId = params.id as string;
 
-  // Accessing our professional mock data
-  const user = mockUsers[0]
-  const allHoldings = user.portfolios.flatMap((p) =>
-      p.holdings.map((h) => ({
-        ...h,
-        portfolioName: p.name,
-        portfolioId: p.id,
-      }))
-  )
+  const { data: response, isLoading } = useGetMeQuery();
 
-  const holding = allHoldings.find((h) => h.id === holdingId)
+  // Find the specific holding within Julian's portfolios
+  const holding = useMemo(() => {
+    if (!response?.user) return null;
+    return response.user.portfolios
+      .flatMap((p: any) => p.holdings)
+      .find((h: any) => h.id === holdingId);
+  }, [response, holdingId]);
+
+  if (isLoading)
+    return (
+      <GlobalLoader
+        message="Retrieving Asset Ledger"
+        subtext="Decrypting position history..."
+      />
+    );
 
   if (!holding) {
     return (
-        <div className="flex flex-col items-center justify-center py-20 animate-in fade-in">
-          <div className="p-4 rounded-full bg-muted mb-4">
-            <Info className="h-10 w-10 text-muted-foreground" />
-          </div>
-          <p className="text-xl font-serif font-medium text-foreground">Asset Not Found</p>
-          <p className="text-muted-foreground mb-6">This holding might have been liquidated or moved.</p>
-          <Button variant="outline" onClick={() => router.back()}>
-            Return to Portfolio
-          </Button>
+      <div className="flex flex-col items-center justify-center py-32 animate-in fade-in">
+        <div className="h-20 w-20 rounded-3xl bg-slate-50 dark:bg-slate-900 flex items-center justify-center mb-6 ring-1 ring-slate-200 dark:ring-slate-800">
+          <Info className="h-8 w-8 text-slate-400" />
         </div>
-    )
+        <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white">
+          Asset Non-Existent
+        </h2>
+        <p className="text-slate-500 mb-8 mt-2 max-w-xs text-center font-medium">
+          This position may have been liquidated or moved during a recent
+          rebalancing.
+        </p>
+        <Button
+          variant="outline"
+          onClick={() => router.back()}
+          className="rounded-xl px-8 border-slate-200 dark:border-slate-800 font-bold"
+        >
+          Return to Ledger
+        </Button>
+      </div>
+    );
   }
 
-  // LOGIC: Derived Calculations from your data structure
-  const initialCostBasis = holding.avgPrice * holding.shares
-  const currentValue = holding.value
-  const totalGain = holding.change
-  const gainPercent = holding.changePercent
+  // LOGIC: Core Calculations
+  const initialCostBasis = holding.avgPrice * holding.shares;
+  const isPositive = holding.change >= 0;
 
-  // Calculate Duration based on purchaseDate
-  const startDate = new Date(holding.purchaseDate)
-  const today = new Date()
-  const diffTime = Math.abs(today.getTime() - startDate.getTime())
-  const monthsHeld = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30.44))
+  // Prep Chart Data for ONLY this specific asset
+  const chartData = holding.performanceHistory.map((ph: any) => ({
+    date: new Date(ph.date)
+      .toLocaleDateString("en-GB", { day: "2-digit", month: "short" })
+      .toUpperCase(),
+    totalValue: ph.value,
+    totalGain: ph.gain,
+  }));
 
-  // Professional Target Logic (Assuming a 36-month standard cycle if not specified)
-  const targetMonths = 36
-  const progressPercent = Math.min(100, (monthsHeld / targetMonths) * 100)
-  const endDate = new Date(startDate.setMonth(startDate.getMonth() + targetMonths))
+  const formatCurrency = (val: number) =>
+    new Intl.NumberFormat("en-DE", {
+      style: "currency",
+      currency: response?.user?.settings?.baseCurrency,
+    }).format(val);
 
   return (
-      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-in slide-in-from-bottom-4 duration-700">
-
-        {/* 1. NAVIGATION & IDENTITY */}
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-5">
-            <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => router.back()}
-                className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </Button>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="font-bold border-primary/20 text-primary uppercase text-[10px]">
-                  {holding.portfolioType}
-                </Badge>
-                <Badge className="bg-secondary text-secondary-foreground text-[10px]">
-                  ID: {holding.id}
-                </Badge>
-              </div>
-              <h1 className="font-serif text-3xl font-bold tracking-tight lg:text-4xl text-foreground">
-                {holding.name} <span className="text-muted-foreground font-sans font-normal ml-1">({holding.symbol})</span>
-              </h1>
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-10 animate-in slide-in-from-bottom-4 duration-1000">
+      {/* 1. NAVIGATION & IDENTITY */}
+      <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between border-b border-slate-100 dark:border-slate-800 pb-12">
+        <div className="flex items-center gap-6">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => router.back()}
+            className="h-14 w-14 rounded-2xl border-slate-200 dark:border-slate-800 hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <Badge
+                variant="outline"
+                className="font-black border-slate-200 dark:border-slate-800 text-slate-400 uppercase text-[9px] tracking-[0.2em] px-2 py-0.5"
+              >
+                {holding.portfolioType} Equity
+              </Badge>
+              <Badge className="bg-blue-500/10 text-blue-600 border-none text-[9px] font-black uppercase tracking-widest px-2 py-0.5">
+                Node Sync Active
+              </Badge>
             </div>
+            <h1 className="font-serif text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+              {holding.name}{" "}
+              <span className="text-slate-400 font-sans font-normal ml-2 tracking-tighter">
+                ({holding.symbol})
+              </span>
+            </h1>
           </div>
+        </div>
 
-          <div className="flex flex-col items-end gap-1">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Current Market Price</p>
-            <p className="text-3xl font-black tracking-tighter">
-              €{holding.currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+        <div className="flex flex-col md:items-end gap-1">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+            Live Quote Price
+          </p>
+          <p className="text-4xl font-mono font-black tracking-tighter text-slate-900 dark:text-white">
+            {formatCurrency(holding.currentPrice)}
+          </p>
+        </div>
+      </div>
+
+      {/* 2. METRIC GRID */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          title="Net Position Value"
+          value={formatCurrency(holding.value)}
+          icon={<Euro className="h-5 w-5" />}
+        />
+        <MetricCard
+          title="Total Gain/Loss"
+          value={formatCurrency(holding.change)}
+          icon={
+            isPositive ? (
+              <TrendingUp className="h-5 w-5" />
+            ) : (
+              <TrendingDown className="h-5 w-5" />
+            )
+          }
+          trend={`${isPositive ? "+" : ""}${holding.changePercent.toFixed(2)}%`}
+          isPositive={isPositive}
+        />
+        <MetricCard
+          title="Inception Date"
+          value={new Date(holding.purchaseDate).toLocaleDateString(undefined, {
+            month: "short",
+            year: "numeric",
+          })}
+          icon={<Calendar className="h-5 w-5" />}
+          trend="Initial Purchase"
+        />
+        <MetricCard
+          title="Avg. Acquisition"
+          value={formatCurrency(holding.avgPrice)}
+          icon={<Target className="h-5 w-5" />}
+          trend={`${holding.shares} Units Held`}
+        />
+      </div>
+
+      {/* 3. PERFORMANCE CHART */}
+      <Card className="border-none bg-white dark:bg-slate-900/40 shadow-2xl ring-1 ring-slate-200 dark:ring-slate-800 overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between px-8 py-8 border-b border-slate-50 dark:border-slate-800">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Activity className="w-3 h-3 text-blue-500" />
+              <CardTitle className="text-xl font-serif font-bold tracking-tight">
+                Price Appreciation Ledger
+              </CardTitle>
+            </div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              Time-Weighted Performance History
             </p>
           </div>
-        </div>
+        </CardHeader>
+        <CardContent className="p-8">
+          <div className="h-[400px] w-full">
+            <InvestmentHoldingsChart holding={holding} />
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* 2. CORE PERFORMANCE METRICS */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <MetricCard
-              title="Equity Value"
-              value={`€${currentValue.toLocaleString()}`}
-              icon={<Euro className="h-5 w-5" />}
-              trend={null}
-          />
-          <MetricCard
-              title="Total P/L"
-              value={`€${totalGain.toLocaleString()}`}
-              icon={totalGain >= 0 ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
-              trend={`${totalGain >= 0 ? '+' : ''}${gainPercent.toFixed(2)}%`}
-              isPositive={totalGain >= 0}
-          />
-          <MetricCard
-              title="Holding Period"
-              value={`${monthsHeld} Months`}
-              icon={<Clock className="h-5 w-5" />}
-              trend="Since Purchase"
-          />
-          <MetricCard
-              title="Avg. Cost Basis"
-              value={`€${holding.avgPrice.toLocaleString()}`}
-              icon={<Target className="h-5 w-5" />}
-              trend={`${holding.shares} Shares Owned`}
-          />
-        </div>
-
-        {/* 3. PERFORMANCE CHART */}
-        <Card className="border-none bg-card/30 backdrop-blur-md shadow-2xl shadow-primary/5 overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-lg font-serif">Historical Accumulation</CardTitle>
-            <Badge variant="secondary" className="font-mono">Real-time Data Sync</Badge>
+      {/* 4. STRATEGIC POSITIONING */}
+      <div className="grid gap-8 lg:grid-cols-3">
+        <Card className="lg:col-span-2 border-none bg-white dark:bg-slate-900 shadow-xl ring-1 ring-slate-200 dark:ring-slate-800">
+          <CardHeader className="p-8 pb-4">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+              <Zap className="h-3 w-3 text-amber-500" /> Capital Allocation
+              Status
+            </CardTitle>
           </CardHeader>
-          <CardContent className="p-0 sm:p-6">
-            <div className="h-[400px] w-full">
-              {/* Reusing your professional chart - passing dummy logic for local context */}
-              <TotalInvestmentChart userId={user.id} />
+          <CardContent className="p-8 pt-0 space-y-10">
+            <div className="space-y-4">
+              <div className="flex justify-between items-end">
+                <div>
+                  <p className="text-2xl font-mono font-black tracking-tighter text-slate-900 dark:text-white">
+                    {(
+                      (holding.value / response?.user?.totalBalance) *
+                      100
+                    ).toFixed(2)}
+                    %
+                  </p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    Global Portfolio Weight
+                  </p>
+                </div>
+                <Badge
+                  variant="outline"
+                  className="text-[9px] font-black uppercase tracking-widest border-slate-200 dark:border-slate-800"
+                >
+                  Exposure Limit: 15%
+                </Badge>
+              </div>
+              <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-slate-900 dark:bg-white transition-all duration-1000"
+                  style={{
+                    width: `${
+                      (holding.value / response?.user?.totalBalance) * 100
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-8">
+              <TimelineItem
+                label="Inception"
+                sub={new Date(holding.purchaseDate).toLocaleDateString()}
+              />
+              <TimelineItem
+                label="Volume"
+                sub={`${holding.shares} ${
+                  holding.symbol === "BTC" ? "Units" : "Shares"
+                }`}
+              />
+              <TimelineItem
+                label="Status"
+                sub={isPositive ? "Profit" : "Drawdown"}
+                highlight={!isPositive}
+              />
             </div>
           </CardContent>
         </Card>
 
-        {/* 4. INVESTMENT TIMELINE & DETAILS */}
-        <div className="grid gap-6 lg:grid-cols-3">
-
-          {/* Progress Tracker */}
-          <Card className="lg:col-span-2 border-muted/40">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-md">
-                <Calendar className="h-5 w-5 text-primary" />
-                Strategic Timeline
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground font-medium">Maturity Progress</span>
-                  <span className="font-bold text-primary">{progressPercent.toFixed(0)}%</span>
-                </div>
-                <div className="h-3 w-full bg-muted rounded-full overflow-hidden border border-border/50">
-                  <div
-                      className="h-full bg-gradient-to-r from-primary/60 to-primary transition-all duration-1000"
-                      style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <TimelineStep label="Acquisition" date={holding.purchaseDate} />
-                <TimelineStep label="Time Elapsed" date={`${monthsHeld} Mo`} isDate={false} />
-                <TimelineStep label="Target Maturity" date={endDate.toISOString()} />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Position Breakdown */}
-          <Card className="border-muted/40 bg-secondary/10">
-            <CardHeader>
-              <CardTitle className="text-md font-serif">Position Ledger</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center border-b border-border/50 pb-2">
-                <span className="text-sm text-muted-foreground">Original Capital</span>
-                <span className="font-bold">€{initialCostBasis.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-border/50 pb-2">
-                <span className="text-sm text-muted-foreground">Units Owned</span>
-                <span className="font-bold">{holding.shares}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-border/50 pb-2">
-                <span className="text-sm text-muted-foreground">Portfolio Weight</span>
-                <span className="font-bold text-primary">
-                    {((currentValue / user.totalBalance) * 100).toFixed(2)}%
-                </span>
-              </div>
-              <div className="pt-4">
-                <p className="text-[10px] uppercase font-bold text-muted-foreground mb-2">Strategy Note</p>
-                <div className="p-3 bg-background/50 rounded-lg text-xs leading-relaxed text-muted-foreground italic border border-border/40">
-                  This {holding.symbol} position is classified under {holding.portfolioType} management.
-                  Monitor for volatility shifts in the {holding.portfolioName}.
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="border-none bg-slate-900 dark:bg-white shadow-2xl overflow-hidden">
+          <CardHeader className="bg-slate-950 dark:bg-slate-50 p-6 border-b border-slate-800 dark:border-slate-200">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2 font-mono">
+              <ShieldCheck className="h-3 w-3 text-emerald-500" /> Liquidity
+              Handshake
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 space-y-6">
+            <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                Position Cost
+              </p>
+              <p className="text-2xl font-mono font-black tracking-tighter text-white dark:text-slate-900">
+                {formatCurrency(initialCostBasis)}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                Unrealized Result
+              </p>
+              <p
+                className={`text-2xl font-mono font-black tracking-tighter ${
+                  isPositive ? "text-emerald-400" : "text-rose-400"
+                }`}
+              >
+                {isPositive ? "+" : ""}
+                {formatCurrency(holding.change)}
+              </p>
+            </div>
+            <Button className="w-full h-12 rounded-xl bg-white text-black dark:bg-slate-900 dark:text-white font-black uppercase tracking-widest text-[10px] hover:opacity-90 transition-all mt-4">
+              Initiate Liquidation
+            </Button>
+          </CardContent>
+        </Card>
       </div>
-  )
+    </div>
+  );
 }
 
-/** * PROFESSIONAL SUB-COMPONENTS
- */
+/** HELPER COMPONENTS **/
 
 function MetricCard({ title, value, icon, trend, isPositive }: any) {
   return (
-      <Card className="border-muted/40 shadow-sm transition-all hover:border-primary/20">
-        <CardContent className="p-6">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-2 rounded-lg bg-primary/5 text-primary">
-              {icon}
-            </div>
+    <Card className="border-none shadow-xl bg-white dark:bg-slate-900/40 ring-1 ring-slate-200 dark:ring-slate-800 group hover:ring-slate-900 dark:hover:ring-white transition-all">
+      <CardContent className="p-7">
+        <div className="flex justify-between items-start mb-6">
+          <div className="h-10 w-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700 text-slate-900 dark:text-white group-hover:bg-slate-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-all">
+            {icon}
           </div>
-          <div className="space-y-1">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{title}</p>
-            <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-black tracking-tight">{value}</p>
-              {trend && (
-                  <span className={`text-[10px] font-bold ${isPositive === null ? 'text-muted-foreground' : (isPositive ? 'text-emerald-500' : 'text-rose-500')}`}>
-                                {trend}
-                            </span>
-              )}
-            </div>
+        </div>
+        <div className="space-y-1">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+            {title}
+          </p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-mono font-black tracking-tighter text-slate-900 dark:text-white">
+              {value}
+            </p>
+            {trend && (
+              <span
+                className={`text-[10px] font-black tracking-widest uppercase ${
+                  isPositive === undefined
+                    ? "text-slate-400"
+                    : isPositive
+                    ? "text-emerald-500"
+                    : "text-rose-500"
+                }`}
+              >
+                {trend}
+              </span>
+            )}
           </div>
-        </CardContent>
-      </Card>
-  )
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
-function TimelineStep({ label, date, isDate = true }: { label: string, date: string, isDate?: boolean }) {
+function TimelineItem({ label, sub, highlight }: any) {
   return (
-      <div className="text-center space-y-1">
-        <p className="text-[10px] font-bold uppercase text-muted-foreground">{label}</p>
-        <p className="text-sm font-bold truncate px-1">
-          {isDate ? new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : date}
-        </p>
-      </div>
-  )
+    <div className="space-y-1">
+      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
+        {label}
+      </p>
+      <p
+        className={`text-xs font-bold uppercase tracking-tight ${
+          highlight ? "text-rose-500" : "text-slate-900 dark:text-slate-100"
+        }`}
+      >
+        {sub}
+      </p>
+    </div>
+  );
 }

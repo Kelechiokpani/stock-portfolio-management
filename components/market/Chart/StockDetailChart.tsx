@@ -2,102 +2,146 @@
 
 import { useMemo } from "react";
 import {
-    ResponsiveContainer,
-    XAxis,
-    YAxis,
-    Tooltip,
-    Area,
-    Bar,
-    ComposedChart,
-    CartesianGrid,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Area,
+  Bar,
+  ComposedChart,
+  CartesianGrid,
 } from "recharts";
 
 export default function StockDetailChart({ stock }: { stock: any }) {
-    const chartData = useMemo(() => {
-        const days = 40;
-        const basePrice = stock.price;
-        return Array.from({ length: days }, (_, i) => ({
-            // Show few labels to keep it clean like the reference
-            date: i === 5 ? "Jan 12" : i === 20 ? "Jan 26" : i === 35 ? "Feb 9" : "",
-            price: basePrice + Math.sin(i / 5) * 8 + (i * 0.5),
-            volume: Math.random() * 5 + 2,
-        }));
-    }, [stock]);
+  const chartData = useMemo(() => {
+    if (!stock) return [];
+    const days = 60; // Extended for better visual density
+    const basePrice = stock.price || 100;
 
-    const isPositive = stock.changePercent >= 0;
+    return Array.from({ length: days }, (_, i) => {
+      const variance = Math.sin(i / 4) * (basePrice * 0.015);
+      const randomness = Math.random() * (basePrice * 0.005);
+      return {
+        time: i % 10 === 0 ? `${10 + i}:00` : "",
+        price: parseFloat((basePrice + variance + randomness).toFixed(2)),
+        volume: Math.floor(Math.random() * 1000) + 200,
+      };
+    });
+  }, [stock]);
 
-    // We use CSS variables for the line color so it's consistent with your UI theme
-    const chartLineColor = isPositive ? "var(--chart-2, #22c55e)" : "var(--chart-5, #ef4444)";
+  const isPositive = stock?.changePercent >= 0;
+  const accentColor = isPositive ? "#10b981" : "#f43f5e"; // Emerald vs Rose
 
-    return (
-        <div className="w-full h-full p-6 select-none outline-none">
-            <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                    <defs>
-                        <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor={chartLineColor} stopOpacity={0.3} />
-                            <stop offset="95%" stopColor={chartLineColor} stopOpacity={0} />
-                        </linearGradient>
-                    </defs>
+  return (
+    <div className="w-full h-full p-4 md:p-8 select-none">
+      <ResponsiveContainer width="100%" height="100%">
+        <ComposedChart
+          data={chartData}
+          margin={{ top: 20, right: 0, left: -25, bottom: 0 }}
+        >
+          <defs>
+            <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={accentColor} stopOpacity={0.25} />
+              <stop offset="95%" stopColor={accentColor} stopOpacity={0} />
+            </linearGradient>
+          </defs>
 
-                    {/* Stroke uses the border variable from your theme */}
-                    <CartesianGrid
-                        vertical={true}
-                        horizontal={false}
-                        stroke="hsl(var(--border))"
-                        strokeOpacity={0.5}
-                    />
+          {/* Institutional Grid Styling */}
+          <CartesianGrid
+            strokeDasharray="4 4"
+            vertical={false}
+            stroke="hsl(var(--border))"
+            strokeOpacity={0.4}
+          />
 
-                    <XAxis
-                        dataKey="date"
-                        axisLine={false}
-                        tickLine={false}
-                        // Uses muted-foreground for text color
-                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11, fontWeight: 500 }}
-                        interval={0}
-                        dy={10}
-                    />
+          <XAxis
+            dataKey="time"
+            axisLine={false}
+            tickLine={false}
+            tick={{
+              fill: "hsl(var(--muted-foreground))",
+              fontSize: 10,
+              fontWeight: 800,
+            }}
+            dy={15}
+          />
 
-                    <YAxis
-                        orientation="left"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11, fontWeight: 500 }}
-                        domain={['auto', 'auto']}
-                    />
+          <YAxis
+            orientation="left"
+            axisLine={false}
+            tickLine={false}
+            tick={{
+              fill: "hsl(var(--muted-foreground))",
+              fontSize: 10,
+              fontWeight: 800,
+            }}
+            domain={["auto", "auto"]}
+            tickFormatter={(val) => `$${val.toLocaleString()}`}
+          />
 
-                    <Tooltip
-                        cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
-                        contentStyle={{
-                            backgroundColor: "hsl(var(--popover))",
-                            border: "1px solid hsl(var(--border))",
-                            borderRadius: "12px",
-                            color: "hsl(var(--popover-foreground))",
-                            fontSize: "12px",
-                            fontWeight: "bold"
-                        }}
-                        itemStyle={{ color: chartLineColor }}
-                    />
+          <Tooltip
+            cursor={{
+              stroke: "hsl(var(--foreground))",
+              strokeWidth: 1.5,
+              strokeDasharray: "5 5",
+            }}
+            content={({ active, payload }) => {
+              if (active && payload && payload.length) {
+                return (
+                  <div className="bg-background/80 backdrop-blur-xl border border-border p-4 rounded-lg shadow-2xl space-y-1">
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                      Live Execution
+                    </p>
+                    <p className="text-xl font-black font-mono tracking-tighter">
+                      ${payload[0].value?.toLocaleString()}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-1.5 h-1.5 rounded-full animate-pulse"
+                        style={{ backgroundColor: accentColor }}
+                      />
+                      <p className="text-[10px] font-bold uppercase text-muted-foreground">
+                        Vol:{" "}
+                        <span className="text-foreground">
+                          {payload[1]?.value}M
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            }}
+          />
 
-                    {/* Volume bars use the muted color of the current theme */}
-                    <Bar
-                        dataKey="volume"
-                        fill="hsl(var(--muted-foreground))"
-                        fillOpacity={0.2}
-                        barSize={6}
-                    />
+          {/* Faded Volume Bars in Background */}
+          <Bar
+            dataKey="volume"
+            fill="hsl(var(--muted-foreground))"
+            fillOpacity={0.08}
+            barSize={3}
+            radius={[2, 2, 0, 0]}
+          />
 
-                    <Area
-                        type="monotone"
-                        dataKey="price"
-                        stroke={chartLineColor}
-                        strokeWidth={2.5}
-                        fillOpacity={1}
-                        fill="url(#chartGradient)"
-                        animationDuration={1500}
-                    />
-                </ComposedChart>
-            </ResponsiveContainer>
-        </div>
-    );
+          {/* High-Impact Price Area */}
+          <Area
+            type="monotone"
+            dataKey="price"
+            stroke={accentColor}
+            strokeWidth={3}
+            fill="url(#areaGradient)"
+            animationDuration={1200}
+            dot={false}
+            activeDot={{
+              r: 6,
+              fill: accentColor,
+              stroke: "white",
+              strokeWidth: 2,
+              className: "shadow-lg",
+            }}
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
+  );
 }

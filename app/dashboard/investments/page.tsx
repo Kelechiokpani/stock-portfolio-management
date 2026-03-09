@@ -1,576 +1,393 @@
-"use client"
+"use client";
 
-import Link from "next/link"
+import Link from "next/link";
 import {
   TrendingUp,
   TrendingDown,
-  Target,
-  Clock,
   ArrowUpRight,
   Wallet,
   Activity,
   ShieldCheck,
   ShieldAlert,
-  CreditCard
-} from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { mockUsers } from "@/components/data/user-data"
+  CreditCard,
+  Layers,
+  ChevronRight,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import GlobalLoader from "@/components/GlobalLoader";
 import TotalInvestmentChart from "@/components/market/Chart/TotalInvestmentChart";
+import { useGetMeQuery } from "@/app/services/features/auth/authApi";
 
 export default function InvestmentsPage() {
-  // Use the new structure for mockUsers[0]
-  const user = mockUsers[0]
-  const portfolios = user.portfolios
+  const { data: response, isLoading } = useGetMeQuery();
 
-  // Flatten all holdings from the user's multiple portfolios
-  const allHoldings = portfolios.flatMap((p) =>
-      p.holdings.map((h) => ({
-        ...h,
-        portfolioName: p.name,
-      }))
-  )
+  if (isLoading)
+    return (
+      <GlobalLoader
+        message="Decrypting Portfolio Ledger"
+        subtext="Accessing institutional asset data..."
+      />
+    );
 
-  // Financial Calculations based on new data types
-  const totalInvested = allHoldings.reduce((sum, h) => sum + (h.avgPrice * h.shares), 0)
-  const totalCurrentValue = allHoldings.reduce((sum, h) => sum + h.value, 0)
-  const totalGain = totalCurrentValue - totalInvested
-  const totalGainPercent = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0
+  const user = response?.user;
+  if (!user) return null;
 
-  const bestPerformer = allHoldings.reduce((best, current) =>
-      current.changePercent > best.changePercent ? current : best
-  )
-  const worstPerformer = allHoldings.reduce((worst, current) =>
-      current.changePercent < worst.changePercent ? current : worst
-  )
+  const portfolios = user.portfolios || [];
 
-  // Derived stats for the Bento Grid
-  const kycVerified = user.settings.kycStatus === "verified"
+  // Flatten all holdings from the user's portfolios
+  const allHoldings = portfolios.flatMap((p: any) =>
+    p.holdings.map((h: any) => ({
+      ...h,
+      portfolioName: p.name,
+    }))
+  );
+
+  // Calculations based on live data
+  const totalInvested = allHoldings.reduce(
+    (sum: number, h: any) => sum + h.avgPrice * h.shares,
+    0
+  );
+  const totalCurrentValue = allHoldings.reduce(
+    (sum: number, h: any) => sum + h.value,
+    0
+  );
+  const totalGain = totalCurrentValue - totalInvested;
+  const totalGainPercent =
+    totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0;
+
+  // Performer logic
+  const bestPerformer =
+    allHoldings.length > 0
+      ? allHoldings.reduce((best: any, current: any) =>
+          current.changePercent > best.changePercent ? current : best
+        )
+      : null;
+
+  const worstPerformer =
+    allHoldings.length > 0
+      ? allHoldings.reduce((worst: any, current: any) =>
+          current.changePercent < worst.changePercent ? current : worst
+        )
+      : null;
+
+  const formatCurrency = (val: number) =>
+    new Intl.NumberFormat("en-DE", {
+      style: "currency",
+      currency: user.settings.baseCurrency,
+    }).format(val);
 
   return (
-      <div className="max-w-7xl mx-auto px-4 py-10 space-y-12 animate-in fade-in duration-700">
-
-        {/* 1. HERO SECTION & HEADER */}
-        <header className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-border/40 pb-8">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="px-3 py-1 text-[10px] uppercase tracking-widest font-bold border-primary/30 text-primary">
-                {user.settings.accountType} Wealth Intelligence
+    <div className="max-w-7xl mx-auto px-4 py-10 space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      {/* 1. HERO HEADER */}
+      <header className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-slate-200 dark:border-slate-800 pb-10">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <Badge
+              variant="outline"
+              className="px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] border-slate-200 dark:border-slate-800"
+            >
+              {user.settings.accountType} Tier
+            </Badge>
+            {user.kycVerified ? (
+              <Badge className="bg-emerald-500 text-white border-none flex gap-1.5 items-center px-3 py-1 text-[9px] font-black uppercase tracking-widest">
+                <ShieldCheck className="w-3 h-3" /> System Verified
               </Badge>
-              {kycVerified ? (
-                  <Badge className="bg-emerald-500/10 text-emerald-500 border-none flex gap-1 items-center px-2 py-1 text-[10px]">
-                    <ShieldCheck className="w-3 h-3" /> Verified
-                  </Badge>
-              ) : (
-                  <Badge className="bg-amber-500/10 text-amber-500 border-none flex gap-1 items-center px-2 py-1 text-[10px]">
-                    <ShieldAlert className="w-3 h-3" /> Action Required
-                  </Badge>
-              )}
+            ) : (
+              <Badge className="bg-amber-500/10 text-amber-600 border-none flex gap-1.5 items-center px-3 py-1 text-[9px] font-black uppercase tracking-widest">
+                <ShieldAlert className="w-3 h-3" /> Audit Required
+              </Badge>
+            )}
+          </div>
+          <h1 className="text-4xl font-serif font-bold tracking-tight text-slate-900 dark:text-white">
+            Wealth Overview
+          </h1>
+          <p className="text-muted-foreground text-sm font-medium">
+            Aggregated intelligence across{" "}
+            <span className="text-slate-900 dark:text-slate-100 font-bold">
+              {portfolios.length} active portfolios
+            </span>
+            .
+          </p>
+        </div>
+
+        <div className="flex flex-col items-end gap-1">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+            Total Assets Under Management
+          </p>
+          <p className="text-4xl font-mono font-black tracking-tighter text-slate-900 dark:text-white">
+            {formatCurrency(totalCurrentValue)}
+          </p>
+        </div>
+      </header>
+
+      {/* 2. STATS GRID */}
+      <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="Principal Invested"
+          value={formatCurrency(totalInvested)}
+          icon={<Wallet className="w-5 h-5" />}
+          theme="light"
+        />
+        <StatCard
+          label="Unrealized P/L"
+          value={formatCurrency(totalGain)}
+          subValue={`${totalGain >= 0 ? "+" : ""}${totalGainPercent.toFixed(
+            2
+          )}%`}
+          icon={
+            totalGain >= 0 ? (
+              <TrendingUp className="w-5 h-5" />
+            ) : (
+              <TrendingDown className="w-5 h-5" />
+            )
+          }
+          theme={totalGain >= 0 ? "success" : "danger"}
+          isTrend
+        />
+        <StatCard
+          label="Settlement Cash"
+          value={formatCurrency(user.availableCash)}
+          icon={<CreditCard className="w-5 h-5" />}
+          theme="light"
+        />
+        <StatCard
+          label="Risk Exposure"
+          value={user.settings.riskTolerance}
+          subValue="Portfolio Profile"
+          icon={<Activity className="w-5 h-5" />}
+          theme="dark"
+        />
+      </section>
+
+      {/* 3. CHART SECTION */}
+      <Card className="border-none bg-white dark:bg-slate-900/40 shadow-2xl ring-1 ring-slate-200 dark:ring-slate-800 overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between px-8 py-8 border-b border-slate-50 dark:border-slate-800">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Layers className="w-3 h-3 text-blue-500" />
+              <CardTitle className="text-xl font-serif font-bold">
+                Equity Trajectory
+              </CardTitle>
             </div>
-            <h1 className="text-2xl font-serif font-bold tracking-tight text-foreground lg:text-2xl">
-              Welcome back, {user.profile.firstName}
-            </h1>
-            <p className="text-muted-foreground text-sm max-w-md font-light">
-              Managing assets across {portfolios.length} portfolios with a {user.settings.riskTolerance} risk profile.
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              Institutional Growth Audit
             </p>
           </div>
-
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-[1px] bg-border hidden md:block mx-4" />
-            <div className="text-right">
-              <p className="text-xs text-muted-foreground uppercase tracking-tighter font-semibold">Total Portfolio Value</p>
-              <p className="text-2xl mt-2 font-bold tracking-tighter text-primary">
-                €{totalCurrentValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </p>
-            </div>
+        </CardHeader>
+        <CardContent className="px-6 py-8">
+          <div className="h-[400px] w-full">
+            <TotalInvestmentChart portfolio={portfolios} />
           </div>
-        </header>
+        </CardContent>
+      </Card>
 
-        {/* 2. SUMMARY STATS */}
-        <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-              label="Equity Invested"
-              value={`€${totalInvested.toLocaleString()}`}
-              icon={<Wallet className="w-5 h-5" />}
-              color="primary"
-          />
-          <StatCard
-              label="Unrealized P/L"
-              value={`€${totalGain.toLocaleString()}`}
-              subValue={`${totalGain >= 0 ? "+" : ""}${totalGainPercent.toFixed(2)}%`}
-              icon={totalGain >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
-              color={totalGain >= 0 ? "success" : "destructive"}
-              isTrend
-          />
-          <StatCard
-              label="Available Cash"
-              value={`€${user.availableCash.toLocaleString()}`}
-              icon={<CreditCard className="w-5 h-5" />}
-              color="info"
-          />
-          <StatCard
-              label="Connected Accounts"
-              value={user.connectedAccounts.length.toString()}
-              subValue="Institutional Sync"
-              icon={<Activity className="w-5 h-5" />}
-              color="warning"
-          />
-        </section>
+      {/* 4. ASSET COMPOSITION */}
+      <section className="space-y-8">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+          <h2 className="text-2xl font-serif font-bold tracking-tight">
+            Asset Composition{" "}
+            <span className="text-slate-400 font-sans font-normal ml-2 text-lg">
+              ({allHoldings.length})
+            </span>
+          </h2>
+          <button className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors flex items-center gap-2">
+            View All Assets <ChevronRight className="w-3 h-3" />
+          </button>
+        </div>
 
-        {/* 3. PERFORMANCE CHART SECTION */}
-        <Card className="border-none bg-card/30 backdrop-blur-sm shadow-2xl shadow-primary/5 overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between px-8 pt-8">
-            <div className="space-y-1">
-              <CardTitle className="text-xl font-serif">Accumulation History</CardTitle>
-              <p className="text-xs text-muted-foreground">Comprehensive performance across all portfolios</p>
-            </div>
-            <Activity className="h-5 w-5 text-muted-foreground/50" />
-          </CardHeader>
-          <CardContent className="px-2 pb-6">
-            <div className="h-[400px] w-full">
-              <TotalInvestmentChart userId={user.id} />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {allHoldings.map((holding: any) => (
+            <Link
+              key={holding.id}
+              href={`/dashboard/investments/${holding.id}`}
+              className="group"
+            >
+              <Card className="h-full border-none bg-white dark:bg-slate-900 shadow-xl hover:shadow-2xl ring-1 ring-slate-200 dark:ring-slate-800 transition-all duration-500 hover:-translate-y-2 group-hover:ring-slate-900 dark:group-hover:ring-white">
+                <CardHeader className="pb-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-500">
+                        {holding.portfolioName}
+                      </p>
+                      <CardTitle className="text-3xl font-mono font-black tracking-tighter">
+                        {holding.symbol}
+                      </CardTitle>
+                      <p className="text-xs text-slate-400 font-bold uppercase tracking-tighter">
+                        {holding.name}
+                      </p>
+                    </div>
+                    <div className="h-12 w-12 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-700 group-hover:bg-slate-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-all duration-300">
+                      <ArrowUpRight className="h-5 w-5" />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6 pt-0">
+                  <div className="grid grid-cols-2 gap-4 border-t border-slate-50 dark:border-slate-800 pt-6">
+                    <div>
+                      <p className="text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">
+                        Position
+                      </p>
+                      <p className="font-bold text-sm">
+                        {holding.shares}{" "}
+                        {holding.symbol === "BTC" ? "Unit" : "Shares"}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">
+                        Net Value
+                      </p>
+                      <p className="font-mono font-black text-lg tracking-tighter">
+                        {formatCurrency(holding.value)}
+                      </p>
+                    </div>
+                  </div>
 
-        {/* 4. HOLDINGS GRID */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-serif font-semibold tracking-tight">
-              Asset Composition <span className="text-muted-foreground font-sans font-normal ml-2 text-lg">({allHoldings.length})</span>
-            </h2>
-          </div>
+                  <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
+                    <div
+                      className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest flex items-center gap-1.5 ${
+                        holding.change >= 0
+                          ? "bg-emerald-500/10 text-emerald-500"
+                          : "bg-rose-500/10 text-rose-500"
+                      }`}
+                    >
+                      {holding.change >= 0 ? (
+                        <TrendingUp className="h-3 h-3" />
+                      ) : (
+                        <TrendingDown className="h-3 h-3" />
+                      )}
+                      {holding.changePercent.toFixed(2)}%
+                    </div>
+                    <p className="text-[9px] font-black uppercase text-slate-400 tracking-tighter">
+                      Inception:{" "}
+                      {new Date(holding.purchaseDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {allHoldings.map((holding) => (
-                <Link key={holding.id} href={`/dashboard/investments/${holding.id}`} className="group">
-                  <Card className="h-full border-muted/40 bg-card/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-xl hover:border-primary/40 overflow-hidden">
-                    <div className="h-1 w-full bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <CardHeader className="pb-4">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-primary/70">{holding.portfolioType} Portfolio</p>
-                          <CardTitle className="text-2xl font-bold tracking-tight">{holding.symbol}</CardTitle>
-                          <p className="text-xs text-muted-foreground font-medium">{holding.name}</p>
-                        </div>
-                        <div className="h-10 w-10 rounded-full bg-secondary/50 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                          <ArrowUpRight className="h-5 w-5" />
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-5">
-                      <div className="flex justify-between items-end border-b border-border/40 pb-4">
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase text-muted-foreground font-bold">Position</span>
-                          <p className="font-semibold text-sm">{holding.shares} Units @ €{holding.avgPrice.toLocaleString()}</p>
-                        </div>
-                        <div className="text-right space-y-1">
-                          <span className="text-[10px] uppercase text-muted-foreground font-bold">Equity Value</span>
-                          <p className="font-bold text-lg">€{holding.value.toLocaleString()}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-between items-center">
-                        <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${holding.change >= 0 ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
-                          {holding.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                          {holding.changePercent.toFixed(2)}%
-                        </div>
-                        <p className="text-xs text-muted-foreground italic">Invested on {new Date(holding.purchaseDate).toLocaleDateString()}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* 5. TOP & BOTTOM PERFORMERS */}
-        <section className="grid gap-6 md:grid-cols-2">
+      {/* 5. TOP & BOTTOM PERFORMERS */}
+      {bestPerformer && (
+        <section className="grid gap-8 md:grid-cols-2">
           <PerformerCard asset={bestPerformer} type="top" />
           <PerformerCard asset={worstPerformer} type="bottom" />
         </section>
-      </div>
-  )
+      )}
+    </div>
+  );
 }
 
 /** * REUSABLE COMPONENTS **/
 
-function StatCard({ label, value, subValue, icon, color, isTrend }: any) {
-  const colorMap: any = {
-    primary: "bg-primary/5 text-primary border-primary/10",
-    success: "bg-emerald-500/5 text-emerald-500 border-emerald-500/10",
-    destructive: "bg-rose-500/5 text-rose-500 border-rose-500/10",
-    info: "bg-blue-500/5 text-blue-500 border-blue-500/10",
-    warning: "bg-amber-500/5 text-amber-500 border-amber-500/10",
-  }
+function StatCard({ label, value, subValue, icon, theme, isTrend }: any) {
+  const themes: any = {
+    light:
+      "bg-white dark:bg-slate-900 shadow-xl ring-1 ring-slate-200 dark:ring-slate-800",
+    dark: "bg-slate-900 text-white dark:bg-white dark:text-black shadow-2xl",
+    success:
+      "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-1 ring-emerald-100 dark:ring-emerald-500/20",
+    danger:
+      "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 ring-1 ring-rose-100 dark:ring-rose-500/20",
+  };
 
   return (
-      <Card className="border-muted/30 shadow-sm bg-card/20 backdrop-blur-md">
-        <CardContent className="p-6 flex items-start justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
-            <div className="flex items-baseline gap-2">
-              <h3 className="text-2xl font-bold tracking-tighter">{value}</h3>
-              {subValue && <span className={`text-xs font-bold ${isTrend ? (subValue.includes('+') ? 'text-emerald-500' : 'text-rose-500') : 'text-muted-foreground'}`}>{subValue}</span>}
-            </div>
+    <Card
+      className={`border-none ${themes[theme]} transition-all duration-300`}
+    >
+      <CardContent className="p-7 flex items-start justify-between">
+        <div className="space-y-2">
+          <p
+            className={`text-[10px] font-black uppercase tracking-[0.2em] ${
+              theme === "dark" ? "opacity-50" : "text-slate-400"
+            }`}
+          >
+            {label}
+          </p>
+          <div className="flex flex-col gap-0.5">
+            <h3 className="text-2xl font-mono font-black tracking-tighter">
+              {value}
+            </h3>
+            {subValue && (
+              <span
+                className={`text-[10px] font-black uppercase tracking-widest ${
+                  isTrend
+                    ? subValue.includes("+")
+                      ? "text-emerald-500"
+                      : "text-rose-500"
+                    : "opacity-60"
+                }`}
+              >
+                {subValue}
+              </span>
+            )}
           </div>
-          <div className={`p-3 rounded-xl border ${colorMap[color]}`}>
-            {icon}
-          </div>
-        </CardContent>
-      </Card>
-  )
-}
-
-function PerformerCard({ asset, type }: { asset: any, type: 'top' | 'bottom' }) {
-  const isTop = type === 'top'
-  return (
-      <Card className={`relative overflow-hidden border-none bg-gradient-to-br ${isTop ? 'from-emerald-500/10 via-background to-background' : 'from-rose-500/10 via-background to-background'}`}>
-        <div className={`absolute top-0 right-0 p-8 opacity-10`}>
-          {isTop ? <TrendingUp className="h-24 w-24" /> : <TrendingDown className="h-24 w-24" />}
         </div>
-        <CardHeader>
-          <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-            {isTop ? <TrendingUp className="h-4 w-4 text-emerald-500" /> : <TrendingDown className="h-4 w-4 text-rose-500" />}
-            {isTop ? 'Alpha Leader' : 'Underperformer'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="text-3xl font-black tracking-tighter uppercase">{asset.symbol}</p>
-              <p className="text-sm text-muted-foreground font-medium">{asset.name}</p>
-            </div>
-            <Badge className={`text-lg px-4 py-1 rounded-full ${isTop ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600'}`}>
-              {isTop ? "+" : ""}{asset.changePercent.toFixed(2)}%
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
-  )
+        <div
+          className={`p-3 rounded-2xl border ${
+            theme === "dark"
+              ? "bg-white/10 border-white/20"
+              : "bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700"
+          }`}
+        >
+          {icon}
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
-// "use client"
-//
-// import Link from "next/link"
-// import {
-//   TrendingUp,
-//   TrendingDown,
-//   Calendar,
-//   Target,
-//   Clock,
-//   AlertCircle,
-// } from "lucide-react"
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Badge } from "@/components/ui/badge"
-// import { mockUsers } from "@/components/market/mock-data"
-// import { InvestmentChart } from "@/components/market/investment-chart"
-// import StockDetailChart from "@/components/market/Chart/StockDetailChart";
-// import TotalInvestmentChart from "@/components/market/Chart/TotalInvestmentChart";
-//
-//
-//
-// export default function InvestmentsPage() {
-//   const user = mockUsers[0]
-//   const portfolios = user.portfolios
-//
-//   // Flatten all holdings from all portfolios
-//   const allHoldings = portfolios.flatMap((p) =>
-//     p.holdings.map((h) => ({
-//       ...h,
-//       portfolioName: p.name,
-//       portfolioId: p.id,
-//     }))
-//   )
-//
-//   // Calculate stats
-//   const totalInvested = allHoldings.reduce(
-//     (sum, h) => sum + h.avgPrice * h.shares,
-//     0
-//   )
-//   const totalCurrentValue = allHoldings.reduce((sum, h) => sum + h.value, 0)
-//   const totalGain = totalCurrentValue - totalInvested
-//   const totalGainPercent = (totalGain / totalInvested) * 100
-//
-//   // Get performance data across all holdings
-//   const performanceData =
-//     allHoldings.length > 0
-//       ? allHoldings[0].performanceHistory.map((perf) => ({
-//           date: perf.date,
-//           value: allHoldings.reduce((sum, h) => {
-//             const hData = h.performanceHistory.find((d) => d.date === perf.date)
-//             return sum + (hData?.value || 0)
-//           }, 0),
-//         }))
-//       : []
-//
-//   const bestPerformer = allHoldings.reduce((best, current) =>
-//     current.changePercent > best.changePercent ? current : best
-//   )
-//   const worstPerformer = allHoldings.reduce((worst, current) =>
-//     current.changePercent < worst.changePercent ? current : worst
-//   )
-//
-//   const averageDuration =
-//     allHoldings.length > 0
-//       ? Math.round(
-//           allHoldings.reduce((sum, h) => sum + h.investmentDuration, 0) /
-//             allHoldings.length
-//         )
-//       : 0
-//
-//   const averageReturn =
-//     allHoldings.length > 0
-//       ? (
-//           allHoldings.reduce((sum, h) => sum + h.projectedReturnPercent, 0) /
-//           allHoldings.length
-//         ).toFixed(1)
-//       : "0"
-//
-//   return (
-//     <div>
-//       {/* Header */}
-//       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-//         <div>
-//           <h1 className="font-serif text-2xl font-bold text-foreground lg:text-3xl">
-//             Investment Monitoring
-//           </h1>
-//           <p className="mt-1 text-muted-foreground">
-//             Track your investments and monitor performance
-//           </p>
-//         </div>
-//       </div>
-//
-//       {/* Summary Stats */}
-//       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-//         <Card>
-//           <CardContent className="flex items-center gap-4 pt-6">
-//             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-//               <TrendingUp className="h-6 w-6 text-primary" />
-//             </div>
-//             <div>
-//               <p className="text-sm text-muted-foreground">Total Invested</p>
-//               <p className="text-2xl font-bold text-foreground">
-//                 €{totalInvested.toLocaleString("en-US", {
-//                   minimumFractionDigits: 2,
-//                 })}
-//               </p>
-//             </div>
-//           </CardContent>
-//         </Card>
-//
-//         <Card>
-//           <CardContent className="flex items-center gap-4 pt-6">
-//             <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${totalGain >= 0 ? "bg-success/10" : "bg-destructive/10"}`}>
-//               {totalGain >= 0 ? (
-//                 <TrendingUp className="h-6 w-6 text-success" />
-//               ) : (
-//                 <TrendingDown className="h-6 w-6 text-destructive" />
-//               )}
-//             </div>
-//             <div>
-//               <p className="text-sm text-muted-foreground">Total Gain/Loss</p>
-//               <p
-//                 className={`text-2xl font-bold ${
-//                   totalGain >= 0 ? "text-success" : "text-destructive"
-//                 }`}
-//               >
-//                 {totalGain >= 0 ? "+" : ""}€
-//                 {totalGain.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-//               </p>
-//               <p className="text-xs text-muted-foreground">
-//                 {totalGain >= 0 ? "+" : ""}
-//                 {totalGainPercent.toFixed(2)}%
-//               </p>
-//             </div>
-//           </CardContent>
-//         </Card>
-//
-//         <Card>
-//           <CardContent className="flex items-center gap-4 pt-6">
-//             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-info/10">
-//               <Clock className="h-6 w-6 text-info" />
-//             </div>
-//             <div>
-//               <p className="text-sm text-muted-foreground">Avg Duration</p>
-//               <p className="text-2xl font-bold text-foreground">
-//                 {averageDuration} mo
-//               </p>
-//             </div>
-//           </CardContent>
-//         </Card>
-//
-//         <Card>
-//           <CardContent className="flex items-center gap-4 pt-6">
-//             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-warning/10">
-//               <Target className="h-6 w-6 text-warning" />
-//             </div>
-//             <div>
-//               <p className="text-sm text-muted-foreground">Avg Projected</p>
-//               <p className="text-2xl font-bold text-foreground">
-//                 {averageReturn}%
-//               </p>
-//             </div>
-//           </CardContent>
-//         </Card>
-//       </div>
-//
-//       {/* Performance Chart */}
-//       {performanceData.length > 0 && (
-//           <CardContent className="h-full mt-8 rounded-lg border">
-//           {/*<StockDetailChart stock={performanceData} />*/}
-//           {/*<InvestmentChart data={performanceData} />*/}
-//           <TotalInvestmentChart userId={user?.id} />
-//
-//         </CardContent>
-//       )}
-//
-//       {/* Holdings Grid */}
-//       <div className="mt-8">
-//         <div className="flex items-center justify-between mb-4">
-//           <h2 className="text-xl font-semibold text-foreground">
-//             Your Holdings ({allHoldings.length})
-//           </h2>
-//         </div>
-//
-//         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-//           {allHoldings.map((holding) => (
-//             <Link
-//               key={holding.id}
-//               href={`/dashboard/investments/${holding.id}`}
-//             >
-//               <Card className="h-full hover:border-primary transition-colors cursor-pointer">
-//                 <CardHeader className="pb-3">
-//                   <div className="flex items-start justify-between">
-//                     <div className="flex-1 min-w-0">
-//                       <CardTitle className="text-lg">
-//                         {holding.symbol}
-//                       </CardTitle>
-//                       <p className="text-sm text-muted-foreground truncate">
-//                         {holding.name}
-//                       </p>
-//                     </div>
-//                     <Badge variant="secondary" className="ml-2 shrink-0">
-//                       {holding.market}
-//                     </Badge>
-//                   </div>
-//                 </CardHeader>
-//                 <CardContent className="space-y-3">
-//                   <div className="flex justify-between items-center">
-//                     <span className="text-sm text-muted-foreground">Shares</span>
-//                     <span className="font-semibold">{holding.shares}</span>
-//                   </div>
-//                   <div className="flex justify-between items-center">
-//                     <span className="text-sm text-muted-foreground">
-//                       Current Price
-//                     </span>
-//                     <span className="font-semibold">
-//                       €{holding.currentPrice.toFixed(2)}
-//                     </span>
-//                   </div>
-//                   <div className="flex justify-between items-center">
-//                     <span className="text-sm text-muted-foreground">Value</span>
-//                     <span className="font-semibold">
-//                       €
-//                       {holding.value.toLocaleString("en-US", {
-//                         minimumFractionDigits: 2,
-//                       })}
-//                     </span>
-//                   </div>
-//                   <div className="border-t border-border pt-3 flex justify-between items-center">
-//                     <span className="text-sm text-muted-foreground">
-//                       Gain/Loss
-//                     </span>
-//                     <div className="text-right">
-//                       <p
-//                         className={`font-semibold ${
-//                           holding.change >= 0
-//                             ? "text-success"
-//                             : "text-destructive"
-//                         }`}
-//                       >
-//                         {holding.change >= 0 ? "+" : ""}€
-//                         {holding.change.toFixed(2)}
-//                       </p>
-//                       <p
-//                         className={`text-xs ${
-//                           holding.changePercent >= 0
-//                             ? "text-success"
-//                             : "text-destructive"
-//                         }`}
-//                       >
-//                         {holding.changePercent >= 0 ? "+" : ""}
-//                         {holding.changePercent.toFixed(2)}%
-//                       </p>
-//                     </div>
-//                   </div>
-//                   <div className="pt-2 space-y-1 text-xs text-muted-foreground">
-//                     <p>Duration: {holding.investmentDuration} months</p>
-//                     <p>
-//                       Target Return: +{holding.projectedReturnPercent.toFixed(1)}
-//                       %
-//                     </p>
-//                   </div>
-//                 </CardContent>
-//               </Card>
-//             </Link>
-//           ))}
-//         </div>
-//       </div>
-//
-//       {/* Top & Bottom Performers */}
-//       <div className="mt-8 grid gap-4 md:grid-cols-2">
-//         <Card>
-//           <CardHeader>
-//             <CardTitle className="flex items-center gap-2">
-//               <TrendingUp className="h-5 w-5 text-success" />
-//               Best Performer
-//             </CardTitle>
-//           </CardHeader>
-//           <CardContent>
-//             <div className="space-y-2">
-//               <p className="text-2xl font-bold text-foreground">
-//                 {bestPerformer.symbol}
-//               </p>
-//               <p className="text-muted-foreground">{bestPerformer.name}</p>
-//               <div className="flex items-center gap-2 pt-2">
-//                 <Badge className="bg-success/10 text-success">
-//                   +{bestPerformer.changePercent.toFixed(2)}%
-//                 </Badge>
-//               </div>
-//             </div>
-//           </CardContent>
-//         </Card>
-//
-//         <Card>
-//           <CardHeader>
-//             <CardTitle className="flex items-center gap-2">
-//               <TrendingDown className="h-5 w-5 text-destructive" />
-//               Worst Performer
-//             </CardTitle>
-//           </CardHeader>
-//           <CardContent>
-//             <div className="space-y-2">
-//               <p className="text-2xl font-bold text-foreground">
-//                 {worstPerformer.symbol}
-//               </p>
-//               <p className="text-muted-foreground">{worstPerformer.name}</p>
-//               <div className="flex items-center gap-2 pt-2">
-//                 <Badge
-//                   className={
-//                     worstPerformer.changePercent >= 0
-//                       ? "bg-success/10 text-success"
-//                       : "bg-destructive/10 text-destructive"
-//                   }
-//                 >
-//                   {worstPerformer.changePercent >= 0 ? "+" : ""}
-//                   {worstPerformer.changePercent.toFixed(2)}%
-//                 </Badge>
-//               </div>
-//             </div>
-//           </CardContent>
-//         </Card>
-//       </div>
-//     </div>
-//   )
-// }
+function PerformerCard({
+  asset,
+  type,
+}: {
+  asset: any;
+  type: "top" | "bottom";
+}) {
+  const isTop = type === "top";
+  return (
+    <Card
+      className={`relative overflow-hidden border-none shadow-2xl ring-1 ${
+        isTop
+          ? "ring-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-500/[0.02]"
+          : "ring-rose-500/20 bg-rose-50/30 dark:bg-rose-500/[0.02]"
+      }`}
+    >
+      <div className={`absolute -top-6 -right-6 p-8 opacity-5 scale-150`}>
+        {isTop ? (
+          <TrendingUp className="h-32 w-32" />
+        ) : (
+          <TrendingDown className="h-32 w-32" />
+        )}
+      </div>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 flex items-center gap-2">
+          {isTop ? "Alpha Leader" : "Risk Underperformer"}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pb-8">
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="text-4xl font-mono font-black tracking-tighter uppercase">
+              {asset.symbol}
+            </p>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">
+              {asset.name}
+            </p>
+          </div>
+          <Badge
+            className={`text-lg font-mono font-black tracking-tighter px-6 py-2 rounded-xl shadow-lg border-none ${
+              isTop ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"
+            }`}
+          >
+            {isTop ? "+" : ""}
+            {asset.changePercent.toFixed(2)}%
+          </Badge>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

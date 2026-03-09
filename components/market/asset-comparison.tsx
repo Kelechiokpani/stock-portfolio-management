@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   LineChart,
@@ -9,9 +9,15 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+} from "recharts";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -19,31 +25,33 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import type { Asset } from "@/lib/mock-data"
+} from "@/components/ui/table";
+import type { Asset } from "@/lib/mock-data";
 
 interface AssetComparisonProps {
-  assets: Asset[]
-  title?: string
+  assets: Asset[];
+  title?: string;
 }
 
 // Generate mock comparison data
 function generateComparisonData(assets: Asset[]) {
-  const data = []
+  const data = [];
   for (let i = 30; i >= 0; i--) {
     const point: any = {
       day: `Day ${30 - i}`,
-    }
+    };
     assets.forEach((asset, idx) => {
-      const variance = (Math.random() - 0.5) * 0.1
-      point[`asset${idx}`] = parseFloat(((asset as any).price * (1 + variance)).toFixed(2))
-    })
-    data.push(point)
+      const variance = (Math.random() - 0.5) * 0.1;
+      point[`asset${idx}`] = parseFloat(
+        ((asset as any).price * (1 + variance)).toFixed(2)
+      );
+    });
+    data.push(point);
   }
-  return data
+  return data;
 }
 
-const colors = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b"]
+const colors = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b"];
 
 export function AssetComparison({
   assets,
@@ -58,13 +66,13 @@ export function AssetComparison({
           </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  const comparisonData = generateComparisonData(assets)
+  const comparisonData = generateComparisonData(assets);
 
   const comparisonTable = assets.map((asset, idx) => {
-    const assetData = asset as any
+    const assetData = asset as any;
     return {
       idx,
       symbol: assetData.symbol,
@@ -73,13 +81,13 @@ export function AssetComparison({
       change: assetData.change,
       changePercent: assetData.changePercent,
       getAdditionalMetric: () => {
-        if ("expenseRatio" in assetData) return `${assetData.expenseRatio}%`
-        if ("sector" in assetData) return assetData.sector
-        if ("couponRate" in assetData) return `${assetData.couponRate}%`
-        return "N/A"
+        if ("expenseRatio" in assetData) return `${assetData.expenseRatio}%`;
+        if ("sector" in assetData) return assetData.sector;
+        if ("couponRate" in assetData) return `${assetData.couponRate}%`;
+        return "N/A";
       },
-    }
-  })
+    };
+  });
 
   return (
     <div className="space-y-6">
@@ -87,7 +95,9 @@ export function AssetComparison({
       <Card>
         <CardHeader>
           <CardTitle>{title}</CardTitle>
-          <CardDescription>Price performance comparison over 30 days</CardDescription>
+          <CardDescription>
+            Price performance comparison over 30 days
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[400px] w-full">
@@ -144,7 +154,10 @@ export function AssetComparison({
                 <TableRow>
                   <TableCell className="font-semibold">Current Price</TableCell>
                   {comparisonTable.map((asset) => (
-                    <TableCell key={`price-${asset.symbol}`} className="text-center">
+                    <TableCell
+                      key={`price-${asset.symbol}`}
+                      className="text-center"
+                    >
                       ${asset.price.toFixed(2)}
                     </TableCell>
                   ))}
@@ -162,7 +175,8 @@ export function AssetComparison({
                           : "text-gray-600"
                       }`}
                     >
-                      {asset.change > 0 ? "+" : ""}{asset.change.toFixed(2)}
+                      {asset.change > 0 ? "+" : ""}
+                      {asset.change.toFixed(2)}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -179,14 +193,20 @@ export function AssetComparison({
                           : "text-gray-600"
                       }`}
                     >
-                      {asset.changePercent > 0 ? "+" : ""}{asset.changePercent.toFixed(2)}%
+                      {asset.changePercent > 0 ? "+" : ""}
+                      {asset.changePercent.toFixed(2)}%
                     </TableCell>
                   ))}
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-semibold">Additional Metric</TableCell>
+                  <TableCell className="font-semibold">
+                    Additional Metric
+                  </TableCell>
                   {comparisonTable.map((asset) => (
-                    <TableCell key={`metric-${asset.symbol}`} className="text-center">
+                    <TableCell
+                      key={`metric-${asset.symbol}`}
+                      className="text-center"
+                    >
                       {asset.getAdditionalMetric()}
                     </TableCell>
                   ))}
@@ -197,5 +217,5 @@ export function AssetComparison({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

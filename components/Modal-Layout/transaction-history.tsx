@@ -1,158 +1,229 @@
-"use client"
+"use client";
 
+import { useMemo } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowDownLeft,
   ArrowUpRight,
-  Share2,
-  TrendingDown,
-  TrendingUp,
   Clock,
   CheckCircle2,
-  XCircle,
-  Banknote,
-  Wallet
-} from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { CashMovement, TransactionStatus } from "@/components/data/user-data"
+  AlertCircle,
+  FileText,
+  ArrowRightLeft,
+} from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
+export default function CashMovementTabs({
+  movements,
+  currency,
+}: {
+  movements: any[];
+  currency: string;
+}) {
+  const deposits = useMemo(
+    () => movements.filter((m) => m.type === "deposit"),
+    [movements]
+  );
 
+  const withdrawals = useMemo(
+    () => movements.filter((m) => m.type === "withdrawal"),
+    [movements]
+  );
 
-interface TransactionHistoryProps {
-  // We use the CashMovement type from your data file
-  transactions: CashMovement[]
-  baseCurrency: string
-}
-
-export function TransactionHistory({
-                                     transactions,
-                                     baseCurrency = "EUR",
-                                   }: TransactionHistoryProps) {
-
-  const getMovementConfig = (type: CashMovement["type"]) => {
-    switch (type) {
-      case "deposit":
-        return {
-          icon: <ArrowDownLeft className="h-4 w-4" />,
-          label: "Inward Remittance",
-          color: "text-emerald-500",
-          bg: "bg-emerald-500/10",
-          prefix: "+"
-        }
-      case "withdrawal":
-        return {
-          icon: <ArrowUpRight className="h-4 w-4" />,
-          label: "Outward Settlement",
-          color: "text-foreground",
-          bg: "bg-secondary",
-          prefix: "-"
-        }
-      default:
-        return {
-          icon: <Wallet className="h-4 w-4" />,
-          label: "Adjustment",
-          color: "text-muted-foreground",
-          bg: "bg-muted",
-          prefix: ""
-        }
-    }
-  }
-
-  const getStatusBadge = (status: TransactionStatus) => {
-    switch (status) {
-      case "completed":
-        return (
-            <Badge variant="outline" className="border-emerald-500/20 bg-emerald-500/5 text-emerald-600 text-[10px] font-bold uppercase tracking-tighter">
-              <CheckCircle2 className="mr-1 h-3 w-3" /> Settled
-            </Badge>
-        )
-      case "pending":
-        return (
-            <Badge variant="outline" className="border-amber-500/20 bg-amber-500/5 text-amber-600 text-[10px] font-bold uppercase tracking-tighter">
-              <Clock className="mr-1 h-3 w-3" /> Pending
-            </Badge>
-        )
-      case "failed":
-        return (
-            <Badge variant="outline" className="border-rose-500/20 bg-rose-500/5 text-rose-600 text-[10px] font-bold uppercase tracking-tighter">
-              <XCircle className="mr-1 h-3 w-3" /> Declined
-            </Badge>
-        )
-    }
-  }
-
-  // Newest transactions first
-  const sortedMovements = [...transactions].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  )
+  const formatCurrency = (val: number) =>
+    new Intl.NumberFormat("en-DE", { style: "currency", currency }).format(val);
 
   return (
-      <Card className="border-none shadow-sm ring-1 ring-border/40">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="font-serif text-xl font-bold">Capital Movements</CardTitle>
-              <CardDescription className="text-xs uppercase tracking-widest font-semibold mt-1">
-                Audit-ready cash flow records
-              </CardDescription>
-            </div>
-            <div className="h-10 w-10 rounded-xl bg-primary/5 flex items-center justify-center border border-primary/10">
-              <Banknote className="h-5 w-5 text-primary" />
-            </div>
-          </div>
+    <Card className="border-none bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-slate-200 dark:ring-slate-800 overflow-hidden">
+      <Tabs defaultValue="deposits" className="w-full">
+        <CardHeader className="border-b border-slate-50 dark:border-slate-800 p-0">
+          <TabsList className="w-full h-16 bg-transparent p-0 flex rounded-none">
+            <TabsTrigger
+              value="deposits"
+              className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-slate-900 dark:data-[state=active]:border-white data-[state=active]:bg-slate-50/50 dark:data-[state=active]:bg-white/5 transition-all"
+            >
+              <div className="flex items-center gap-2">
+                <ArrowDownLeft className="w-4 h-4 text-emerald-500" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                  Inbound Ledger
+                </span>
+                <Badge
+                  variant="secondary"
+                  className="ml-1 text-[9px] font-bold bg-slate-100 dark:bg-slate-800"
+                >
+                  {deposits.length}
+                </Badge>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger
+              value="withdrawals"
+              className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-slate-900 dark:data-[state=active]:border-white data-[state=active]:bg-slate-50/50 dark:data-[state=active]:bg-white/5 transition-all"
+            >
+              <div className="flex items-center gap-2">
+                <ArrowUpRight className="w-4 h-4 text-rose-500" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                  Outbound Ledger
+                </span>
+                <Badge
+                  variant="secondary"
+                  className="ml-1 text-[9px] font-bold bg-slate-100 dark:bg-slate-800"
+                >
+                  {withdrawals.length}
+                </Badge>
+              </div>
+            </TabsTrigger>
+          </TabsList>
         </CardHeader>
 
-        <CardContent>
-          <div className="space-y-3">
-            {sortedMovements.map((txn) => {
-              const config = getMovementConfig(txn.type)
-
-              return (
-                  <div
-                      key={txn.id}
-                      className="group flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card/30 hover:bg-muted/50 transition-all"
-                  >
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border/50 ${config.bg} ${config.color}`}>
-                        {config.icon}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-foreground leading-none">
-                          {config.label}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground mt-1.5 font-medium">
-                          {txn.method} • {new Date(txn.date).toLocaleDateString("en-DE", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col items-end gap-2 ml-4">
-                      <p className={`font-bold text-sm tracking-tight tabular-nums ${config.color}`}>
-                        {config.prefix}{new Intl.NumberFormat("en-DE", {
-                        style: "currency",
-                        currency: txn.currency || baseCurrency,
-                      }).format(txn.amount)}
-                      </p>
-                      {getStatusBadge(txn.status)}
-                    </div>
-                  </div>
-              )
-            })}
-
-            {sortedMovements.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-border/50 rounded-2xl">
-                  <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center mb-3">
-                    <Wallet className="h-6 w-6 text-muted-foreground/50" />
-                  </div>
-                  <p className="text-sm font-medium text-muted-foreground">No ledger entries detected</p>
-                </div>
-            )}
-          </div>
+        <CardContent className="p-0">
+          <TabsContent value="deposits" className="m-0">
+            <MovementTable data={deposits} format={formatCurrency} />
+          </TabsContent>
+          <TabsContent value="withdrawals" className="m-0">
+            <MovementTable data={withdrawals} format={formatCurrency} />
+          </TabsContent>
         </CardContent>
-      </Card>
-  )
+      </Tabs>
+    </Card>
+  );
+}
+
+function MovementTable({ data, format }: { data: any[]; format: any }) {
+  if (data.length === 0)
+    return (
+      <div className="py-20 flex flex-col items-center justify-center text-slate-400">
+        <FileText className="w-8 h-8 mb-2 opacity-20" />
+        <p className="text-[10px] font-black uppercase tracking-widest">
+          No activity found
+        </p>
+      </div>
+    );
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-left border-collapse">
+        <thead>
+          <tr className="border-b border-slate-50 dark:border-slate-800 bg-slate-50/30 dark:bg-white/5">
+            <th className="px-8 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+              Date / ID
+            </th>
+            <th className="px-8 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+              Class
+            </th>
+            <th className="px-8 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+              Method
+            </th>
+            <th className="px-8 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+              Status
+            </th>
+            <th className="px-8 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">
+              Amount
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((m) => (
+            <tr
+              key={m.id}
+              className="group border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors"
+            >
+              <td className="px-8 py-6">
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-slate-900 dark:text-white">
+                    {new Date(m.date).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
+                  <span className="text-[9px] font-mono text-slate-400 uppercase">
+                    REF: {m.id.slice(-8)}
+                  </span>
+                </div>
+              </td>
+              <td className="px-8 py-6">
+                <TypeBadge type={m.type} />
+              </td>
+              <td className="px-8 py-6">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300">
+                  {m.method}
+                </span>
+              </td>
+              <td className="px-8 py-6">
+                <StatusIndicator status={m.status} />
+              </td>
+              <td className="px-8 py-6 text-right">
+                <span
+                  className={`text-sm font-mono font-black tracking-tighter ${
+                    m.type === "deposit"
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-slate-900 dark:text-white"
+                  }`}
+                >
+                  {m.type === "deposit" ? "+" : "-"}
+                  {format(m.amount)}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function TypeBadge({ type }: { type: string }) {
+  const isDeposit = type === "deposit";
+  return (
+    <div
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded border ${
+        isDeposit
+          ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-600"
+          : "border-rose-500/20 bg-rose-500/5 text-rose-600"
+      }`}
+    >
+      {isDeposit ? (
+        <ArrowDownLeft className="w-3 h-3" />
+      ) : (
+        <ArrowUpRight className="w-3 h-3" />
+      )}
+      <span className="text-[9px] font-black uppercase tracking-widest">
+        {type}
+      </span>
+    </div>
+  );
+}
+
+function StatusIndicator({ status }: { status: string }) {
+  const configs: any = {
+    completed: {
+      color: "text-slate-900 dark:text-white",
+      icon: <CheckCircle2 className="w-3 h-3 text-emerald-500" />,
+      text: "Settled",
+    },
+    pending: {
+      color: "text-amber-500 bg-amber-500/10",
+      icon: <Clock className="w-3 h-3" />,
+      text: "Pending",
+    },
+    failed: {
+      color: "text-rose-500 bg-rose-500/10",
+      icon: <AlertCircle className="w-3 h-3" />,
+      text: "Declined",
+    },
+  };
+
+  const config = configs[status] || configs.pending;
+
+  return (
+    <div
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md ${config.color}`}
+    >
+      {config.icon}
+      <span className="text-[9px] font-black uppercase tracking-widest">
+        {config.text}
+      </span>
+    </div>
+  );
 }

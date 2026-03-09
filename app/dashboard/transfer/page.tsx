@@ -1,201 +1,337 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
-  Send,
-  TrendingUp,
   Plus,
-  ArrowRightLeft,
   ShieldCheck,
-  ChevronRight,
-  CheckCircle2,
   ArrowUpRight,
   ArrowDownLeft,
-  Wallet,
-  Activity
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+  Activity,
+  History,
+  FileText,
+  Layers,
+  Box,
+  Globe,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import GlobalLoader from "@/components/GlobalLoader";
 
-// Your project-specific imports
-import { mockUsers } from "@/components/data/user-data"
-import { TransferPortfolioModal } from "@/components/Modal-Layout/transfer-portfolio-modal"
-import {PortfolioTransferHistory} from "@/components/Modal-Layout/PortfolioTransferHistory";
+// API & Components
+import { useGetMeQuery } from "@/app/services/features/auth/authApi";
+import { TransferPortfolioModal } from "@/components/Modal-Layout/transfer-portfolio-modal";
 
+export default function AssetTransfersPage() {
+  const { data: response, isLoading } = useGetMeQuery();
+  const [showTransferModal, setShowTransferModal] = useState(false);
 
+  if (isLoading)
+    return (
+      <GlobalLoader
+        message="Syncing Asset Ledger"
+        subtext="Verifying block-level migrations..."
+      />
+    );
 
-export default function TransfersPage() {
-  const [showTransferModal, setShowTransferModal] = useState(false)
-  const user = mockUsers[0] // Julian Bernhardt
+  const user = response?.user;
+  const transfers = user?.stockTransfers || [];
 
-  if (!user) return null
+  if (!user) return null;
 
   const formatCurrency = (val: number) =>
-      new Intl.NumberFormat("en-DE", {
-        style: "currency",
-        currency: user.settings.baseCurrency,
-      }).format(val)
+    new Intl.NumberFormat("en-DE", {
+      style: "currency",
+      currency: user.settings.baseCurrency,
+    }).format(val);
+
+  // Stats derived from stockTransfers
+  const totalInbound = transfers
+    .filter((t: any) => t.type === "inbound")
+    .reduce((acc: number, curr: any) => acc + curr.valueAtTransfer, 0);
+
+  const totalOutbound = transfers
+    .filter((t: any) => t.type === "outbound")
+    .reduce((acc: number, curr: any) => acc + curr.valueAtTransfer, 0);
 
   return (
-      <div className="max-w-7xl mx-auto space-y-8 py-8 px-4 animate-in fade-in duration-500">
-
-        {/* HEADER */}
-        <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between border-b border-border/40 pb-8">
-          <div>
-            <Badge variant="outline" className="mb-2 border-primary/20 text-primary bg-primary/5 uppercase tracking-tighter text-[10px] font-bold">
-              Network Operations
-            </Badge>
-            <h1 className="font-serif text-3xl font-bold tracking-tight lg:text-4xl">Transfer Center</h1>
-            <p className="text-muted-foreground text-sm mt-1">Manage and audit your cross-platform asset migrations.</p>
+    <div className="max-w-7xl mx-auto space-y-8 py-8 px-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      {/* HEADER */}
+      <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between border-b border-slate-200 dark:border-slate-800 pb-10">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <Layers className="w-3 h-3 text-blue-500" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
+              Protocol: Asset Migration
+            </span>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" className="rounded-xl h-11 px-6 border-border/60">
-              View Reports
-            </Button>
-            <Button onClick={() => setShowTransferModal(true)} className="rounded-xl h-11 px-6 shadow-lg shadow-primary/20">
-              <Plus className="mr-2 h-4 w-4" /> New Transfer
-            </Button>
-          </div>
-        </header>
-
-        {/* STATS OVERVIEW */}
-        <div className="grid gap-6 sm:grid-cols-3">
-          <StatsCard title="Liquid Cash" value={formatCurrency(user.availableCash)} icon={<Wallet className="text-primary" />} description="Ready for deployment" />
-          <StatsCard title="In-Transit" value={formatCurrency(1200)} icon={<Activity className="text-amber-500" />} description="Pending verification" />
-          <StatsCard title="Security Level" value={user.settings.kycStatus} icon={<ShieldCheck className="text-emerald-500" />} isBadge />
+          <h1 className="font-serif text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+            Stock Asset Transfers
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1 font-medium">
+            Manage and audit the movement of stocks and digital assets across
+            your portfolios.
+          </p>
         </div>
-
-        <div className="grid gap-8 lg:grid-cols-3">
-          {/* LEFT: CASH MOVEMENT TABS */}
-          <div className="lg:col-span-2 space-y-6">
-            <Tabs defaultValue="received" className="w-full">
-              <div className="flex items-center justify-between mb-6">
-                <TabsList className="bg-secondary/50 p-1 rounded-xl border border-border/40">
-                  <TabsTrigger value="received" className="rounded-lg px-8 data-[state=active]:bg-background">Deposits</TabsTrigger>
-                  <TabsTrigger value="sent" className="rounded-lg px-8 data-[state=active]:bg-background">Withdrawals</TabsTrigger>
-                </TabsList>
-                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Cash Operations</p>
-              </div>
-
-              <TabsContent value="sent" className="space-y-4 outline-none">
-                {user.cashMovements.filter(m => m.type === "withdrawal").length === 0 ? (
-                    <EmptyState message="No withdrawal history" />
-                ) : (
-                    user.cashMovements.filter(m => m.type === "withdrawal").map((m) => (
-                        <TransferItem key={m.id} title={m.method} date={m.date} value={formatCurrency(m.amount)} status={m.status} isOutbound />
-                    ))
-                )}
-              </TabsContent>
-
-              <TabsContent value="received" className="space-y-4 outline-none">
-                {user.cashMovements.filter(m => m.type === "deposit").map((m) => (
-                    <TransferItem key={m.id} title={m.method} date={m.date} value={formatCurrency(m.amount)} status={m.status} isOutbound={false} />
-                ))}
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          {/* RIGHT: STOCK LEDGER & PROTOCOL */}
-          <div className="space-y-6">
-            {/* Using Julian's corrected stockTransfers data here */}
-            <PortfolioTransferHistory
-                transfers={user.stockTransfers}
-                baseCurrency={user.settings.baseCurrency}
-            />
-
-            <Card className="border-none bg-secondary/30 shadow-inner ring-1 ring-border/40">
-              <CardHeader><CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Compliance Guidelines</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                <ProtocolStep step="01" label="Portfolio Selection" sub="Select holdings to migrate" />
-                <ProtocolStep step="02" label="KYC Handshake" sub="Recipient must be tier-1 verified" />
-                <ProtocolStep step="03" label="Escrow Lock" sub="24h cooling period for large assets" />
-              </CardContent>
-            </Card>
-          </div>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => setShowTransferModal(true)}
+            className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] 
+                      bg-slate-900 text-white shadow-[0_10px_20px_-10px_rgba(0,0,0,0.3)] 
+                      dark:bg-white dark:text-black dark:shadow-[0_10px_20px_-10px_rgba(255,255,255,0.1)]
+                      hover:opacity-90 active:scale-[0.98] transition-all duration-200"
+          >
+            <Plus className="mr-2 h-4 w-4 stroke-[3px]" />
+            Move Assets
+          </Button>
         </div>
+      </header>
 
-        <TransferPortfolioModal
-            isOpen={showTransferModal}
-            onClose={() => setShowTransferModal(false)}
-            portfolios={user.portfolios}
+      {/* ASSET STATS OVERVIEW */}
+      <div className="grid gap-6 sm:grid-cols-3">
+        <StatsCard
+          title="Total Inbound Volume"
+          value={formatCurrency(totalInbound)}
+          icon={<ArrowDownLeft className="text-emerald-500" />}
+          description="Total assets received into custody"
+        />
+        <StatsCard
+          title="Total Outbound Volume"
+          value={formatCurrency(totalOutbound)}
+          icon={<ArrowUpRight className="text-rose-500" />}
+          description="Assets migrated to external sinks"
+        />
+        <StatsCard
+          title="Network Status"
+          value={user.kycVerified ? "Tier-1 Verified" : "Verification Required"}
+          icon={<Globe className="text-blue-500" />}
+          isBadge
         />
       </div>
-  )
+
+      <div className="grid gap-8 lg:grid-cols-3">
+        {/* LEFT: MAIN LEDGER */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+              <Box className="w-3 h-3" /> Transactional Ledger
+            </h2>
+            <Badge variant="outline" className="text-[9px] font-bold">
+              {transfers.length} Operations Found
+            </Badge>
+          </div>
+
+          <div className="space-y-4">
+            {transfers.length === 0 ? (
+              <EmptyState message="No asset transfers recorded" />
+            ) : (
+              transfers.map((t: any) => (
+                <AssetTransferItem
+                  key={t.id}
+                  transfer={t}
+                  formatCurrency={formatCurrency}
+                />
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT: PROTOCOL & COMPLIANCE */}
+        <div className="space-y-8">
+          <Card className="border-none bg-slate-900 dark:bg-slate-100 shadow-2xl overflow-hidden ring-1 ring-slate-800 dark:ring-white">
+            <CardHeader className="border-b border-slate-800 dark:border-slate-200 bg-slate-950 dark:bg-slate-50">
+              <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+                <ShieldCheck className="w-3 h-3 text-emerald-500" /> Compliance
+                Protocols
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-6">
+              <ProtocolStep
+                step="01"
+                label="Asset Lock"
+                sub="Selected shares are frozen in the source portfolio during the migration handshake."
+                darkTheme
+              />
+              <ProtocolStep
+                step="02"
+                label="Identity Verification"
+                sub="Level 1 KYC is mandatory for all cross-user or external wallet migrations."
+                darkTheme
+              />
+              <ProtocolStep
+                step="03"
+                label="Settlement Cycle"
+                sub="Traditional stocks follow T+1 settlement; digital assets await 3 network confirmations."
+                darkTheme
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="border-none bg-slate-50 dark:bg-slate-900/40 shadow-inner ring-1 ring-slate-200 dark:ring-slate-800 p-2">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
+                <FileText className="w-3 h-3" /> System Notes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+                NVIDIA Corp. (NVDA) transfers reflect the pre-split adjusted
+                value. Bitcoin (BTC) transfers include the internal liquidity
+                fees applied at the time of migration.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <TransferPortfolioModal
+        isOpen={showTransferModal}
+        onClose={() => setShowTransferModal(false)}
+        portfolios={user.portfolios}
+      />
+    </div>
+  );
 }
 
 /** HELPER COMPONENTS **/
 
 function StatsCard({ title, value, icon, description, isBadge }: any) {
   return (
-      <Card className="border-none shadow-sm ring-1 ring-border/40">
-        <CardContent className="flex items-center gap-4 pt-6">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/50">{icon}</div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{title}</p>
-            {isBadge ? (
-                <Badge className="bg-emerald-500/10 text-emerald-600 border-none uppercase text-[10px] mt-1 px-2">{value}</Badge>
-            ) : (
-                <p className="text-2xl font-serif font-bold tabular-nums leading-none mt-1">{value}</p>
-            )}
-            {description && <p className="text-[10px] text-muted-foreground mt-1 font-medium">{description}</p>}
-          </div>
-        </CardContent>
-      </Card>
-  )
-}
-
-function ProtocolStep({ step, label, sub }: any) {
-  return (
-      <div className="flex gap-3 items-start">
-        <span className="text-[10px] font-black text-primary/40 mt-0.5">{step}</span>
-        <div>
-          <p className="text-xs font-bold text-foreground leading-none">{label}</p>
-          <p className="text-[10px] text-muted-foreground mt-1">{sub}</p>
+    <Card className="border-none shadow-xl bg-white dark:bg-slate-900/40 ring-1 ring-slate-200 dark:ring-slate-800">
+      <CardContent className="flex items-center gap-5 pt-7 pb-7">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+          {icon}
         </div>
-      </div>
-  )
+        <div className="space-y-1">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+            {title}
+          </p>
+          {isBadge ? (
+            <Badge className="bg-emerald-500/10 text-emerald-600 border-none uppercase text-[10px] font-black tracking-widest px-3 py-1 mt-1">
+              {value}
+            </Badge>
+          ) : (
+            <p className="text-2xl font-mono font-black tabular-nums tracking-tighter text-slate-900 dark:text-white">
+              {value}
+            </p>
+          )}
+          {description && (
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+              {description}
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
-function TransferItem({ title, date, value, status, isOutbound }: any) {
-  const statusColors: any = {
-    completed: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
-    pending: "text-amber-500 bg-amber-500/10 border-amber-500/20",
-    failed: "text-rose-500 bg-rose-500/10 border-rose-500/20",
-  }
+function AssetTransferItem({ transfer, formatCurrency }: any) {
+  const isInbound = transfer.type === "inbound";
 
   return (
-      <Card className="border-none shadow-sm ring-1 ring-border/40 hover:ring-primary/30 transition-all overflow-hidden bg-card/40">
-        <div className="flex items-center justify-between p-5">
-          <div className="flex items-center gap-4">
-            <div className={`p-2.5 rounded-xl ${isOutbound ? 'bg-rose-500/5 text-rose-500' : 'bg-emerald-500/5 text-emerald-500'}`}>
-              {isOutbound ? <ArrowUpRight className="h-5 w-5" /> : <ArrowDownLeft className="h-5 w-5" />}
-            </div>
-            <div>
-              <p className="font-bold text-sm flex items-center gap-2">{title}</p>
-              <p className="text-[11px] text-muted-foreground">
-                {new Date(date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric'})}
-              </p>
-            </div>
+    <Card className="border-none shadow-md ring-1 ring-slate-200 dark:ring-slate-800 hover:ring-blue-500/30 transition-all bg-white dark:bg-slate-900/30 backdrop-blur-sm group">
+      <div className="flex items-center justify-between p-6">
+        <div className="flex items-center gap-5">
+          <div
+            className={`p-3 rounded-2xl transition-transform group-hover:scale-110 ${
+              isInbound
+                ? "bg-emerald-500/10 text-emerald-500"
+                : "bg-rose-500/10 text-rose-500"
+            }`}
+          >
+            {isInbound ? (
+              <ArrowDownLeft className="h-5 w-5" />
+            ) : (
+              <ArrowUpRight className="h-5 w-5" />
+            )}
           </div>
-          <div className="text-right">
-            <p className={`text-sm font-bold tabular-nums ${isOutbound ? 'text-foreground' : 'text-emerald-600'}`}>
-              {isOutbound ? '-' : '+'}{value}
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-black text-sm text-slate-800 dark:text-slate-100">
+                {transfer.assetName}
+              </span>
+              <Badge
+                variant="outline"
+                className="text-[9px] font-black h-4 px-1 border-slate-200 text-slate-400"
+              >
+                {transfer.assetSymbol}
+              </Badge>
+            </div>
+            <p className="text-[11px] text-slate-400 font-bold uppercase tracking-tighter mt-1">
+              {isInbound
+                ? `From: ${transfer.fromUser}`
+                : `To: ${transfer.toUser}`}
             </p>
-            <Badge variant="outline" className={`text-[9px] font-black uppercase mt-1 px-1.5 h-4 border-none ${statusColors[status]}`}>
-              {status}
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="text-lg font-mono font-black tabular-nums tracking-tighter text-slate-900 dark:text-white">
+            {isInbound ? "+" : "-"}
+            {transfer.shares}{" "}
+            <span className="text-[10px] font-bold text-slate-400 ml-0.5">
+              SHARES
+            </span>
+          </p>
+          <div className="flex items-center justify-end gap-2 mt-1">
+            <span className="text-[10px] text-slate-400 font-bold tabular-nums">
+              {formatCurrency(transfer.valueAtTransfer)}
+            </span>
+            <Badge className="text-[8px] font-black uppercase tracking-widest px-2 h-3.5 border-none bg-emerald-500/10 text-emerald-500">
+              {transfer.status}
             </Badge>
           </div>
         </div>
-      </Card>
-  )
+      </div>
+    </Card>
+  );
+}
+
+function ProtocolStep({ step, label, sub, darkTheme }: any) {
+  return (
+    <div className="flex gap-4 items-start group">
+      <div
+        className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black border transition-colors ${
+          darkTheme
+            ? "bg-slate-800 text-slate-400 border-slate-700 group-hover:bg-white group-hover:text-black"
+            : "bg-white text-slate-400 border-slate-100 group-hover:bg-slate-900 group-hover:text-white"
+        }`}
+      >
+        {step}
+      </div>
+      <div className="space-y-1">
+        <p
+          className={`text-xs font-bold leading-none ${
+            darkTheme ? "text-slate-200" : "text-slate-800 dark:text-slate-200"
+          }`}
+        >
+          {label}
+        </p>
+        <p
+          className={`text-[10px] font-medium leading-relaxed ${
+            darkTheme ? "text-slate-500" : "text-slate-400"
+          }`}
+        >
+          {sub}
+        </p>
+      </div>
+    </div>
+  );
 }
 
 function EmptyState({ message }: { message: string }) {
   return (
-      <div className="h-40 flex items-center justify-center border-2 border-dashed rounded-2xl border-border/40">
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{message}</p>
-      </div>
-  )
+    <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed rounded-3xl border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20">
+      <Box className="w-8 h-8 text-slate-300 mb-2 opacity-30" />
+      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+        {message}
+      </p>
+    </div>
+  );
 }

@@ -13,6 +13,6 @@ export const baseApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["User", "Portfolio", "Market", "Admin", "Funds"],
+  tagTypes: ["User", "Market", "Portfolio", "Transactions", "UserBalance"],
   endpoints: () => ({}), // Empty: we will inject here
 });

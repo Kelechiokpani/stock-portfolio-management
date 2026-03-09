@@ -1,33 +1,34 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AssetClass } from '@/components/data/data-type';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { MarketSummary } from "./marketApi";
 
 interface MarketState {
-    searchQuery: string;
-    activeCategory: AssetClass | 'all';
-    sortBy: 'price' | 'change' | 'name';
+  searchQuery: string;
+  sortBy: "price" | "change" | "name";
+  summary: MarketSummary | null;
 }
 
 const initialState: MarketState = {
-    searchQuery: '',
-    activeCategory: 'all',
-    sortBy: 'name',
+  searchQuery: "",
+  sortBy: "name",
+  summary: null,
 };
 
 const marketSlice = createSlice({
-    name: 'market',
-    initialState,
-    reducers: {
-        setSearchQuery: (state, action: PayloadAction<string>) => {
-            state.searchQuery = action.payload;
-        },
-        setCategory: (state, action: PayloadAction<AssetClass | 'all'>) => {
-            state.activeCategory = action.payload;
-        },
-        setSortBy: (state, action: PayloadAction<MarketState['sortBy']>) => {
-            state.sortBy = action.payload;
-        },
+  name: "market",
+  initialState,
+  reducers: {
+    setSearchQuery: (state, action: PayloadAction<string>) => {
+      state.searchQuery = action.payload;
     },
+    setSortBy: (state, action: PayloadAction<MarketState["sortBy"]>) => {
+      state.sortBy = action.payload;
+    },
+    updateMarketSummary: (state, action: PayloadAction<MarketSummary>) => {
+      state.summary = action.payload;
+    },
+  },
 });
 
-export const { setSearchQuery, setCategory, setSortBy } = marketSlice.actions;
+export const { setSearchQuery, setSortBy, updateMarketSummary } =
+  marketSlice.actions;
 export default marketSlice.reducer;

@@ -10,7 +10,6 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import { useGetMeQuery } from "@/app/services/features/auth/authApi";
 import { Activity } from "lucide-react";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -49,56 +48,30 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export default function TotalInvestmentChart({
-  portfolio,
-}: {
-  portfolio: any;
-}) {
+export default function InvestmentHoldingsChart({ holding }: { holding: any }) {
   const chartData = useMemo(() => {
-    // Flatten all holdings from Julian's portfolios (NVDA, BTC)
-    const allHoldings = portfolio.flatMap((p: any) => p.holdings);
+    // If we are on a specific asset page, we use that holding's history directly
+    if (!holding || !holding.performanceHistory) return [];
 
-    // Extract unique dates from the performanceHistory of all assets
-    const dates = Array.from(
-      new Set(
-        allHoldings.flatMap((h: any) =>
-          h.performanceHistory.map((ph: any) => ph.date)
-        )
-      )
-    ).sort((a: any, b: any) => new Date(a).getTime() - new Date(b).getTime());
-
-    return dates.map((date: any) => {
-      let totalValue = 0;
-      let totalGain = 0;
-
-      allHoldings.forEach((h: any) => {
-        const ph = h.performanceHistory.find((p: any) => p.date === date);
-        if (ph) {
-          totalValue += ph.value;
-          totalGain += ph.gain;
-        }
-      });
-
-      return {
-        // Institutional date format: 09 MAR 2026
-        date: new Date(date)
-          .toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-          })
-          .toUpperCase(),
-        totalValue,
-        totalGain,
-      };
-    });
-  }, [portfolio]);
+    return holding.performanceHistory.map((ph: any) => ({
+      // Formatting date to professional "DD MMM" uppercase format
+      date: new Date(ph.date)
+        .toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+        })
+        .toUpperCase(),
+      totalValue: ph.value,
+      totalGain: ph.gain,
+    }));
+  }, [holding]);
 
   if (!chartData.length)
     return (
-      <div className="h-full flex flex-col items-center justify-center text-slate-400 gap-2">
+      <div className="h-[350px] flex flex-col items-center justify-center text-slate-400 gap-2 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl">
         <Activity className="w-5 h-5 animate-pulse" />
         <p className="text-[10px] font-black uppercase tracking-[0.2em]">
-          Synchronizing Ledger...
+          Synchronizing Asset History...
         </p>
       </div>
     );
@@ -111,7 +84,6 @@ export default function TotalInvestmentChart({
           margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
         >
           <defs>
-            {/* High-Contrast Monochrome Gradient */}
             <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
               <stop
                 offset="5%"
@@ -131,7 +103,7 @@ export default function TotalInvestmentChart({
           <CartesianGrid
             vertical={false}
             stroke="currentColor"
-            strokeDasharray="0" // Solid lines for a cleaner, modern look
+            strokeDasharray="0"
             className="text-slate-100 dark:text-slate-800"
           />
 
@@ -166,7 +138,7 @@ export default function TotalInvestmentChart({
           />
 
           <Area
-            type="stepAfter" // Step chart looks more "calculated" for institutional data
+            type="stepAfter"
             dataKey="totalValue"
             stroke="currentColor"
             strokeWidth={3}

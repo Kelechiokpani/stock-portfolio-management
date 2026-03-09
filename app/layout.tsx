@@ -5,7 +5,7 @@ import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme-provider";
-import { ReduxProvider } from "./ReduxProvider";
+import { ReduxProvider } from "./Providers";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });

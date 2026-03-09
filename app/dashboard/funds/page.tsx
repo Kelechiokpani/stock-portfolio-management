@@ -1,167 +1,231 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState, useMemo } from "react";
 import {
   ArrowDownLeft,
   ArrowUpRight,
   Wallet,
   Plus,
   Minus,
-  History,
   ShieldCheck,
-  Banknote,
-  ExternalLink,
   CheckCircle2,
   Clock,
-  AlertCircle
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { mockUsers } from "@/components/data/user-data"
+  AlertCircle,
+  Activity,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-import { DepositModal } from "@/components/Modal-Layout/deposit-modal"
-import { WithdrawalModal } from "@/components/Modal-Layout/withdrawal-modal"
-import {TransactionHistory} from "@/components/Modal-Layout/transaction-history";
-import {SettlementNodes} from "@/components/Modal-Layout/settlement-nodes";
-
-
-
+// API & Modals
+import { useGetMeQuery } from "@/app/services/features/auth/authApi";
+import GlobalLoader from "@/components/GlobalLoader";
+import { DepositModal } from "@/components/Modal-Layout/deposit-modal";
+import { WithdrawalModal } from "@/components/Modal-Layout/withdrawal-modal";
+import CashMovementTabs from "@/components/Modal-Layout/transaction-history";
+import { SettlementNodes } from "@/components/Modal-Layout/settlement-nodes";
 
 export default function FundsPage() {
-  const [showDepositModal, setShowDepositModal] = useState(false)
-  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false)
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
 
-  // Mapping to your strict 'User' type
-  const user = mockUsers[0]
-  const { availableCash, totalBalance, cashMovements, connectedAccounts, settings } = user
-  const currency = settings.baseCurrency || "EUR"
+  const { data: response, isLoading } = useGetMeQuery();
 
-  // Financial Calculations based on 'CashMovement' type
-  const depositTotal = cashMovements
-      .filter((m) => m.type === "deposit" && m.status === "completed")
-      .reduce((sum, m) => sum + m.amount, 0)
+  console.log("User Data:", response?.user);
 
-  const withdrawalTotal = cashMovements
-      .filter((m) => m.type === "withdrawal" && m.status === "completed")
-      .reduce((sum, m) => sum + m.amount, 0)
+  const user = response?.user;
 
+  // Financial Calculations
+  const stats = useMemo(() => {
+    if (!user) return { deposits: 0, withdrawals: 0 };
+
+    const deposits = user.cashMovements
+      .filter((m: any) => m.type === "deposit" && m.status === "completed")
+      .reduce((sum: number, m: any) => sum + m.amount, 0);
+
+    const withdrawals = user.cashMovements
+      .filter((m: any) => m.type === "withdrawal" && m.status === "completed")
+      .reduce((sum: number, m: any) => sum + m.amount, 0);
+
+    return { deposits, withdrawals };
+  }, [user]);
+
+  if (isLoading)
+    return (
+      <GlobalLoader
+        message="Syncing Capital Ledger"
+        subtext="Verifying settlement nodes..."
+      />
+    );
+  if (!user) return null;
+
+  const currency = user.settings.baseCurrency || "EUR";
   const formatCurrency = (val: number) =>
-      new Intl.NumberFormat("en-DE", { style: "currency", currency }).format(val)
+    new Intl.NumberFormat("en-DE", { style: "currency", currency }).format(val);
 
   return (
-      <div className="max-w-7xl mx-auto space-y-10 py-6 px-4 animate-in fade-in duration-700">
-
-        {/* 1. HEADER SECTION */}
-        <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between border-b border-border/40 pb-8">
-          <div>
-            <Badge variant="outline" className="mb-2 border-primary/20 text-primary bg-primary/5 uppercase tracking-tighter text-[10px] font-bold">
-              Asset Liquidity
-            </Badge>
-            <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-              Capital Management
-            </h1>
-            <p className="mt-1 text-muted-foreground text-sm max-w-md">
-              Manage your {settings.accountType} account funds and track cash movements.
-            </p>
-          </div>
-
+    <div className="max-w-7xl mx-auto space-y-12 py-10 px-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      {/* 1. INSTITUTIONAL HEADER */}
+      <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-slate-100 dark:border-slate-800 pb-10">
+        <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Button onClick={() => setShowDepositModal(true)} className="rounded-xl shadow-lg shadow-primary/20 px-6 h-11">
-              <Plus className="mr-2 h-4 w-4" /> Deposit
-            </Button>
-            <Button onClick={() => setShowWithdrawalModal(true)} variant="outline" className="rounded-xl border-border px-6 h-11">
-              <Minus className="mr-2 h-4 w-4" /> Withdraw
-            </Button>
+            <Badge
+              variant="outline"
+              className="px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] border-slate-200 dark:border-slate-800"
+            >
+              Capital Reserve
+            </Badge>
+            <Badge className="bg-emerald-500 text-white border-none flex gap-1.5 items-center px-3 py-1 text-[9px] font-black uppercase tracking-widest">
+              <ShieldCheck className="w-3 h-3" /> SECURED BY LEDGER
+            </Badge>
           </div>
-        </header>
-
-        {/* 2. CORE FINANCIAL KPIS */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <BalanceCard
-              title="Available Cash"
-              amount={availableCash}
-              icon={<Wallet className="h-5 w-5 text-primary" />}
-              description="Ready for immediate reinvestment"
-              format={formatCurrency}
-          />
-          <BalanceCard
-              title="Net Deposits"
-              amount={depositTotal}
-              icon={<ArrowDownLeft className="h-5 w-5 text-emerald-500" />}
-              description="Lifetime successful inflows"
-              format={formatCurrency}
-              variant="success"
-          />
-          <BalanceCard
-              title="Total Withdrawals"
-              amount={withdrawalTotal}
-              icon={<ArrowUpRight className="h-5 w-5 text-rose-500" />}
-              description="Lifetime successful outflows"
-              format={formatCurrency}
-              variant="destructive"
-          />
+          <h1 className="font-serif text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+            Funds Management
+          </h1>
+          <p className="text-slate-500 text-sm font-medium">
+            Authorized for{" "}
+            <span className="text-slate-900 dark:text-slate-100 font-bold">
+              {user.settings.accountType}
+            </span>{" "}
+            clearing and settlement.
+          </p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-2">
-          {/* 3. CASH MOVEMENTS TABLE */}
-          <TransactionHistory
-              transactions={user.cashMovements}
-              baseCurrency={user.settings.baseCurrency}
-          />
-
-          {/* 4. CONNECTED ACCOUNTS SIDEBAR */}
-          <SettlementNodes
-              accounts={user.connectedAccounts}
-              kycStatus={user.settings.kycStatus}
-              formatCurrency={formatCurrency}
-          />
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => setShowDepositModal(true)}
+            className="rounded-xl bg-slate-900 text-white dark:bg-white dark:text-black font-black uppercase tracking-widest text-[10px] px-8 h-12 shadow-2xl hover:opacity-90 transition-all"
+          >
+            <Plus className="mr-2 h-4 w-4 stroke-[3px]" /> Deposit
+          </Button>
+          <Button
+            onClick={() => setShowWithdrawalModal(true)}
+            variant="outline"
+            className="rounded-xl border-slate-200 dark:border-slate-800 font-black uppercase tracking-widest text-[10px] px-8 h-12 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+          >
+            <Minus className="mr-2 h-4 w-4 stroke-[3px]" /> Withdraw
+          </Button>
         </div>
+      </header>
 
-        <DepositModal
-            isOpen={showDepositModal}
-            onClose={() => setShowDepositModal(false)}
-            connectedAccounts={connectedAccounts} // Added this
-            baseCurrency={currency}               // Added this
+      {/* 2. CORE KPIS */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <BalanceCard
+          title="Available Liquidity"
+          amount={user.availableCash}
+          icon={<Wallet className="h-5 w-5" />}
+          description="Total funds cleared for trading"
+          format={formatCurrency}
+          theme="dark"
         />
-
-        <WithdrawalModal
-            isOpen={showWithdrawalModal}
-            onClose={() => setShowWithdrawalModal(false)}
-            availableBalance={availableCash}
-            connectedAccounts={connectedAccounts} // Added this
+        <BalanceCard
+          title="Net Inflows"
+          amount={stats.deposits}
+          icon={<ArrowDownLeft className="h-5 w-5 text-emerald-500" />}
+          description="Total lifetime successful deposits"
+          format={formatCurrency}
+          theme="light"
+        />
+        <BalanceCard
+          title="Capital Outflows"
+          amount={stats.withdrawals}
+          icon={<ArrowUpRight className="h-5 w-5 text-rose-500" />}
+          description="Total lifetime successful withdrawals"
+          format={formatCurrency}
+          theme="light"
         />
       </div>
-  )
+
+      {/* 3. MOVEMENTS & NODES */}
+      <div className="grid gap-10 lg:grid-cols-2">
+        <div className="space-y-8">
+          <div className="flex items-center gap-3 mb-6">
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <h2 className="text-lg font-serif font-bold tracking-tight">
+              Verified Nodes
+            </h2>
+          </div>
+          <SettlementNodes
+            accounts={user.connectedAccounts}
+            kycStatus={user.settings.kycStatus}
+            formatCurrency={formatCurrency}
+          />
+        </div>
+
+        <div className="lg:col-span-2">
+          <div className="flex items-center gap-3 mb-6">
+            <Activity className="w-4 h-4 text-slate-400" />
+            <h2 className="text-lg font-serif font-bold tracking-tight">
+              Recent Cash Movements
+            </h2>
+          </div>
+          <CashMovementTabs
+            movements={user.cashMovements}
+            currency={currency}
+          />
+        </div>
+      </div>
+
+      <DepositModal
+        isOpen={showDepositModal}
+        onClose={() => setShowDepositModal(false)}
+        connectedAccounts={user.connectedAccounts}
+        baseCurrency={currency}
+      />
+
+      <WithdrawalModal
+        isOpen={showWithdrawalModal}
+        onClose={() => setShowWithdrawalModal(false)}
+        availableBalance={user.availableCash}
+        connectedAccounts={user.connectedAccounts}
+      />
+    </div>
+  );
 }
 
 /** * SUB-COMPONENTS **/
 
-function BalanceCard({ title, amount, icon, description, format, variant = 'default' }: any) {
-  return (
-      <Card className="border-none shadow-sm ring-1 ring-border/40 relative overflow-hidden">
-        <div className={`absolute left-0 top-0 h-full w-1 ${variant === 'success' ? 'bg-emerald-500' : variant === 'destructive' ? 'bg-rose-500' : 'bg-primary'}`} />
-        <CardContent className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-secondary/80">{icon}</div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{title}</span>
-          </div>
-          <p className="text-3xl font-serif font-bold tracking-tighter tabular-nums">{format(amount)}</p>
-          <p className="text-[11px] text-muted-foreground mt-2">{description}</p>
-        </CardContent>
-      </Card>
-  )
-}
+function BalanceCard({ title, amount, icon, description, format, theme }: any) {
+  const isDark = theme === "dark";
 
-function StatusBadge({ status }: { status: string }) {
-  switch (status) {
-    case 'completed':
-      return <Badge className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/10 border-none flex items-center gap-1 w-fit mx-auto"><CheckCircle2 className="w-3 h-3" /> Success</Badge>
-    case 'pending':
-      return <Badge className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/10 border-none flex items-center gap-1 w-fit mx-auto"><Clock className="w-3 h-3" /> Processing</Badge>
-    case 'failed':
-      return <Badge className="bg-rose-500/10 text-rose-500 hover:bg-rose-500/10 border-none flex items-center gap-1 w-fit mx-auto"><AlertCircle className="w-3 h-3" /> Declined</Badge>
-    default:
-      return null
-  }
+  return (
+    <Card
+      className={`border-none shadow-xl ring-1 ${
+        isDark
+          ? "bg-slate-900 text-white dark:bg-white dark:text-black ring-slate-900 dark:ring-white"
+          : "bg-white dark:bg-slate-900/40 ring-slate-100 dark:ring-slate-800"
+      }`}
+    >
+      <CardContent className="p-8">
+        <div className="flex items-center justify-between mb-6">
+          <div
+            className={`p-3 rounded-2xl ${
+              isDark
+                ? "bg-white/10 dark:bg-slate-100"
+                : "bg-slate-50 dark:bg-slate-800"
+            }`}
+          >
+            {icon}
+          </div>
+          <p
+            className={`text-[9px] font-black uppercase tracking-[0.2em] ${
+              isDark ? "opacity-60" : "text-slate-400"
+            }`}
+          >
+            {title}
+          </p>
+        </div>
+        <p className="text-4xl font-mono font-black tracking-tighter tabular-nums mb-2">
+          {format(amount)}
+        </p>
+        <p
+          className={`text-[10px] font-bold uppercase tracking-widest ${
+            isDark ? "opacity-40" : "text-slate-400"
+          }`}
+        >
+          {description}
+        </p>
+      </CardContent>
+    </Card>
+  );
 }
