@@ -30,9 +30,12 @@ import { Asset, AssetClass } from "@/components/data/data-type";
 import { RootState } from "@/app/store";
 import { AssetDetailsModal } from "@/components/market/markets/asset-table-details";
 import { AssetTableFilter } from "@/components/market/markets/asset-table-filter";
+import { CartHeader } from "@/app/services/hooks/CartHeader";
+import { useCart } from "@/app/services/Provider/CartProvider";
 
 export default function MarketplacePage() {
   const dispatch = useDispatch();
+  const { buyCart, sellCart } = useCart();
 
   // State with explicit types to fix ts(2322)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
@@ -141,6 +144,7 @@ export default function MarketplacePage() {
           >
             <BarChart3 className="mr-2 h-4 w-4 text-blue-500" /> High Volume
           </Button>
+          <CartHeader buyCount={buyCart.length} sellCount={sellCart.length} />
         </div>
       </header>
 
@@ -149,7 +153,7 @@ export default function MarketplacePage() {
         <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
         <Input
           placeholder="Search symbols, sectors, or companies..."
-          className="pl-16 h-20 text-lg rounded-[2rem] border-border bg-card shadow-xl dark:shadow-none 
+          className="pl-16 h-18 text-lg rounded-[1rem] border-border bg-card shadow-xl dark:shadow-none 
                focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all 
                placeholder:text-muted-foreground/50 text-foreground"
           value={searchQuery}

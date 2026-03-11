@@ -21,12 +21,22 @@ import React, { useState } from "react";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/dashboard/market", label: "Markets", icon: BarChart2 },
+  {
+    href: "/dashboard/market",
+    label: "Market",
+    icon: BarChart2,
+  },
+
   { href: "/dashboard/stocks", label: "Stocks", icon: TrendingUp },
+
   { href: "/dashboard/funds", label: "Funds", icon: PieChart },
 
-  { href: "/dashboard/investments", label: "Investments", icon: Wallet },
-  { href: "/dashboard/transfer", label: "Stock Transfers", icon: Repeat },
+  {
+    href: "/dashboard/investments",
+    label: "Investments Portfolio",
+    icon: Wallet,
+  },
+  { href: "/dashboard/transfer", label: "Assets Transfers", icon: Repeat },
   { href: "/dashboard/settings", label: "Profile Settings", icon: Settings },
 ];
 

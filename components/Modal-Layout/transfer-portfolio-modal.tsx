@@ -1,39 +1,39 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
+import { toast } from "sonner";
+import { useTransferStockMutation } from "@/app/services/features/market/marketApi";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea"; // Added for description
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
-  AlertCircle,
   CheckCircle2,
   Loader2,
   ArrowRightLeft,
   ChevronRight,
   ArrowLeft,
   ShieldAlert,
-  Briefcase,
-  UserPlus
-} from "lucide-react"
-
-
-import { Investment } from "@/components/data/user-data"
-import {Badge} from "@/components/ui/badge";
-
+  UserPlus,
+  Phone,
+  MapPin,
+  FileText,
+} from "lucide-react";
+import { Investment } from "@/components/data/user-data";
 
 interface Portfolio {
   id: string;
@@ -42,270 +42,447 @@ interface Portfolio {
 }
 
 interface TransferPortfolioModalProps {
-  isOpen: boolean
-  onClose: () => void
-  portfolios: Portfolio[]
+  isOpen: boolean;
+  onClose: () => void;
+  portfolios: Portfolio[];
 }
 
-type Step = "select" | "recipient" | "confirm" | "success"
+type Step = "select" | "recipient" | "confirm" | "success";
 
 export function TransferPortfolioModal({
-                                         isOpen,
-                                         onClose,
-                                         portfolios,
-                                       }: TransferPortfolioModalProps) {
-  const [step, setStep] = useState<Step>("select")
-  const [selectedPortfolioId, setSelectedPortfolioId] = useState("")
-  const [recipientEmail, setRecipientEmail] = useState("")
-  const [recipientUserId, setRecipientUserId] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  isOpen,
+  onClose,
+  portfolios,
+}: TransferPortfolioModalProps) {
+  const [step, setStep] = useState<Step>("select");
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState("");
 
-  const selectedPortfolio = portfolios.find((p) => p.id === selectedPortfolioId)
+  const [tracking, setTracking] = useState({
+    firstName: "",
+    lastName: "",
+    address: "",
+    phone: "",
+    description: "Portfolio Migration",
+  });
 
-  // Calculate total value and performance from holdings
-  const portfolioValue = selectedPortfolio?.holdings.reduce((sum, h) => sum + h.value, 0) || 0
-  const portfolioChange = selectedPortfolio?.holdings.reduce((sum, h) => sum + h.change, 0) || 0
+  const [transferStock, { isLoading }] = useTransferStockMutation();
+
+  const selectedPortfolio = portfolios.find(
+    (p) => p.id === selectedPortfolioId
+  );
+
+  const portfolioValue =
+    selectedPortfolio?.holdings.reduce((sum, h) => sum + h.value, 0) || 0;
+  const totalShares =
+    selectedPortfolio?.holdings.reduce((sum, h) => sum + h.shares, 0) || 0;
+  const totalAssetsCount = selectedPortfolio?.holdings.length || 0;
+
+  const isRecipientValid = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return (
+      emailRegex.test(recipientEmail) &&
+      tracking.firstName.length > 1 &&
+      tracking.lastName.length > 1 &&
+      tracking.phone.length > 7 &&
+      tracking.address.length > 5
+    );
+  };
 
   const handleTransfer = async () => {
-    setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    setIsLoading(false)
-    setStep("success")
-  }
+    if (!selectedPortfolio) return;
+    try {
+      const transferPromises = selectedPortfolio.holdings.map((asset) =>
+        transferStock({
+          portfolioId: selectedPortfolio.id,
+          toUserEmail: recipientEmail,
+          assetSymbol: asset.symbol,
+          shares: asset.shares,
+          firstName: tracking.firstName,
+          lastName: tracking.lastName,
+          address: tracking.address,
+          phone: tracking.phone,
+          description: tracking.description, // Correctly passing the state value
+          assetName: asset.name,
+          valueAtTransfer: asset.value,
+        }).unwrap()
+      );
+
+      await Promise.all(transferPromises);
+      setStep("success");
+      toast.success("Migration Authorized Successfully");
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Transfer failed.");
+    }
+  };
 
   const handleClose = () => {
-    setStep("select")
-    setSelectedPortfolioId("")
-    setRecipientEmail("")
-    setRecipientUserId("")
-    setIsLoading(false)
-    onClose()
-  }
+    setStep("select");
+    setSelectedPortfolioId("");
+    setRecipientEmail("");
+    setTracking({
+      firstName: "",
+      lastName: "",
+      address: "",
+      phone: "",
+      description: "Portfolio Migration",
+    });
+    onClose();
+  };
 
   return (
-      <Dialog open={isOpen} onOpenChange={(open) => { if (!open) handleClose() }}>
-        <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden border-none shadow-2xl ring-1 ring-border/50">
-
-          {/* Institutional Stepper Header */}
-          <div className="bg-primary/5 px-6 py-4 border-b border-border/40 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <ArrowRightLeft className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <span className="font-serif font-bold text-sm tracking-tight text-foreground uppercase tracking-widest">Asset Migration</span>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="sm:max-w-[520px] p-0 overflow-hidden border-none shadow-2xl ring-1 ring-border/50 bg-background">
+        <div className="bg-primary/5 px-6 py-4 border-b border-border/40 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+              <ArrowRightLeft className="h-4 w-4" />
             </div>
-            {step !== "success" && (
-                <div className="flex gap-1.5">
-                  {(['select', 'recipient', 'confirm'] as Step[]).map((s) => (
-                      <div key={s} className={`h-1.5 w-6 rounded-full transition-all ${step === s ? "bg-primary w-10" : "bg-muted"}`} />
-                  ))}
-                </div>
-            )}
+            <span className="font-serif font-bold text-sm text-foreground uppercase tracking-widest">
+              Asset Migration
+            </span>
           </div>
+        </div>
 
-          <div className="p-6">
-            {/* STEP 1: PORTFOLIO SELECTION */}
-            {step === "select" && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <header className="space-y-1">
-                    <DialogTitle className="text-2xl font-serif">Select Portfolio</DialogTitle>
-                    <DialogDescription className="text-sm">Choose the asset group you wish to transfer ownership of.</DialogDescription>
-                  </header>
+        <div className="p-6 max-h-[80vh] overflow-y-auto">
+          {/* STEP 1: PORTFOLIO SELECTION */}
+          {step === "select" && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <header className="space-y-1">
+                <DialogTitle className="text-2xl font-serif text-foreground">
+                  Select Portfolio
+                </DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
+                  Choose the asset group for migration.
+                </DialogDescription>
+              </header>
 
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="portfolio-select" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Managed Portfolios</Label>
-                      <Select value={selectedPortfolioId} onValueChange={setSelectedPortfolioId}>
-                        <SelectTrigger
-                            id="portfolio-select"
-                            className="h-14 rounded-xl border-border/50 bg-secondary/20 hover:bg-secondary/40 transition-colors focus:ring-primary"
+              <div className="space-y-4">
+                <Select
+                  value={selectedPortfolioId}
+                  onValueChange={setSelectedPortfolioId}
+                >
+                  <SelectTrigger className="h-16 rounded-xl border-border/50 bg-secondary/20 hover:bg-secondary/40 transition-colors">
+                    <SelectValue placeholder="Select an allocation..." />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-border/50 bg-background shadow-2xl z-50">
+                    {portfolios.map((p) => {
+                      const sharesCount = p.holdings.reduce(
+                        (s, h) => s + h.shares,
+                        0
+                      );
+                      return (
+                        <SelectItem
+                          key={p.id}
+                          value={p.id}
+                          className="py-3 px-4 rounded-lg cursor-pointer"
                         >
-                          <SelectValue placeholder="Select an allocation..." />
-                        </SelectTrigger>
-
-
-                        <SelectContent
-                            className="rounded-xl border-border/50 bg-background shadow-2xl z-50 min-w-[var(--radix-select-trigger-width)]"
-                        >
-                          {portfolios.map((p) => (
-                              <SelectItem
-                                  key={p.id}
-                                  value={p.id}
-                                  className="py-3 px-4 rounded-lg focus:bg-primary/10 focus:text-primary transition-all cursor-pointer mx-1 my-1"
-                              >
-                                <div className="flex flex-col gap-0.5">
-                                  <span className="font-bold text-sm tracking-tight">{p.name}</span>
-                                  <span className="text-[10px] text-muted-foreground uppercase font-medium tracking-widest">
-                                    {p.holdings.length} Assets • €{p.holdings.reduce((s, h) => s + h.value, 0).toLocaleString()}
+                          <div className="flex flex-col">
+                            <span className="font-bold text-sm text-foreground">
+                              {p.name}
                             </span>
-                                </div>
-                              </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>                    </div>
-
-                    {selectedPortfolio && (
-                        <div className="rounded-2xl bg-primary/[0.03] border border-primary/10 p-5 space-y-4">
-                          <div className="flex justify-between items-end">
-                            <div>
-                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Total Valuation</p>
-                              <p className="text-2xl font-serif font-bold">€{portfolioValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                            </div>
-                            <Badge className={portfolioChange >= 0 ? "bg-emerald-500/10 text-emerald-600" : "bg-rose-500/10 text-rose-600"}>
-                              {portfolioChange >= 0 ? "+" : ""}€{portfolioChange.toLocaleString()}
-                            </Badge>
+                            <span className="text-[10px] text-muted-foreground uppercase font-medium">
+                              {p.holdings.length} Assets •{" "}
+                              {sharesCount.toLocaleString()} Total Shares • €
+                              {p.holdings
+                                .reduce((s, h) => s + h.value, 0)
+                                .toLocaleString()}
+                            </span>
                           </div>
-                          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-primary/5">
-                            <div>
-                              <p className="text-[10px] font-medium text-muted-foreground uppercase">Asset Count</p>
-                              <p className="text-sm font-bold">{selectedPortfolio.holdings.length} Positions</p>
-                            </div>
-                            <div>
-                              <p className="text-[10px] font-medium text-muted-foreground uppercase">Migration Status</p>
-                              <p className="text-sm font-bold text-emerald-600">Eligible</p>
-                            </div>
-                          </div>
-                        </div>
-                    )}
-                  </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
 
-                  <div className="flex gap-3 pt-2">
-                    <Button variant="ghost" onClick={handleClose} className="flex-1 text-muted-foreground">Cancel</Button>
-                    <Button
-                        onClick={() => setStep("recipient")}
-                        disabled={!selectedPortfolioId}
-                        className="flex-1 rounded-xl h-12 shadow-lg shadow-primary/20"
-                    >
-                      Next Step <ChevronRight className="ml-1 h-4 w-4" />
-                    </Button>
+                {selectedPortfolio && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl bg-primary/[0.03] border border-primary/10 p-4">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">
+                        Total Assets
+                      </p>
+                      <p className="text-xl font-serif font-bold text-foreground">
+                        {totalAssetsCount}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl bg-primary/[0.03] border border-primary/10 p-4">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">
+                        Portfolio Shares
+                      </p>
+                      <p className="text-xl font-serif font-bold text-foreground">
+                        {totalShares.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="col-span-2 rounded-2xl bg-primary/[0.03] border border-primary/10 p-4">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">
+                        Aggregated Valuation
+                      </p>
+                      <p className="text-2xl font-serif font-bold text-foreground">
+                        €{portfolioValue.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <Button
+                onClick={() => setStep("recipient")}
+                disabled={!selectedPortfolioId}
+                className="w-full h-12 rounded-xl bg-primary text-primary-foreground"
+              >
+                Identify Recipient <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
+          {/* STEP 2: RECIPIENT DETAILS & DESCRIPTION */}
+          {step === "recipient" && (
+            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+              <button
+                onClick={() => setStep("select")}
+                className="flex items-center text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase"
+              >
+                <ArrowLeft className="mr-1 h-3 w-3" /> Back
+              </button>
+              <header className="space-y-1">
+                <DialogTitle className="text-2xl font-serif text-foreground">
+                  Recipient Details
+                </DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
+                  Enter tracking details and migration reason.
+                </DialogDescription>
+              </header>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground">
+                    First Name
+                  </Label>
+                  <Input
+                    placeholder="John"
+                    value={tracking.firstName}
+                    onChange={(e) =>
+                      setTracking({ ...tracking, firstName: e.target.value })
+                    }
+                    className="h-10 rounded-lg bg-muted/20"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground">
+                    Last Name
+                  </Label>
+                  <Input
+                    placeholder="Doe"
+                    value={tracking.lastName}
+                    onChange={(e) =>
+                      setTracking({ ...tracking, lastName: e.target.value })
+                    }
+                    className="h-10 rounded-lg bg-muted/20"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground">
+                  Email Address
+                </Label>
+                <div className="relative">
+                  <Input
+                    type="email"
+                    placeholder="recipient@vaultstock.com"
+                    value={recipientEmail}
+                    onChange={(e) => setRecipientEmail(e.target.value)}
+                    className="h-10 pl-9 rounded-lg bg-muted/20"
+                  />
+                  <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground">
+                    Phone Number
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      placeholder="+1..."
+                      value={tracking.phone}
+                      onChange={(e) =>
+                        setTracking({ ...tracking, phone: e.target.value })
+                      }
+                      className="h-10 pl-9 rounded-lg bg-muted/20"
+                    />
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
-            )}
-
-            {/* STEP 2: RECIPIENT IDENTIFICATION */}
-            {step === "recipient" && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <button onClick={() => setStep("select")} className="flex items-center text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">
-                    <ArrowLeft className="mr-1 h-3 w-3" /> Back to Selection
-                  </button>
-
-                  <header className="space-y-1">
-                    <DialogTitle className="text-2xl font-serif">Identify Recipient</DialogTitle>
-                    <DialogDescription className="text-sm text-muted-foreground">Specify the destination entity for this portfolio migration.</DialogDescription>
-                  </header>
-
-                  <div className="space-y-5">
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest">Verified Email Address</Label>
-                      <div className="relative">
-                        <Input
-                            id="email"
-                            type="email"
-                            placeholder="institution@private-wealth.io"
-                            value={recipientEmail}
-                            onChange={(e) => setRecipientEmail(e.target.value)}
-                            className="h-12 rounded-xl pl-10 bg-secondary/20 border-border/50"
-                        />
-                        <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      </div>
-                    </div>
-
-                    <div className="relative py-2">
-                      <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border/50" /></div>
-                      <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-tighter"><span className="bg-background px-2 text-muted-foreground">OR USE UNIQUE ID</span></div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="user-id" className="text-[10px] font-bold uppercase tracking-widest">User UUID</Label>
-                      <Input
-                          id="user-id"
-                          placeholder="usr_XXXXXXXXXXXX"
-                          value={recipientUserId}
-                          onChange={(e) => setRecipientUserId(e.target.value)}
-                          className="h-12 rounded-xl bg-secondary/20 border-border/50 font-mono text-xs"
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                      onClick={() => setStep("confirm")}
-                      disabled={!recipientEmail && !recipientUserId}
-                      className="w-full h-12 rounded-xl"
-                  >
-                    Continue to Verification
-                  </Button>
-                </div>
-            )}
-
-            {/* STEP 3: FINAL CONFIRMATION */}
-            {step === "confirm" && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <header className="space-y-1 text-center">
-                    <DialogTitle className="text-2xl font-serif">Final Authorization</DialogTitle>
-                    <DialogDescription className="text-sm">Please verify the migration details before signing.</DialogDescription>
-                  </header>
-
-                  <div className="rounded-2xl border border-border/40 bg-card overflow-hidden">
-                    <div className="p-4 bg-secondary/20 border-b border-border/40 flex justify-between">
-                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Portfolio</span>
-                      <span className="font-serif font-bold text-foreground">{selectedPortfolio?.name}</span>
-                    </div>
-                    <div className="p-4 space-y-3 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Total Valuation</span>
-                        <span className="font-bold">€{portfolioValue.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Recipient</span>
-                        <span className="font-bold text-primary truncate max-w-[180px] text-right">{recipientEmail || recipientUserId}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-rose-500/5 rounded-xl p-4 flex gap-3 border border-rose-500/10">
-                    <ShieldAlert className="h-5 w-5 text-rose-500 shrink-0" />
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      <span className="text-rose-600 font-bold uppercase tracking-tighter">Irreversible Action:</span> Once transferred, you will lose all management rights and access to the holdings within this portfolio.
-                    </p>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <Button variant="outline" onClick={() => setStep("recipient")} disabled={isLoading} className="flex-1 h-12 rounded-xl">Back</Button>
-                    <Button onClick={handleTransfer} disabled={isLoading} className="flex-[2] h-12 rounded-xl bg-foreground text-background hover:bg-foreground/90 shadow-lg">
-                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Authorize Migration"}
-                    </Button>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground">
+                    Physical Address
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      placeholder="City, Country"
+                      value={tracking.address}
+                      onChange={(e) =>
+                        setTracking({ ...tracking, address: e.target.value })
+                      }
+                      className="h-10 pl-9 rounded-lg bg-muted/20"
+                    />
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
-            )}
+              </div>
 
-            {/* SUCCESS STATE */}
-            {step === "success" && (
-                <div className="space-y-6 py-4 animate-in zoom-in duration-500 text-center">
-                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                    <CheckCircle2 className="h-10 w-10 text-emerald-500" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <h2 className="text-2xl font-serif font-bold">Transfer Initiated</h2>
-                    <p className="text-muted-foreground text-sm">Ownership transfer for <span className="text-foreground font-bold">{selectedPortfolio?.name}</span> has been sent.</p>
-                  </div>
-
-                  <div className="bg-secondary/40 rounded-2xl p-4 text-left space-y-3 border border-border/40">
-                    <div className="flex justify-between text-[11px] uppercase font-bold tracking-widest text-muted-foreground">
-                      <span>Recipient</span>
-                      <span className="text-foreground truncate max-w-[150px]">{recipientEmail || recipientUserId}</span>
-                    </div>
-                    <div className="flex justify-between text-[11px] uppercase font-bold tracking-widest text-muted-foreground">
-                      <span>Auth Code</span>
-                      <span className="text-foreground font-mono">XTR-902-PF</span>
-                    </div>
-                  </div>
-
-                  <Button onClick={handleClose} className="w-full h-12 rounded-xl">Return to Transfers</Button>
+              <div className="space-y-1">
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground">
+                  Transfer Description
+                </Label>
+                <div className="relative">
+                  <Input
+                    placeholder="Reason for migration (e.g., Trust Allocation)"
+                    value={tracking.description}
+                    onChange={(e) =>
+                      setTracking({ ...tracking, description: e.target.value })
+                    }
+                    className="h-10 pl-9 rounded-lg bg-muted/20"
+                  />
+                  <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-  )
+              </div>
+
+              <Button
+                onClick={() => setStep("confirm")}
+                disabled={!isRecipientValid()}
+                className="w-full h-12 rounded-xl mt-4 bg-primary text-primary-foreground"
+              >
+                Continue to Verification
+              </Button>
+            </div>
+          )}
+
+          {/* STEP 3: FINAL CONFIRMATION */}
+          {step === "confirm" && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+              <header className="text-center space-y-1">
+                <DialogTitle className="text-2xl font-serif text-foreground">
+                  Final Authorization
+                </DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
+                  Verify migration details.
+                </DialogDescription>
+              </header>
+
+              <div className="rounded-2xl border border-border bg-card overflow-hidden">
+                <div className="p-4 bg-muted/30 border-b border-border space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-bold text-muted-foreground uppercase">
+                      Recipient
+                    </span>
+                    <span className="font-bold text-foreground">
+                      {tracking.firstName} {tracking.lastName}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-bold text-muted-foreground uppercase">
+                      Email
+                    </span>
+                    <span className="font-bold text-primary">
+                      {recipientEmail}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs pt-1 border-t border-border/50">
+                    <span className="font-bold text-muted-foreground uppercase">
+                      Note
+                    </span>
+                    <span className="italic text-foreground truncate max-w-[200px]">
+                      {tracking.description}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-4 space-y-3">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Staged Assets</span>
+                    <span className="font-bold text-foreground">
+                      {totalAssetsCount} Stocks/Funds
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Aggregated Shares</span>
+                    <span className="font-bold text-foreground">
+                      {totalShares.toLocaleString()} Units
+                    </span>
+                  </div>
+                  <div className="pt-3 border-t border-border flex justify-between items-center">
+                    <span className="text-xs font-bold text-muted-foreground uppercase">
+                      Total Migration Value
+                    </span>
+                    <span className="font-serif font-black text-xl text-foreground">
+                      €{portfolioValue.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-rose-500/5 rounded-xl p-4 flex gap-3 border border-rose-500/10">
+                <ShieldAlert className="h-5 w-5 text-rose-500 shrink-0" />
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  <span className="text-rose-600 font-bold uppercase">
+                    Irreversible Action:
+                  </span>{" "}
+                  This will transfer legal management rights of all assets in
+                  this portfolio.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setStep("recipient")}
+                  disabled={isLoading}
+                  className="flex-1 h-12 rounded-xl text-muted-foreground"
+                >
+                  Back
+                </Button>
+                <Button
+                  onClick={handleTransfer}
+                  disabled={isLoading}
+                  className="flex-[2] h-12 rounded-xl bg-foreground text-background"
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Authorize Migration"
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* SUCCESS STATE */}
+          {step === "success" && (
+            <div className="space-y-6 py-4 text-center animate-in zoom-in duration-500">
+              <div className="mx-auto h-20 w-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
+                <CheckCircle2 className="h-10 w-10" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-serif font-bold text-foreground">
+                  Transfer Initiated
+                </h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Migration to {recipientEmail} is now processing.
+                </p>
+              </div>
+              <Button
+                onClick={handleClose}
+                className="w-full h-12 rounded-xl bg-foreground text-background"
+              >
+                Return to Dashboard
+              </Button>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }

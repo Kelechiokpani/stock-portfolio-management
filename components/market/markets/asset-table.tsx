@@ -22,7 +22,14 @@ export function AssetTable({
   assetClass,
   onRowClick,
 }: AssetTableProps) {
+
+    
+ 
+
+
   const renderPriceChange = (change: number, percent: number) => {
+
+
     const isPositive = change > 0;
     const isNeutral = change === 0;
     const colorClass = isPositive

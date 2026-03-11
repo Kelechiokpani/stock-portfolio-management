@@ -52,8 +52,6 @@ export default function LoginPage() {
 
       const userRole = response?.user?.role;
 
-      console.log(" User response:", response);
-      console.log("Login successful! User role:", userRole);
 
       // 3. Conditional Redirect
       if (userRole === "admin") {

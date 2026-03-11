@@ -5,10 +5,8 @@ import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme-provider";
-import { ReduxProvider } from "./Providers";
-
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+import { ReduxProvider } from "./services/Provider/Providers";
+import { CartProvider } from "./services/Provider/CartProvider";
 
 export const metadata: Metadata = {
   title: "Invest - Stock Investment Platform",
@@ -36,7 +34,9 @@ export default function RootLayout({
           shadow="0 0 10px #2299DD,0 0 5px #2299DD"
         />
         <ReduxProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <CartProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </CartProvider>
         </ReduxProvider>
         <Toaster position="bottom-right" richColors />
       </body>

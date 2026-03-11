@@ -31,14 +31,27 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // API Hook
 import { useGetApprovedStocksQuery } from "@/app/services/features/market/marketApi";
+import { CartHeader } from "@/app/services/hooks/CartHeader";
+import { useCart } from "@/app/services/Provider/CartProvider";
+import { toast } from "sonner";
 
 export default function MarketplacePage() {
   const router = useRouter();
+  const { buyCart, sellCart, addToBuyCart, addToSellCart } = useCart();
+  const [quantity, setQuantity] = useState(1);
 
   // 1. Real Data Fetching
   const { data, isLoading } = useGetApprovedStocksQuery();
 
-  console.log("Fetched Stocks Data:", data);
+  const handleSell = (asset: any) => {
+    addToSellCart({
+      symbol: asset.symbol,
+      shares: quantity,
+      price: asset.price,
+      // symbol is required by your SellPayload interface
+    });
+    toast.warning(`${asset.symbol} added to Sell Cart`);
+  };
 
   // 2. States
   const [activeTab, setActiveTab] = useState("all");
@@ -102,7 +115,7 @@ export default function MarketplacePage() {
       <section className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-2">
           <h1 className="text-2xl font-black tracking-tighter uppercase text-foreground">
-            Marketplace
+            Trade Market
           </h1>
           <p className="text-sm text-muted-foreground max-w-2xl font-medium italic">
             Institutional-grade terminal accessing{" "}
@@ -258,6 +271,9 @@ export default function MarketplacePage() {
           <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">
             Institutional Feed ({filteredAssets.length})
           </h2>
+          <div className="flex justify-end items-center gap-4 pt-4">
+            <CartHeader buyCount={buyCart.length} sellCount={sellCart.length} />
+          </div>
         </div>
 
         {filteredAssets.length === 0 ? (
@@ -272,7 +288,6 @@ export default function MarketplacePage() {
               <Card
                 key={asset._id}
                 className="group border-border/40 hover:border-primary/40 hover:shadow-2xl dark:bg-card/40 transition-all cursor-pointer rounded-[1rem] overflow-hidden"
-                onClick={() => router.push(`/dashboard/stocks/${asset._id}`)}
               >
                 <CardContent className="p-4 md:p-4">
                   <div className="flex items-center justify-between">
@@ -331,6 +346,16 @@ export default function MarketplacePage() {
                       </div>
 
                       <Button
+                        onClick={() => handleSell(asset)}
+                        className="h-6 rounded-2xl bg-red-300 hover:bg-red-700 text-white font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-2"
+                      >
+                        <Zap className="h-2 w-2" /> Sell
+                      </Button>
+
+                      <Button
+                        onClick={() =>
+                          router.push(`/dashboard/stocks/${asset._id}`)
+                        }
                         size="icon"
                         variant="ghost"
                         className="rounded-2xl group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300"

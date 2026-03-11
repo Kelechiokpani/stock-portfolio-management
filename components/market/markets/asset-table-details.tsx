@@ -19,6 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useCart } from "@/app/services/Provider/CartProvider";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface AssetDetailsModalProps {
   asset: Asset;
@@ -26,7 +29,33 @@ interface AssetDetailsModalProps {
 }
 
 export function AssetDetailsModal({ asset, onClose }: AssetDetailsModalProps) {
+  const { addToBuyCart, addToSellCart } = useCart();
+  const [quantity, setQuantity] = useState(1);
+
   const isPositive = asset.change >= 0;
+
+  const handleBuy = () => {
+    addToBuyCart({
+      symbol: asset.symbol,
+      shares: quantity,
+      price: asset.price,
+      companyName: asset.name,
+      // portfolioId: portfolioId
+    });
+    toast.success(`${asset.symbol} added to Buy Cart`);
+    onClose();
+  };
+
+  const handleSell = () => {
+    addToSellCart({
+      symbol: asset.symbol,
+      shares: quantity,
+      price: asset.price,
+      // symbol is required by your SellPayload interface
+    });
+    toast.success(`${asset.symbol} added to Sell Cart`);
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
@@ -122,7 +151,22 @@ export function AssetDetailsModal({ asset, onClose }: AssetDetailsModalProps) {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="mt-10 grid grid-cols-2 gap-4">
+              <Button
+                onClick={handleBuy}
+                className="h-16 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-2"
+              >
+                <Zap className="h-4 w-4" /> Add to Buy Cart
+              </Button>
+              <Button
+                onClick={handleSell}
+                variant="outline"
+                className="h-16 rounded-2xl border-2 border-slate-100 hover:bg-rose-50 hover:text-rose-600 font-black uppercase tracking-widest text-[11px]"
+              >
+                Add to Sell Cart
+              </Button>
+            </div>
+            {/* <div className="grid grid-cols-2 gap-4">
               <Button className="h-16 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-widest text-[11px] gap-2 shadow-xl shadow-slate-200 dark:shadow-none transition-all active:scale-95">
                 <Zap className="h-4 w-4 fill-white" /> Buy Asset
               </Button>
@@ -132,7 +176,7 @@ export function AssetDetailsModal({ asset, onClose }: AssetDetailsModalProps) {
               >
                 Execute Sell
               </Button>
-            </div>
+            </div> */}
           </div>
         </div>
 

@@ -2,7 +2,14 @@
 
 import { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Activity, ChevronDown, Info, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Activity,
+  ChevronDown,
+  Info,
+  Loader2,
+  Zap,
+} from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,8 +17,14 @@ import { Badge } from "@/components/ui/badge";
 // 1. Import your real API Hook
 import { useGetApprovedStocksQuery } from "@/app/services/features/market/marketApi";
 import StockDetailChart from "@/components/market/Chart/StockDetailChart";
+import { useCart } from "@/app/services/Provider/CartProvider";
+import { toast } from "sonner";
+import { CartHeader } from "@/app/services/hooks/CartHeader";
 
 export default function StockDetailsPage() {
+  const { buyCart, sellCart, addToBuyCart, addToSellCart } = useCart();
+
+  const [quantity, setQuantity] = useState(1);
   const params = useParams();
   const router = useRouter();
   const [timeRange, setTimeRange] = useState("YTD");
@@ -66,6 +79,15 @@ export default function StockDetailsPage() {
   }
 
   const isPositive = stock.changePercent >= 0;
+  const handleSell = () => {
+    addToSellCart({
+      symbol: stock.symbol,
+      shares: quantity,
+      price: stock.price,
+      // symbol is required by your SellPayload interface
+    });
+    toast.warning(`${stock.symbol} added to Sell Cart`);
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 text-foreground">
@@ -118,6 +140,16 @@ export default function StockDetailsPage() {
             Real-time Market Feed{" "}
             <span className="text-emerald-500 font-bold">Active</span>
           </span>
+        </div>
+
+        <div className="flex justify-end items-center gap-4 pt-4">
+          <CartHeader buyCount={buyCart.length} sellCount={sellCart.length} />
+          <Button
+            onClick={handleSell}
+            className="h-10 rounded-2xl bg-red-300 hover:bg-red-700 text-white font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-2"
+          >
+            <Zap className="h-4 w-4" /> Add to Sell Cart
+          </Button>
         </div>
       </header>
 

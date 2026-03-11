@@ -11,16 +11,29 @@ export interface MarketSummary {
 }
 
 export interface MarketResponse {
-  stocks: Asset[]; // Changed from assets to stocks to match your frontend usage
+  stocks: Asset[];
   summary: MarketSummary;
 }
 
-// --- New Transaction Interfaces ---
+// --- Updated Transaction Interfaces ---
+
 export interface FundPayload {
   amount: number;
   method: string;
   currency?: string;
   description?: string;
+}
+
+/** * NEW: Updated for /api/funds/withdrawal
+ * Includes bankDetails and specific method as per update.
+ */
+export interface WithdrawalPayload extends FundPayload {
+  bankDetails: {
+    bankName: string;
+    accountName: string;
+    accountNumber: string;
+  };
+  method: "moniepoint" | "gtbank" | string;
 }
 
 export interface BuyPayload {
@@ -38,12 +51,22 @@ export interface SellPayload {
   price: number;
 }
 
+/** * NEW: Enhanced Transfers for POST /api/transfers
+ * Includes tracking: firstName, lastName, address, phone, and description.
+ */
 export interface TransferPayload {
+  portfolioId: string;
   assetSymbol: string;
   shares: number;
   toUserEmail: string;
   assetName?: string;
   valueAtTransfer?: number;
+  // Tracking parameters
+  firstName: string;
+  lastName: string;
+  address: string;
+  phone: string;
+  description: string; // Transfer Instruction
 }
 
 export const marketApi = baseApi.injectEndpoints({
@@ -64,13 +87,15 @@ export const marketApi = baseApi.injectEndpoints({
       invalidatesTags: ["UserBalance", "Transactions"],
     }),
 
-    withdrawFunds: builder.mutation<any, FundPayload>({
+    withdrawFunds: builder.mutation<any, WithdrawalPayload>({
       query: (body) => ({
         url: "/funds/withdrawal",
         method: "POST",
         body,
       }),
-      invalidatesTags: ["UserBalance", "Transactions"],
+      // Invalidating "User" is key here because the 3-strike logic
+      // updates the user's "requiresResettlementAccount" flag.
+      invalidatesTags: ["UserBalance", "Transactions", "User"],
     }),
 
     // 2. Investment Operations
@@ -95,7 +120,7 @@ export const marketApi = baseApi.injectEndpoints({
     // 3. Peer-to-Peer Transfers
     transferStock: builder.mutation<any, TransferPayload>({
       query: (body) => ({
-        url: "/transfers/stock",
+        url: "/transfers",
         method: "POST",
         body,
       }),
@@ -112,30 +137,3 @@ export const {
   useSellStockMutation,
   useTransferStockMutation,
 } = marketApi;
-
-// import { baseApi } from "@/app/services/api";
-// import { Asset } from '@/components/data/data-type';
-
-// export interface MarketSummary {
-//     total: number;
-//     gainers: number;
-//     losers: number;
-//     sectors: string[];
-//     markets: string[];
-// }
-
-// export interface MarketResponse {
-//     assets: Asset[];
-//     summary: MarketSummary;
-// }
-
-// export const marketApi = baseApi.injectEndpoints({
-//     endpoints: (builder) => ({
-//         getApprovedStocks: builder.query<MarketResponse, void>({
-//             query: () => '/market/approved',
-//             providesTags: ['Market'],
-//         }),
-//     }),
-// });
-
-// export const { useGetApprovedStocksQuery } = marketApi;
