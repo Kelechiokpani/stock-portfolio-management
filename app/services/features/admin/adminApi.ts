@@ -1,6 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../../../store";
 
+interface PaginationParams {
+  page: number;
+  limit: number;
+  total: number;
+}
+
 export const adminApi = createApi({
   reducerPath: "adminApi",
   baseQuery: fetchBaseQuery({
@@ -26,8 +32,16 @@ export const adminApi = createApi({
       providesTags: ["Overview"],
     }),
 
-    getAllUsers: builder.query<any, void>({
-      query: () => "/users",
+    // getAllUsers: builder.query<any, void>({
+    //   query: () => "/users",
+    //   providesTags: ["Users"],
+    // }),
+
+    getAllUsers: builder.query<any, PaginationParams>({
+      query: ({ page, limit, total }) => ({
+        url: "/users",
+        params: { page, limit, total }, // This automatically appends ?page=1&limit=20 to your URL
+      }),
       providesTags: ["Users"],
     }),
 
@@ -46,7 +60,7 @@ export const adminApi = createApi({
           : [{ type: "Market", id: "LIST" }],
       // providesTags: ["Market"],
     }),
-    
+
     updateMarketAsset: builder.mutation<any, { id: string; data: any }>({
       query: ({ id, data }) => ({
         url: `/market/stocks/${id}`,
@@ -110,9 +124,11 @@ export const adminApi = createApi({
       invalidatesTags: ["Settings"],
     }),
 
-    // --- ACCOUNT REQUESTS ---
-    getAccountRequests: builder.query<any, void>({
-      query: () => "/requests",
+    getAccountRequests: builder.query<any, PaginationParams>({
+      query: ({ page, limit, total }) => ({
+        url: "/requests",
+        params: { page, limit, total }, // This automatically appends ?page=1&limit=20 to your URL
+      }),
       providesTags: ["Requests"],
     }),
 

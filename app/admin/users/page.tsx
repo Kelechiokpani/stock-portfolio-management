@@ -41,11 +41,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import GlobalLoader from "@/components/GlobalLoader";
+import { useParams, useRouter } from "next/navigation";
 
 // Import your hook
 import { useGetAllUsersQuery } from "@/app/services/features/admin/adminApi";
+import { CustomPagination } from "@/components/Reuse/CustomPagination";
 
 export default function ManageUsersPage() {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
   const [view, setView] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -55,7 +59,9 @@ export default function ManageUsersPage() {
     isLoading,
     refetch,
     isFetching,
-  } = useGetAllUsersQuery();
+  } = useGetAllUsersQuery({ page, limit, total: 0 });
+
+  console.log("API Response:", rawResponse); // Debug log to check API response structure
 
   // --- 1. DATA NORMALIZATION ---
   const usersList = useMemo(() => {
@@ -243,6 +249,19 @@ export default function ManageUsersPage() {
               </TableBody>
             </Table>
           </div>
+          {filteredUsers && (
+            <CustomPagination
+              currentPage={page}
+              totalPages={rawResponse?.pagination?.totalPages}
+              limit={limit}
+              totalItems={rawResponse?.pagination?.total}
+              onPageChange={(p) => setPage(p)}
+              onLimitChange={(l) => {
+                setLimit(l);
+                setPage(1);
+              }}
+            />
+          )}
         </CardContent>
       </Card>
     </div>
@@ -252,6 +271,7 @@ export default function ManageUsersPage() {
 /* --- ROW COMPONENT --- */
 
 function UserRow({ user }: { user: any }) {
+  const router = useRouter();
   const name = `${user.firstName || ""} ${user.lastName || ""}`;
 
   return (
@@ -372,14 +392,16 @@ function UserRow({ user }: { user: any }) {
               Security Ops
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-800" />
-          
 
             {/* Audit Action */}
-            <DropdownMenuItem className="flex items-center gap-3 p-3 cursor-pointer rounded-lg focus:bg-blue-50 dark:focus:bg-blue-500/10 transition-colors">
+            <DropdownMenuItem
+              onClick={() => router.push(`/admin/users/${user._id}`)}
+              className="flex items-center gap-3 p-3 cursor-pointer rounded-lg focus:bg-blue-50 dark:focus:bg-blue-500/10 transition-colors"
+            >
               <History className="w-4 h-4 text-blue-500" />
               <div className="flex flex-col text-left">
                 <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                  Audit Ledger
+                  View User Data
                 </span>
                 <span className="text-[10px] text-slate-400 font-medium">
                   View transaction history
@@ -390,7 +412,7 @@ function UserRow({ user }: { user: any }) {
             <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-800" />
 
             {/* Danger Action */}
-            <DropdownMenuItem className="flex items-center gap-3 p-3 cursor-pointer rounded-lg text-rose-500 focus:bg-rose-50 dark:focus:bg-rose-500/10 transition-colors group">
+            {/* <DropdownMenuItem className="flex items-center gap-3 p-3 cursor-pointer rounded-lg text-rose-500 focus:bg-rose-50 dark:focus:bg-rose-500/10 transition-colors group">
               <Ban className="w-4 h-4 group-hover:scale-110 transition-transform" />
               <div className="flex flex-col text-left">
                 <span className="text-sm font-bold">Revoke Access</span>
@@ -398,8 +420,7 @@ function UserRow({ user }: { user: any }) {
                   Suspend account immediately
                 </span>
               </div>
-            </DropdownMenuItem>
-            
+            </DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>

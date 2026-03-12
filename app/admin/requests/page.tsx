@@ -41,11 +41,20 @@ import {
   useGetAccountRequestsQuery,
   useReviewRequestMutation,
 } from "@/app/services/features/admin/adminApi";
+import { CustomPagination } from "@/components/Reuse/CustomPagination";
 
 export default function AdminAccountRequests() {
-  const { data: response, isLoading, refetch } = useGetAccountRequestsQuery();
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+
+  const {
+    data: response,
+    isLoading,
+    refetch,
+  } = useGetAccountRequestsQuery({ page, limit, total: 0 }); // Pass total as 0 for now, it will be updated after we get the response
   const [reviewRequest, { isLoading: isReviewing }] =
     useReviewRequestMutation();
+
 
   const [selectedReqId, setSelectedReqId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -115,14 +124,6 @@ export default function AdminAccountRequests() {
               results.
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            className="dark:bg-slate-900"
-          >
-            <RefreshCcw className="mr-2 h-4 w-4" /> Sync Queue
-          </Button>
         </div>
 
         {/* ANALYTICS */}
@@ -142,8 +143,10 @@ export default function AdminAccountRequests() {
             icon={<Clock className="h-4 w-4 text-amber-500" />}
           />
           <MiniStat
-            label="System Status"
-            value="Secure"
+            label="Approved Users"
+            value={requestsList
+              .filter((r: any) => r.status === "approved")
+              .length.toString()}
             sub="API Online"
             icon={<UserCheck className="h-4 w-4 text-emerald-500" />}
           />
@@ -221,6 +224,19 @@ export default function AdminAccountRequests() {
                 </TableBody>
               </Table>
             </ScrollArea>
+            {filteredRequests && (
+              <CustomPagination
+                currentPage={page}
+                totalPages={response?.pagination?.totalPages}
+                limit={limit}
+                totalItems={response?.pagination?.total}
+                onPageChange={(p) => setPage(p)}
+                onLimitChange={(l) => {
+                  setLimit(l);
+                  setPage(1);
+                }}
+              />
+            )}
           </Card>
 
           {/* INSPECTION PANEL */}

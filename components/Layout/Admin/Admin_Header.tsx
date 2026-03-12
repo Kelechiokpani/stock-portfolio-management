@@ -56,11 +56,6 @@ export default function Admin_Header({ onMenuClick }: HeaderProps) {
               <Menu className="h-5 w-5" />
             </button>
           )}
-
-          {/* Logo Component */}
-          <div className="flex items-center">
-            <Logo />
-          </div>
         </div>
 
         {/* RIGHT SECTION */}

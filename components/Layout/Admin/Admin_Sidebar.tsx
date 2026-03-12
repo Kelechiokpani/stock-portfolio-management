@@ -17,19 +17,20 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
+import Logo from "../Logo";
 
 // Updated Nav Items for Admin Context
 const adminNavItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
-  { href: "/admin/region", label: "Regional Settings ", icon: UserCheck },
-  { href: "/admin/users", label: "Manage Users", icon: Users },
 
   { href: "/admin/market", label: "System Markets", icon: FileText },
+  { href: "/admin/users", label: "Manage Users", icon: Users },
   { href: "/admin/requests", label: "Account Requests", icon: ClipboardList },
 
   { href: "/admin/kyc", label: "Compliance/KYC", icon: ShieldCheck },
-  { href: "/admin/settings", label: "System Settings", icon: Settings },
   { href: "/admin/profile", label: "Admin Profile", icon: Settings },
+  { href: "/admin/region", label: "Regional Settings ", icon: UserCheck },
+  // { href: "/admin/settings", label: "System Settings", icon: Settings },
 ];
 
 interface Props {
@@ -64,12 +65,7 @@ export default function Admin_Sidebar({ open, onClose }: Props) {
         <div className="flex items-center justify-between h-16 px-4 border-b border-border/50">
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-lg font-bold text-foreground leading-tight">
-                FS Group
-              </span>
-              <span className="text-[10px] uppercase tracking-widest text-primary font-bold">
-                Admin Portal
-              </span>
+              <Logo />
             </div>
           )}
 

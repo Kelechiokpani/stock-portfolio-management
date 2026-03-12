@@ -140,7 +140,7 @@ export default function ProfilePage() {
           value={`${user.availableCash.toLocaleString()} ${
             user.settings.baseCurrency
           }`}
-          subtext="Ready to Deploy"
+          subtext="Available Liquidity"
           icon={<CreditCard className="text-amber-500" />}
         />
       </div>
