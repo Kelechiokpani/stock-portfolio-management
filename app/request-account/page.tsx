@@ -15,6 +15,8 @@ import {
   ClipboardList,
   ShieldCheck,
   Calendar,
+  UserPlus,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +26,7 @@ import { Card } from "@/components/ui/card";
 import Header from "@/components/Layout/User/Header";
 import { useRegisterMutation } from "@/app/services/features/auth/authApi";
 import { toast } from "sonner";
+import { Nav } from "@/components/Reuse/Nav";
 
 const accountTypes = [
   {
@@ -92,8 +95,12 @@ export default function RequestAccountPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfcfd] dark:bg-zinc-950 text-slate-900 dark:text-slate-50 transition-colors duration-300">
-      <Header onMenuClick={() => setSidebarOpen(false)} />
+    <div className="min-h-screen bg-[rgb(252,252,253)] dark:bg-zinc-950 text-slate-900 dark:text-slate-50 transition-colors duration-300">
+      <Nav
+        subtitle="Registration"
+        icon={UserPlus}
+        badgeText="New User Account Request"
+      />
 
       <main className="mx-auto max-w-2xl px-6 py-16 lg:py-24">
         {step < 6 ? (

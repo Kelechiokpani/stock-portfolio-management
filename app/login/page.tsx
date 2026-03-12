@@ -14,14 +14,15 @@ import {
   Eye,
   EyeOff,
   Lock,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTheme } from "@/lib/theme-provider";
-import Header from "@/components/Layout/User/Header";
 import { useLoginMutation } from "@/app/services/features/auth/authApi";
 import { toast } from "sonner";
+import { Nav } from "@/components/Reuse/Nav";
 
 export default function LoginPage() {
   const [login, { isLoading }] = useLoginMutation();
@@ -52,7 +53,6 @@ export default function LoginPage() {
 
       const userRole = response?.user?.role;
 
-
       // 3. Conditional Redirect
       if (userRole === "admin") {
         router.push("/admin");
@@ -71,9 +71,13 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#fcfcfd] dark:bg-zinc-950 text-slate-900 dark:text-slate-50 transition-colors duration-300">
-      <Header onMenuClick={() => setSidebarOpen(false)} />
+      <Nav
+        subtitle="Welcome Back"
+        icon={UserPlus}
+        badgeText="Already Existing User Account"
+      />
 
-      <main className="mx-auto max-w-[640px] px-6 py-20 lg:py-32">
+      <main className="mx-auto max-w-[600px] px-6 py-20 lg:py-42">
         {/* Branding/Logo Area */}
         <div className="mb-10 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/20">
@@ -86,7 +90,7 @@ export default function LoginPage() {
         </div>
 
         {/* Login Card */}
-        <div className="rounded-3xl border border-slate-200/60 bg-white p-8 shadow-xl shadow-slate-200/50 dark:border-zinc-800/50 dark:bg-zinc-900/50 dark:shadow-none">
+        <div className="rounded-2xl border border-slate-200/60 bg-white p-8 shadow-xl shadow-slate-200/50 dark:border-zinc-800/50 dark:bg-zinc-900/50 dark:shadow-none">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label

@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   Eye,
   EyeOff,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,7 @@ import {
   useGetGendersQuery,
   useGetLocationsQuery,
 } from "../services/features/data/referenceApi";
+import { Nav } from "@/components/Reuse/Nav";
 
 const steps = [
   { id: 1, label: "Account", icon: User },
@@ -193,7 +195,7 @@ export default function OnboardingPage() {
       const successMessage =
         response?.message || "Account created successfully!";
       const currentKycStatus = response?.kycStatus;
-      
+
       toast.success(successMessage, {
         description:
           currentKycStatus === "pending"
@@ -215,68 +217,13 @@ export default function OnboardingPage() {
     }
   };
 
-  // const handleNext = async () => {
-  //   // 1. Validate the current step's inputs
-  //   if (!validateStep()) {
-  //     toast.error("Please fill in all required fields.");
-  //     return;
-  //   }
-
-  //   // 2. If not on the last step, just move to the next screen
-  //   if (currentStep < steps.length) {
-  //     setCurrentStep(currentStep + 1);
-  //     window.scrollTo({ top: 0, behavior: "smooth" });
-  //     return;
-  //   }
-
-  //   // 3. If on Step 4, call the API with the ENTIRE formData
-  //   try {
-  //     // Logic check: Ensure selfie is present if required for final step
-  //     if (!selfieRef.current?.files?.[0] && !formData.selfie) {
-  //       toast.error("Please upload your selfie to complete registration.");
-  //       return;
-  //     }
-
-  //     const submitData = new FormData();
-
-  //     Object.keys(formData).forEach((key) => {
-  //       if (key === "nomineeName" || key === "bankInfo") {
-  //         submitData.append(key, JSON.stringify(formData[key]));
-  //       } else {
-  //         submitData.append(key, formData[key]);
-  //       }
-  //     });
-
-  //     const response = await onboarding({ data: submitData }).unwrap();
-  //     setSuccessData(response);
-
-  //     toast.success("Account created successfully!");
-  //     router.push("/dashboard");
-  //   } catch (err: any) {
-  //     toast.error(
-  //       err?.data?.message || "Registration failed. Please try again."
-  //     );
-  //   }
-  // };
-
   return (
     <div className="min-h-screen bg-[#fcfcfd] dark:bg-zinc-950 text-slate-900 dark:text-slate-50">
-      <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-950/80">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-12">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
-              <TrendingUp className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold tracking-tight">VaultStock</span>
-          </Link>
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
-            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-medium text-slate-600 dark:text-zinc-400 uppercase tracking-wider">
-              Secure Onboarding
-            </span>
-          </div>
-        </div>
-      </header>
+      <Nav
+        subtitle="Secure Onboarding"
+        icon={UserPlus}
+        badgeText="New User Account Onboarding"
+      />
 
       <main className="mx-auto max-w-2xl px-6 py-12">
         <div className="mb-12">

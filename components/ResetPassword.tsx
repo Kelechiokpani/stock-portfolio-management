@@ -2,12 +2,13 @@
 
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Lock, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { Lock, Eye, EyeOff, CheckCircle2, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Header from "@/components/Layout/User/Header";
 import { useResetPasswordMutation } from "@/app/services/features/auth/authApi";
+import { Nav } from "./Reuse/Nav";
 
 export default function ResetPassword() {
   const router = useRouter();
@@ -49,7 +50,11 @@ export default function ResetPassword() {
 
   return (
     <div className="min-h-screen bg-[#fcfcfd] dark:bg-zinc-950 text-slate-900 dark:text-slate-50 transition-colors duration-300">
-      <Header onMenuClick={() => {}} />
+      <Nav
+        subtitle="Reset Password"
+        icon={UserPlus}
+        badgeText="Enter your new password to regain access to your account."
+      />
 
       <main className="mx-auto max-w-[540px] px-6 py-20 lg:py-32">
         <div className="mb-10 text-center">

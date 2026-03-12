@@ -42,9 +42,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
           )}
 
           {/* Logo Component */}
-          <div className="flex items-center">
-            <Logo />
-          </div>
         </div>
 
         {/* RIGHT SECTION */}

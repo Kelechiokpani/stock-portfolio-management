@@ -1,16 +1,18 @@
 import Link from "next/link";
-import {TrendingUp} from "lucide-react";
+import { Activity, TrendingUp } from "lucide-react";
 import React from "react";
 
-const Logo = ( ) => {
-    return (
-        <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <TrendingUp className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-foreground tracking-tight">VaultStock</span>
-        </Link>
-    )
-}
+const Logo = () => {
+  return (
+    <div className="flex items-center gap-2 font-bold text-lg md:text-xl tracking-tighter shrink-0">
+      <div className="bg-primary p-1.5 rounded text-primary-foreground">
+        <Activity size={18} />
+      </div>
+      <span className="text-foreground">
+        EQUITY<span className="text-primary font-black">FLOW</span>
+      </span>
+    </div>
+  );
+};
 
-export default Logo
+export default Logo;

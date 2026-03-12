@@ -2,13 +2,19 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { TrendingUp, ArrowLeft, Mail, CheckCircle2 } from "lucide-react";
+import {
+  TrendingUp,
+  ArrowLeft,
+  Mail,
+  CheckCircle2,
+  UserPlus,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Header from "@/components/Layout/User/Header";
 import { useForgotPasswordMutation } from "@/app/services/features/auth/authApi";
-
+import { Nav } from "@/components/Reuse/Nav";
 
 export default function ForgotPasswordPage() {
   const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
@@ -21,23 +27,40 @@ export default function ForgotPasswordPage() {
     setErrorMsg(null);
 
     try {
-      await forgotPassword({ email }).unwrap();
+      const response = await forgotPassword({ email }).unwrap();
+      // Log successful response
+      console.log("✅ Forgot Password Success:", response);
       setIsSubmitted(true);
     } catch (err: any) {
-      setErrorMsg(err?.data?.message || "Something went wrong. Please try again.");
+      // Log the full error object to see the status code and data structure
+      console.error("❌ Forgot Password Error:", {
+        status: err?.status,
+        data: err?.data,
+        fullError: err,
+      });
+
+      setErrorMsg(
+        err?.data?.message || "Something went wrong. Please try again."
+      );
     }
   }
 
   return (
     <div className="min-h-screen bg-[#fcfcfd] dark:bg-zinc-950 text-slate-900 dark:text-slate-50 transition-colors duration-300">
-      <Header onMenuClick={() => {}} />
+      <Nav
+        subtitle="Recover Password"
+        icon={UserPlus}
+        badgeText="We'll send a secure reset link to your email."
+      />
 
       <main className="mx-auto max-w-[540px] px-6 py-20 lg:py-32">
         <div className="mb-10 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/20">
             <TrendingUp className="h-7 w-7 text-primary-foreground" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">Recover Password</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Recover Password
+          </h1>
           <p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">
             We'll send a secure reset link to your email.
           </p>
@@ -47,7 +70,10 @@ export default function ForgotPasswordPage() {
           {!isSubmitted ? (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[13px] font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-400 ml-1">
+                <Label
+                  htmlFor="email"
+                  className="text-[13px] font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-400 ml-1"
+                >
                   Email Address
                 </Label>
                 <div className="relative">
@@ -64,11 +90,17 @@ export default function ForgotPasswordPage() {
                 </div>
               </div>
 
-              <Button disabled={isLoading} className="w-full h-12 rounded-xl bg-primary font-bold shadow-lg shadow-primary/25">
+              <Button
+                disabled={isLoading}
+                className="w-full h-12 rounded-xl bg-primary font-bold shadow-lg shadow-primary/25"
+              >
                 {isLoading ? "Sending link..." : "Send Reset Link"}
               </Button>
 
-              <Link href="/login" className="flex items-center justify-center gap-2 text-sm font-medium text-slate-500 hover:text-primary transition-colors">
+              <Link
+                href="/login"
+                className="flex items-center justify-center gap-2 text-sm font-medium text-slate-500 hover:text-primary transition-colors"
+              >
                 <ArrowLeft className="h-4 w-4" /> Back to Login
               </Link>
             </form>
@@ -82,7 +114,12 @@ export default function ForgotPasswordPage() {
                 A password reset link has been sent to <strong>{email}</strong>.
               </p>
               <Link href="/login">
-                <Button variant="outline" className="mt-6 w-full h-12 rounded-xl">Return to Login</Button>
+                <Button
+                  variant="outline"
+                  className="mt-6 w-full h-12 rounded-xl"
+                >
+                  Return to Login
+                </Button>
               </Link>
             </div>
           )}

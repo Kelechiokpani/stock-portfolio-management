@@ -55,6 +55,7 @@ export default function MarketplacePage() {
 
   const { data, isLoading } = useGetApprovedStocksQuery();
 
+
   // Sync Summary
   useEffect(() => {
     if (data?.summary) {

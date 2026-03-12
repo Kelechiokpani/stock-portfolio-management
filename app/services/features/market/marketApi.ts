@@ -54,19 +54,23 @@ export interface SellPayload {
 /** * NEW: Enhanced Transfers for POST /api/transfers
  * Includes tracking: firstName, lastName, address, phone, and description.
  */
-export interface TransferPayload {
-  portfolioId: string;
+
+export interface TransferAssetItem {
   assetSymbol: string;
   shares: number;
-  toUserEmail: string;
   assetName?: string;
   valueAtTransfer?: number;
-  // Tracking parameters
+}
+
+export interface TransferPayload {
+  portfolioId: string;
+  toUserEmail: string;
+  assets: TransferAssetItem[]; // Changed from single fields to an array
   firstName: string;
   lastName: string;
   address: string;
   phone: string;
-  description: string; // Transfer Instruction
+  description: string;
 }
 
 export const marketApi = baseApi.injectEndpoints({

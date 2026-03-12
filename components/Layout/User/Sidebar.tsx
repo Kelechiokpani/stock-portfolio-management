@@ -27,7 +27,7 @@ const navItems = [
     icon: BarChart2,
   },
 
-  { href: "/dashboard/stocks", label: "Stocks", icon: TrendingUp },
+  { href: "/dashboard/stocks", label: "Stocks Holdings", icon: TrendingUp },
 
   { href: "/dashboard/funds", label: "Funds", icon: PieChart },
 
@@ -73,7 +73,7 @@ export default function Sidebar({ open, onClose }: Props) {
         <div className="flex items-center justify-between h-16 px-4 ">
           {!collapsed && (
             <span className="text-xl font-bold text-foreground tracking-tight">
-              VaultStock
+              <Logo />
             </span>
           )}
 

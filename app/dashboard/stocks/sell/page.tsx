@@ -33,7 +33,7 @@ export default function StockSellCart() {
       }
       toast.success("Assets liquidated successfully.");
       clearCarts();
-      router.push("/dashboard/portfolio"); // Optional: redirect to portfolio after sale
+      // router.push("/dashboard/"); // Optional: redirect to portfolio after sale
     } catch (err: any) {
       toast.error(err?.data?.message || "Execution failure on asset disposal.");
     }

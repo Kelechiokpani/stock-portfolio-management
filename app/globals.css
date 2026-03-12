@@ -11,6 +11,24 @@ body {
     text-wrap: balance;
   }
 }
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
 
 /* Custom Scrollbar */
 @layer components {
@@ -44,20 +62,20 @@ body {
 @layer base {
   :root {
     /* PROFESSIONAL LIGHT THEME */
-    --background: 222 20% 97%;   /* soft off-white with hint of dark blue */
-    --foreground: 222 10% 15%;   /* dark slate for text */
-    --card: 222 18% 95%;         /* subtle card background */
+    --background: 222 20% 97%; /* soft off-white with hint of dark blue */
+    --foreground: 222 10% 15%; /* dark slate for text */
+    --card: 222 18% 95%; /* subtle card background */
     --card-foreground: 222 10% 15%;
-    --primary: 200 90% 50%;      /* accent color */
-    --secondary: 222 12% 88%;    /* secondary muted areas */
-    --muted: 222 15% 80%;        /* lighter muted areas */
-    --border: 222 15% 85%;       /* subtle border */
+    --primary: 200 90% 50%; /* accent color */
+    --secondary: 222 12% 88%; /* secondary muted areas */
+    --muted: 222 15% 80%; /* lighter muted areas */
+    --border: 222 15% 85%; /* subtle border */
     --radius: 0.5rem;
   }
 
   .dark {
     /* DARK THEME (your preferred color) */
-    --background: 222 40% 6%;   /* bg-[#0b0f17] equivalent */
+    --background: 222 40% 6%; /* bg-[#0b0f17] equivalent */
     --foreground: 0 0% 98%;
     --card: 222 35% 10%;
     --card-foreground: 0 0% 98%;
@@ -73,7 +91,6 @@ body {
     @apply bg-background text-foreground;
   }
 }
-
 
 /*@layer base {*/
 /*  :root {*/

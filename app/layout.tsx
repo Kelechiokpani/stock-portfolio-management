@@ -35,7 +35,11 @@ export default function RootLayout({
         />
         <ReduxProvider>
           <CartProvider>
-            <ThemeProvider>{children}</ThemeProvider>
+            <ThemeProvider>
+              <div className="flex flex-col min-h-screen">
+                <main className="flex-grow">{children}</main>
+              </div>
+            </ThemeProvider>
           </CartProvider>
         </ReduxProvider>
         <Toaster position="bottom-right" richColors />
