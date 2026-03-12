@@ -779,7 +779,7 @@ export default function MarketplacePage() {
                   >
                     Liquidate
                   </Button>
-                  <Button
+                  {/* <Button
                     onClick={() =>
                       router.push(`/dashboard/stocks/${asset.assetId}`)
                     }
@@ -788,7 +788,7 @@ export default function MarketplacePage() {
                     className="rounded-xl"
                   >
                     <ArrowUpRight className="w-4 h-4" />
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
             </CardContent>

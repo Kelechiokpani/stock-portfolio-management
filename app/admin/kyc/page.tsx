@@ -33,6 +33,8 @@ export default function KYC_Workbench() {
   const [updateStatus, { isLoading: isUpdating }] =
     useUpdateKycStatusMutation();
 
+  console.log("Fetched KYC Data:", usersData);
+
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [activeStepId, setActiveStepId] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
