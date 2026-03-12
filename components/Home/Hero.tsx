@@ -10,9 +10,9 @@ export const Hero = () => {
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/5 text-primary rounded border border-primary/10 text-[9px] font-black uppercase tracking-[0.2em]">
           <Star size={10} fill="currentColor" /> Market Leader 2026
         </div>
-        <h1 className="text-4xl xl:text-5xl font-black tracking-tight leading-[1.1]">
+        <h1 className="text-4xl xl:text-5xl font-black tracking-tight leading-[2.1]">
           Invest with <br />
-          <span className="text-primary italic">Institutional</span> <br />
+          <span className="text-primary mt-3 mr-3">Institutional</span>
           Precision.
         </h1>
         <p className="text-base text-muted-foreground max-w-[460px] leading-relaxed font-medium">
