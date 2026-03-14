@@ -1,14 +1,38 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Lock, Eye, EyeOff, CheckCircle2, UserPlus } from "lucide-react";
+import {
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  ShieldCheck,
+  ChevronRight,
+  TrendingUp,
+  Star,
+  RefreshCcw,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Header from "@/components/Layout/User/Header";
 import { useResetPasswordMutation } from "@/app/services/features/auth/authApi";
-import { Nav } from "./Reuse/Nav";
+import { toast } from "sonner";
+
+const slides = [
+  {
+    image:
+      "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=2070&auto=format&fit=crop",
+    title: "Secure Access",
+    desc: "Update your credentials through our encrypted gateway to maintain portfolio integrity.",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop",
+    title: "Advanced Encryption",
+    desc: "Every credential update is backed by high-standard cryptographic protocols.",
+  },
+];
 
 export default function ResetPassword() {
   const router = useRouter();
@@ -17,145 +41,215 @@ export default function ResetPassword() {
 
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
 
-  // Separate visibility states for each field
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
   const [passwords, setPasswords] = useState({ password: "", confirm: "" });
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(
+      () =>
+        setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1)),
+      8000
+    );
+    return () => clearInterval(timer);
+  }, []);
+
+  const isPasswordSecure = passwords.password.length >= 8;
+  const doPasswordsMatch =
+    passwords.password === passwords.confirm && passwords.password !== "";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
 
-    if (passwords.password !== passwords.confirm) {
-      setErrorMsg("Passwords do not match.");
+    if (!doPasswordsMatch) {
+      setErrorMsg("Security confirmation: Passwords do not match.");
       return;
     }
 
     if (!token) {
-      setErrorMsg("Invalid or missing reset token. Please request a new link.");
+      setErrorMsg(
+        "Authentication token expired or missing. Please re-initiate recovery."
+      );
       return;
     }
 
     try {
       await resetPassword({ token, newPassword: passwords.password }).unwrap();
       setIsSuccess(true);
+      toast.success("Credentials updated successfully.");
       setTimeout(() => router.push("/login"), 3000);
     } catch (err: any) {
-      setErrorMsg(err?.data?.message || "Failed to reset password.");
+      setErrorMsg(
+        err?.data?.message || "Protocol error: Failed to reset credentials."
+      );
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#fcfcfd] dark:bg-zinc-950 text-slate-900 dark:text-slate-50 transition-colors duration-300">
-      <Nav
-        subtitle="Reset Password"
-        icon={UserPlus}
-        badgeText="Enter your new password to regain access to your account."
-      />
+    <div className="flex min-h-screen bg-white dark:bg-zinc-950">
+      {/* Left: Branding & Context Slide */}
+      <div className="relative hidden w-[40%] overflow-hidden lg:block border-r border-zinc-100 dark:border-zinc-900">
+        {slides.map((slide, i) => (
+          <div
+            key={i}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              i === currentSlide ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <div className="absolute inset-0 z-10 bg-gradient-to-t from-blue-950 via-zinc-950/40 to-transparent" />
+            <img
+              src={slide.image}
+              className="h-full w-full object-cover grayscale-[0.2]"
+              alt="Security"
+            />
+            <div className="absolute bottom-20 left-12 z-20 max-w-sm space-y-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg">
+                <RefreshCcw size={28} />
+              </div>
+              <h2 className="text-4xl font-black italic tracking-tighter text-white font-serif">
+                {slide.title}
+              </h2>
+              <p className="text-zinc-300 text-lg font-medium">{slide.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
 
-      <main className="mx-auto max-w-[540px] px-6 py-20 lg:py-32">
-        <div className="mb-10 text-center">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Set New Password
-          </h1>
-          <p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">
-            Please enter your new secure password below.
-          </p>
-        </div>
-
-        <div className="rounded-3xl border border-slate-200/60 bg-white p-8 shadow-xl shadow-slate-200/50 dark:border-zinc-800/50 dark:bg-zinc-900/50 dark:shadow-none">
+      {/* Right: Reset Form */}
+      <main className="flex w-full flex-col lg:w-[80%] justify-center pt-8">
+        <div className="mx-auto w-full max-w-lg px-8 py-12">
           {!isSuccess ? (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* New Password Field */}
+            <div className="space-y-10 animate-in fade-in slide-in-from-right-8 duration-700">
               <div className="space-y-2">
-                <Label className="text-[13px] font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-400 ml-1">
-                  New Password
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="h-12 rounded-xl border-slate-200 bg-slate-50/50 pl-11 pr-11 transition-all focus:bg-white focus:ring-2 focus:ring-primary/20 dark:border-zinc-800 dark:bg-zinc-950"
-                    value={passwords.password}
-                    onChange={(e) =>
-                      setPasswords({ ...passwords, password: e.target.value })
-                    }
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
+                <div className="flex items-center gap-2 text-[10px] pt-6 font-black uppercase tracking-[0.3em] text-blue-600">
+                  Security Terminal <ChevronRight size={12} />{" "}
+                  <span className="text-zinc-400">Credential Reset</span>
                 </div>
+                <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-white">
+                  Set New Password.
+                </h1>
+                <p className="text-zinc-500 font-medium">
+                  Define a new high-entropy password for your account.
+                </p>
               </div>
 
-              {/* Confirm Password Field */}
-              <div className="space-y-2">
-                <Label className="text-[13px] font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-400 ml-1">
-                  Confirm Password
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <Input
-                    type={showConfirm ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="h-12 rounded-xl border-slate-200 bg-slate-50/50 pl-11 pr-11 transition-all focus:bg-white focus:ring-2 focus:ring-primary/20 dark:border-zinc-800 dark:bg-zinc-950"
-                    value={passwords.confirm}
-                    onChange={(e) =>
-                      setPasswords({ ...passwords, confirm: e.target.value })
-                    }
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
-                  >
-                    {showConfirm ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
+              <form onSubmit={handleSubmit} className="space-y-6 pt-6">
+                <div className="space-y-2">
+                  <Label className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-1">
+                    New Password
+                  </Label>
+                  <div className="relative mt-4">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 h-4 w-4" />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      className="h-14 rounded-2xl border-zinc-200 bg-zinc-50/50 pl-12 pr-12 transition-all focus:bg-white focus:ring-4 focus:ring-blue-500/10 dark:border-zinc-800 dark:bg-zinc-900/50"
+                      value={passwords.password}
+                      onChange={(e) =>
+                        setPasswords({ ...passwords, password: e.target.value })
+                      }
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-blue-500"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  {passwords.password && (
+                    <div className="flex items-center gap-2 mt-2 ml-1">
+                      <div
+                        className={`h-1 flex-1 rounded-full ${
+                          isPasswordSecure ? "bg-emerald-500" : "bg-zinc-200"
+                        }`}
+                      />
+                      <p
+                        className={`text-[10px] font-bold uppercase tracking-tighter ${
+                          isPasswordSecure
+                            ? "text-emerald-500"
+                            : "text-zinc-400"
+                        }`}
+                      >
+                        {isPasswordSecure
+                          ? "Secure Entropy"
+                          : "Min 8 Characters"}
+                      </p>
+                    </div>
+                  )}
                 </div>
-              </div>
 
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full h-12 rounded-xl bg-primary font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:scale-[1.01] active:scale-100"
-              >
-                {isLoading ? "Updating Password..." : "Update Password"}
-              </Button>
-            </form>
+                <div className="space-y-2">
+                  <Label className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-1">
+                    Confirm Identity Key
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 h-4 w-4" />
+                    <Input
+                      type={showConfirm ? "text" : "password"}
+                      placeholder="••••••••"
+                      className="h-14 rounded-2xl border-zinc-200 bg-zinc-50/50 pl-12 pr-12 transition-all focus:bg-white focus:ring-4 focus:ring-blue-500/10 dark:border-zinc-800 dark:bg-zinc-900/50"
+                      value={passwords.confirm}
+                      onChange={(e) =>
+                        setPasswords({ ...passwords, confirm: e.target.value })
+                      }
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm(!showConfirm)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-blue-500"
+                    >
+                      {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={isLoading || !isPasswordSecure || !doPasswordsMatch}
+                  className="w-full h-14 rounded-2xl bg-blue-600 font-black uppercase tracking-widest text-white shadow-xl shadow-blue-500/25 transition-all hover:translate-y-[-2px]"
+                >
+                  {isLoading ? "Encrypting Update..." : "Update Credentials"}
+                </Button>
+              </form>
+            </div>
           ) : (
-            <div className="text-center py-4 animate-in fade-in zoom-in-95 duration-500">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-                <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
+            <div className="text-center space-y-8 animate-in zoom-in-95 duration-700">
+              <div className="mx-auto w-28 h-28 bg-emerald-500/10 rounded-[3rem] flex items-center justify-center border border-emerald-500/20 shadow-2xl">
+                <ShieldCheck className="h-14 w-14 text-emerald-500" />
               </div>
-              <h2 className="text-xl font-bold">Password Updated!</h2>
-              <p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">
-                Your security is our priority. Redirecting to login...
-              </p>
+              <div className="space-y-4">
+                <h2 className="text-4xl font-black tracking-tighter">
+                  Identity Verified.
+                </h2>
+                <p className="text-zinc-500 font-medium max-w-sm mx-auto">
+                  Your password has been successfully updated. Transitioning to
+                  login terminal...
+                </p>
+              </div>
             </div>
           )}
 
           {errorMsg && (
-            <div className="mt-6 flex items-center gap-3 rounded-xl bg-red-50 p-4 text-sm font-medium text-red-600 dark:bg-red-950/30 dark:text-red-400">
+            <div className="mt-8 p-4 rounded-2xl bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 text-xs font-bold flex items-center gap-3">
+              <Star size={14} fill="currentColor" className="shrink-0" />{" "}
               {errorMsg}
             </div>
           )}
+        </div>
+
+        {/* Dynamic Footer Status */}
+        <div className="mt-auto border-t border-zinc-100 dark:border-zinc-900 p-8 flex justify-between items-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+          <div className="flex items-center gap-2">
+            <Lock size={12} className="text-blue-600" /> AES-256 Protected
+          </div>
+          <div className="hidden sm:block">Session Status: Active</div>
         </div>
       </main>
     </div>

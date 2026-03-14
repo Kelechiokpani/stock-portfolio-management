@@ -18,9 +18,10 @@ export interface MarketResponse {
 // --- Updated Transaction Interfaces ---
 
 export interface FundPayload {
+  userId: string;
+  fullName: string;
   amount: number;
   method: string;
-  currency?: string;
   description?: string;
 }
 
@@ -73,33 +74,31 @@ export interface TransferPayload {
   description: string;
 }
 
+export interface Message {
+  id: string;
+  sender: "user" | "admin";
+  text: string;
+  timestamp: string;
+  conversationId: string;
+}
+
+export interface SendMessagePayload {
+  text: string;
+  recipientId?: string;
+}
+
+export interface ChatActionResponse {
+  success: boolean;
+  message: string;
+  data?: Message;
+}
+
 export const marketApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Existing Query
     getApprovedStocks: builder.query<MarketResponse, void>({
       query: () => "/market/approved",
       providesTags: ["Market"],
-    }),
-
-    // 1. Funds Management
-    depositFunds: builder.mutation<any, FundPayload>({
-      query: (body) => ({
-        url: "/funds/deposit",
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: ["UserBalance", "Transactions"],
-    }),
-
-    withdrawFunds: builder.mutation<any, WithdrawalPayload>({
-      query: (body) => ({
-        url: "/funds/withdrawal",
-        method: "POST",
-        body,
-      }),
-      // Invalidating "User" is key here because the 3-strike logic
-      // updates the user's "requiresResettlementAccount" flag.
-      invalidatesTags: ["UserBalance", "Transactions", "User"],
     }),
 
     // 2. Investment Operations
@@ -129,6 +128,57 @@ export const marketApi = baseApi.injectEndpoints({
         body,
       }),
       invalidatesTags: ["Portfolio", "Transactions"],
+    }),
+
+    // 1. Funds Management
+    depositFunds: builder.mutation<any, FundPayload>({
+      query: (body) => ({
+        url: "/funds/deposit",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["UserBalance", "Transactions"],
+    }),
+
+    withdrawFunds: builder.mutation<any, WithdrawalPayload>({
+      query: (body) => ({
+        url: "/funds/withdrawal",
+        method: "POST",
+        body,
+      }),
+      // Invalidating "User" is key here because the 3-strike logic
+      // updates the user's "requiresResettlementAccount" flag.
+      invalidatesTags: ["UserBalance", "Transactions", "User"],
+    }),
+
+    //  Support & Ticketing
+    // 1. User: Get their own chat history
+    getChatHistory: builder.query<Message[], void>({
+      query: () => "/support/chat",
+      providesTags: ["Messages"],
+    }),
+
+    // 2. Admin: Get a specific user's chat history
+    getChatByUserId: builder.query<Message[], string>({
+      query: (userId) => `/support/admin/chat/${userId}`,
+      providesTags: (result, error, userId) => [
+        { type: "Messages" as const, id: userId },
+      ],
+    }),
+
+    // 3. Shared: Send message
+    sendMessage: builder.mutation<ChatActionResponse, SendMessagePayload>({
+      query: (body) => ({
+        url: "/support/chat/send",
+        method: "POST",
+        body,
+      }),
+      // Logic: If recipientId exists, it's an admin reply; invalidate that specific user's tag.
+      // Otherwise, it's a user message; invalidate the general message tag.
+      invalidatesTags: (result, error, { recipientId }) =>
+        recipientId
+          ? [{ type: "Messages" as const, id: recipientId }]
+          : ["Messages"],
     }),
   }),
 });

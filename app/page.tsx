@@ -32,19 +32,19 @@ import { Trackers } from "@/components/Home/Trackers";
 import HomeLayout from "@/components/Layout/Layout";
 import { AssetAllocation } from "@/components/Home/AssetAllocation";
 import { YieldCalculator } from "@/components/Home/YieldCalculator";
+import { HomeCarousel } from "@/components/Home/HomeCarousel";
 
 export default function EquityFlowHome() {
   return (
     <HomeLayout>
       <div className="min-h-screen bg-[#fafafa] dark:bg-[#09090b] text-foreground font-sans selection:bg-primary/10">
         <Markets_Chart />
-
-        <Hero />
+        <HomeCarousel />
 
         <YieldCalculator />
 
         <Analysis />
-
+        <Hero />
         <Feature />
 
         <AssetAllocation />

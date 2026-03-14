@@ -36,6 +36,8 @@ export default function KYC_Workbench() {
   const [updateStatus, { isLoading: isUpdating }] =
     useUpdateKycStatusMutation();
 
+  console.log("Fetched KYC Data:", usersData); // Debug log to check data structure
+
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [activeStepId, setActiveStepId] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -106,6 +108,8 @@ export default function KYC_Workbench() {
     () => userSteps.find((s: any) => s.id === activeStepId),
     [userSteps, activeStepId]
   );
+
+  console.log("Current Step Data:", currentStepData); // Debug log to check step data
 
   const handleApproveStep = async () => {
     if (!selectedUserId) return;
@@ -252,16 +256,26 @@ export default function KYC_Workbench() {
                         : "grid-cols-1"
                     }`}
                   >
-                    {currentStepData.docs.map((url: string, idx: number) => (
+                    {currentStepData?.docs?.map((url: string, idx: number) => (
                       <div key={idx} className="space-y-3">
-                        <div className="aspect-[4/3] bg-white rounded-2xl shadow-lg border-4 border-white overflow-hidden group">
+                        <div className="aspect-[4/3] bg-white dark:bg-slate-800 rounded-2xl shadow-lg border-4 border-white dark:border-slate-700 overflow-hidden group relative">
                           <img
                             src={url}
-                            alt="KYC"
+                            alt={`KYC ${idx === 0 ? "Front" : "Back"}`}
                             className="w-full h-full object-cover transition-transform group-hover:scale-110 cursor-zoom-in"
                           />
+                          {/* Optional: Overlay button to open in new tab */}
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <a
+                              href={url}
+                              target="_blank"
+                              className="text-white text-[10px] font-bold uppercase tracking-tighter bg-blue-600 px-3 py-1.5 rounded-full"
+                            >
+                              View Full Size
+                            </a>
+                          </div>
                         </div>
-                        <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <p className="text-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                           {idx === 0 ? "Front Page" : "Back Page"}
                         </p>
                       </div>

@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   TrendingUp,
-  CheckCircle2,
   User,
   Building2,
   Heart,
@@ -12,47 +11,58 @@ import {
   ChevronLeft,
   MailCheck,
   Smartphone,
-  ClipboardList,
   ShieldCheck,
-  Calendar,
-  UserPlus,
-  ArrowLeft,
+  Star,
+  Lock,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
-import Header from "@/components/Layout/User/Header";
 import { useRegisterMutation } from "@/app/services/features/auth/authApi";
 import { toast } from "sonner";
-import { Nav } from "@/components/Reuse/Nav";
+
+const slides = [
+  {
+    image:
+      "https://images.unsplash.com/photo-1554469384-e58fac16e23a?q=80&w=1974&auto=format&fit=crop",
+    title: "Institutional Wealth",
+    desc: "Join an ecosystem of elite investors and corporate entities.",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1454165833767-027ffea9e77b?q=80&w=2070&auto=format&fit=crop",
+    title: "Global Compliance",
+    desc: "Our rigorous onboarding ensures the highest standards of portfolio security.",
+  },
+];
 
 const accountTypes = [
   {
     id: "personal",
     title: "Personal",
-    desc: "For individual investors",
+    desc: "Individual wealth management",
     icon: <User className="w-5 h-5" />,
   },
   {
     id: "business",
     title: "Business",
-    desc: "Corporate entity accounts",
+    desc: "Corporate entity structures",
     icon: <Building2 className="w-5 h-5" />,
   },
   {
     id: "non-profit",
     title: "Non-Profit",
-    desc: "Charitable organizations",
+    desc: "Charitable & Endowment funds",
     icon: <Heart className="w-5 h-5" />,
   },
 ];
 
 export default function RequestAccountPage() {
-  const [register, { isLoading }] = useRegisterMutation(); // API Hook
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [register, { isLoading }] = useRegisterMutation();
   const [step, setStep] = useState(1);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [successData, setSuccessData] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -67,15 +77,51 @@ export default function RequestAccountPage() {
     note: "",
   });
 
+  // Slide Effect
+  useEffect(() => {
+    const timer = setInterval(
+      () =>
+        setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1)),
+      8000
+    );
+    return () => clearInterval(timer);
+  }, []);
+
+  // Validation Logic
+  const isStepValid = () => {
+    switch (step) {
+      case 1:
+        return !!form.accountType;
+      case 2:
+        const ageLimit = new Date();
+        ageLimit.setFullYear(ageLimit.getFullYear() - 18);
+        return (
+          form.firstName.length >= 2 &&
+          form.lastName.length >= 2 &&
+          !!form.dob &&
+          new Date(form.dob) <= ageLimit
+        );
+      case 3:
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+      case 4:
+        return form.phone.replace(/\D/g, "").length >= 10;
+      case 5:
+        return form.note.trim().length >= 20;
+      default:
+        return true;
+    }
+  };
+
   const nextStep = async () => {
     if (step === 5) {
       try {
         const response = await register(form).unwrap();
         setSuccessData(response);
         setStep(6);
+        toast.success("Application Successfully");
       } catch (err: any) {
-        console.log("Registration failed:", err);
-        const message = err?.data?.error || "An unexpected error occurred.";
+        const message =
+          err?.data?.error || "Registration failed. Please try again.";
         setErrorMsg(message);
         toast.error(message);
       }
@@ -84,271 +130,297 @@ export default function RequestAccountPage() {
     }
   };
 
-  const prevStep = () => setStep((prev) => prev - 1);
-
-  const isStepValid = () => {
-    if (step === 1) return !!form.accountType;
-    if (step === 2) return !!form.firstName && !!form.lastName && !!form.dob;
-    if (step === 3) return form.email.includes("@") && form.email.length > 5;
-    if (step === 4) return form.phone.length > 7;
-    return true;
-  };
-
   return (
-    <div className="min-h-screen bg-[rgb(252,252,253)] dark:bg-zinc-950 text-slate-900 dark:text-slate-50 transition-colors duration-300">
-      <Nav
-        subtitle="Registration"
-        icon={UserPlus}
-        badgeText="New User Account Request"
-      />
+    <div className="flex min-h-screen bg-white dark:bg-zinc-950">
+      {/* LEFT: VISUAL NARRATIVE */}
+      <div className="relative hidden w-[40%] overflow-hidden lg:block border-r border-zinc-100 dark:border-zinc-900">
+        {slides.map((slide, i) => (
+          <div
+            key={i}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              i === currentSlide ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <div className="absolute inset-0 z-10 bg-gradient-to-t from-blue-950 via-zinc-950/40 to-transparent" />
+            <img
+              src={slide.image}
+              className="h-full w-full object-cover grayscale-[0.2]"
+              alt="Vaulting"
+            />
+            <div className="absolute bottom-20 left-12 z-20 max-w-sm space-y-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg">
+                <TrendingUp size={28} />
+              </div>
+              <h2 className="text-4xl font-black italic tracking-tighter text-white font-serif">
+                {slide.title}
+              </h2>
+              <p className="text-zinc-300 text-lg font-medium">{slide.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
 
-      <main className="mx-auto max-w-2xl px-6 py-16 lg:py-24">
-        {step < 6 ? (
-          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
-            {/* Elegant Progress Bar */}
-            <div className="relative flex justify-between items-center px-2">
-              <div className="absolute top-1/2 left-0 w-full h-[2px] bg-slate-200 dark:bg-zinc-800 -translate-y-1/2 z-0" />
-              <div
-                className="absolute top-1/2 left-0 h-[2px] bg-primary transition-all duration-500 -translate-y-1/2 z-0"
-                style={{ width: `${(step - 1) * 25}%` }}
-              />
-              {[1, 2, 3, 4, 5].map((s) => (
-                <div key={s} className="relative z-10">
-                  <div
-                    className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all duration-300 ${
-                      step >= s
-                        ? "bg-primary border-primary text-white shadow-lg shadow-primary/30 scale-110"
-                        : "bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-400"
-                    }`}
-                  >
-                    {step > s ? <CheckCircle2 className="w-5 h-5" /> : s}
-                  </div>
+      {/* RIGHT: INTERACTIVE PORTAL */}
+      <main className="flex w-full flex-col lg:w-[60%]">
+        <div className="mx-auto w-full max-w-xl px-6 py-12 lg:py-24">
+          {step < 6 ? (
+            <div className="space-y-12 animate-in fade-in slide-in-from-right-8 duration-700">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-blue-600">
+                  Step 0{step} <ChevronRight size={12} />{" "}
+                  <span className="text-zinc-400">Application</span>
                 </div>
-              ))}
-            </div>
+                <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-white">
+                  {step === 1 && "Select Portfolio Type"}
+                  {step === 2 && "Identity Particulars"}
+                  {step === 3 && "Contact Channel"}
+                  {step === 4 && "Verification Link"}
+                  {step === 5 && "Executive Brief"}
+                </h1>
+              </div>
 
-            <div className="text-center space-y-2">
-              <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-                {step === 1 && "Select Account Type"}
-                {step === 2 && "Personal Details"}
-                {step === 3 && "Email Address"}
-                {step === 4 && "Phone Number"}
-                {step === 5 && "Final Remarks"}
-              </h1>
-              <p className="text-slate-500 dark:text-zinc-400 font-medium">
-                Step {step} of 5 — Secure Application Process
-              </p>
-            </div>
+              {/* Progress Bar */}
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <div
+                    key={s}
+                    className={`h-1 flex-1 rounded-full transition-all duration-500 ${
+                      step >= s ? "bg-blue-600" : "bg-zinc-100 dark:bg-zinc-800"
+                    }`}
+                  />
+                ))}
+              </div>
 
-            <Card className="p-8 border-slate-200/60 dark:border-zinc-800/50 bg-white/70 dark:bg-zinc-900/50 shadow-2xl shadow-slate-200/50 dark:shadow-none backdrop-blur-xl rounded-[2rem]">
-              {/* STEP 1: Account Type */}
-              {step === 1 && (
-                <div className="grid gap-4">
-                  {accountTypes.map((type) => (
-                    <button
-                      key={type.id}
-                      onClick={() => setForm({ ...form, accountType: type.id })}
-                      className={`group flex items-center gap-5 p-5 rounded-2xl border-2 transition-all ${
-                        form.accountType === type.id
-                          ? "border-primary bg-primary/5 ring-4 ring-primary/10"
-                          : "border-slate-100 dark:border-zinc-800 hover:border-primary/40 bg-slate-50/50 dark:bg-zinc-950/50"
-                      }`}
-                    >
-                      <div
-                        className={`p-4 rounded-xl transition-colors ${
+              <div className="min-h-[420px]">
+                {/* STEP 1 */}
+                {step === 1 && (
+                  <div className="grid gap-4">
+                    {accountTypes.map((type) => (
+                      <button
+                        key={type.id}
+                        onClick={() =>
+                          setForm({ ...form, accountType: type.id })
+                        }
+                        className={`group flex items-center gap-6 p-6 rounded-3xl border-2 transition-all ${
                           form.accountType === type.id
-                            ? "bg-primary text-white"
-                            : "bg-white dark:bg-zinc-900 text-slate-400 group-hover:text-primary"
+                            ? "border-blue-600 bg-blue-50/30 ring-4 ring-blue-500/5 dark:bg-blue-500/5"
+                            : "border-zinc-100 dark:border-zinc-900 hover:border-zinc-200"
                         }`}
                       >
-                        {type.icon}
-                      </div>
-                      <div className="text-left">
-                        <p className="font-bold text-lg">{type.title}</p>
-                        <p className="text-sm text-slate-500 dark:text-zinc-400">
-                          {type.desc}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
+                        <div
+                          className={`p-4 rounded-2xl transition-all ${
+                            form.accountType === type.id
+                              ? "bg-blue-600 text-white shadow-lg"
+                              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
+                          }`}
+                        >
+                          {type.icon}
+                        </div>
+                        <div className="text-left">
+                          <p
+                            className={`font-bold text-lg ${
+                              form.accountType === type.id
+                                ? "text-blue-600"
+                                : ""
+                            }`}
+                          >
+                            {type.title}
+                          </p>
+                          <p className="text-sm text-zinc-500">{type.desc}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
 
-              {/* STEP 2: Details */}
-              {step === 2 && (
-                <div className="space-y-6">
-                  <div className="grid gap-6 sm:grid-cols-2">
+                {/* STEP 2 */}
+                {step === 2 && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+                          First Name
+                        </Label>
+                        <Input
+                          value={form.firstName}
+                          onChange={(e) =>
+                            setForm({ ...form, firstName: e.target.value })
+                          }
+                          className="h-14 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/50"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+                          Last Name
+                        </Label>
+                        <Input
+                          value={form.lastName}
+                          onChange={(e) =>
+                            setForm({ ...form, lastName: e.target.value })
+                          }
+                          className="h-14 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/50"
+                        />
+                      </div>
+                    </div>
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
-                        First Name
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+                        Date of Birth
                       </Label>
                       <Input
-                        value={form.firstName}
+                        type="date"
+                        value={form.dob}
                         onChange={(e) =>
-                          setForm({ ...form, firstName: e.target.value })
+                          setForm({ ...form, dob: e.target.value })
                         }
-                        placeholder="John"
-                        className="h-12 rounded-xl bg-slate-50/50 dark:bg-zinc-950/50 border-slate-200"
+                        className="h-14 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/50"
                       />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
-                        Middle Name
-                      </Label>
-                      <Input
-                        value={form.middleName}
-                        onChange={(e) =>
-                          setForm({ ...form, middleName: e.target.value })
-                        }
-                        placeholder=""
-                        className="h-12 rounded-xl bg-slate-50/50 dark:bg-zinc-950/50 border-slate-200"
-                      />
+                      {form.dob &&
+                        new Date(form.dob) >
+                          new Date(
+                            new Date().setFullYear(
+                              new Date().getFullYear() - 18
+                            )
+                          ) && (
+                          <p className="text-[10px] text-red-500 font-bold uppercase mt-2">
+                            Required: 18+ years of age
+                          </p>
+                        )}
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
-                      Last Name
-                    </Label>
-                    <Input
-                      value={form.lastName}
-                      onChange={(e) =>
-                        setForm({ ...form, lastName: e.target.value })
-                      }
-                      placeholder="Doe"
-                      className="h-12 rounded-xl bg-slate-50/50 dark:bg-zinc-950/50 border-slate-200"
-                    />
-                  </div>
-                  <div className="space-y-2 relative">
-                    <Label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
-                      Date of Birth
-                    </Label>
-                    <Input
-                      type="date"
-                      value={form.dob}
-                      onChange={(e) =>
-                        setForm({ ...form, dob: e.target.value })
-                      }
-                      className="h-12 rounded-xl bg-slate-50/50 dark:bg-zinc-950/50 border-slate-200"
-                    />
-                    <div className="flex items-center gap-2 mt-2 ml-1">
-                      <ShieldCheck className="w-3 h-3 text-emerald-500" />
-                      <p className="text-[10px] text-slate-400 font-medium italic">
-                        Identity verification required for age 18+.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
+                )}
 
-              {/* STEP 3 & 4 (Combined Style) */}
-              {(step === 3 || step === 4) && (
-                <div className="space-y-8 py-4">
-                  <div className="mx-auto w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center animate-pulse">
-                    {step === 3 ? (
-                      <MailCheck className="text-primary w-10 h-10" />
-                    ) : (
-                      <Smartphone className="text-primary w-10 h-10" />
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">
-                      {step === 3 ? "Email Address" : "Phone Number"}
-                    </Label>
+                {/* STEP 3 & 4 */}
+                {(step === 3 || step === 4) && (
+                  <div className="space-y-8">
+                    <div className="p-8 bg-blue-50/50 dark:bg-blue-500/5 rounded-[2.5rem] border border-blue-100 dark:border-blue-900/30 flex items-center justify-center">
+                      {step === 3 ? (
+                        <MailCheck className="text-blue-600 w-12 h-12" />
+                      ) : (
+                        <Smartphone className="text-blue-600 w-12 h-12" />
+                      )}
+                    </div>
                     <Input
                       type={step === 3 ? "email" : "tel"}
                       value={step === 3 ? form.email : form.phone}
+                      placeholder={
+                        step === 3
+                          ? "name@institutional.com"
+                          : "+1 (XXX) XXX-XXXX"
+                      }
                       onChange={(e) =>
                         setForm({
                           ...form,
                           [step === 3 ? "email" : "phone"]: e.target.value,
                         })
                       }
-                      placeholder={
-                        step === 3 ? "name@company.com" : "+1 (555) 000-0000"
-                      }
-                      className="h-14 text-lg rounded-xl bg-slate-50/50 dark:bg-zinc-950/50 border-slate-200"
+                      className="h-16 text-xl font-medium rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/50 text-center"
                     />
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* STEP 5: Note */}
-              {step === 5 && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-zinc-950 rounded-2xl border border-slate-100 dark:border-zinc-800">
-                    <ClipboardList className="text-primary w-6 h-6" />
-                    <p className="text-sm font-medium">
-                      Investment Objectives & Notes
-                    </p>
+                {/* STEP 5 */}
+                {step === 5 && (
+                  <div className="space-y-4">
+                    <Textarea
+                      value={form.note}
+                      onChange={(e) =>
+                        setForm({ ...form, note: e.target.value })
+                      }
+                      placeholder="Briefly state your primary investment objectives..."
+                      className="h-60 rounded-[2rem] bg-zinc-50/50 dark:bg-zinc-900/50 p-6 resize-none"
+                    />
+                    <div className="flex justify-between px-2 text-[10px] font-bold uppercase tracking-widest">
+                      <span
+                        className={
+                          form.note.length >= 20
+                            ? "text-emerald-500"
+                            : "text-zinc-400"
+                        }
+                      >
+                        Min 20 characters
+                      </span>
+                      <span className="text-zinc-400">
+                        {form.note.length}/500
+                      </span>
+                    </div>
                   </div>
-                  <Textarea
-                    value={form.note}
-                    onChange={(e) => setForm({ ...form, note: e.target.value })}
-                    placeholder="Briefly describe your interest in VaultStock..."
-                    className="min-h-[180px] rounded-2xl bg-slate-50/50 dark:bg-zinc-950/50 border-slate-200 p-4 resize-none focus:ring-primary/20"
-                  />
-                </div>
-              )}
+                )}
+              </div>
 
-              {/* Action Buttons */}
-              <div className="mt-10 flex gap-4">
+              {/* NAV BUTTONS */}
+              <div className="flex items-center gap-4 pt-8">
                 {step > 1 && (
                   <Button
                     variant="ghost"
-                    onClick={prevStep}
-                    className="h-12 px-6 rounded-xl font-bold text-slate-500 hover:bg-slate-100"
+                    onClick={() => setStep((s) => s - 1)}
+                    className="h-14 px-8 rounded-2xl font-bold text-zinc-400"
                   >
-                    <ChevronLeft className="w-5 h-5 mr-1" /> Back
+                    <ChevronLeft className="mr-2" /> Back
                   </Button>
                 )}
                 <Button
                   onClick={nextStep}
                   disabled={!isStepValid() || isLoading}
-                  className="flex-1 h-12 rounded-xl bg-primary text-white font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+                  className={`flex-1 h-14 rounded-2xl font-black uppercase tracking-widest transition-all ${
+                    isStepValid()
+                      ? "bg-blue-600 text-white shadow-xl shadow-blue-500/30 hover:translate-y-[-2px]"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
+                  }`}
                 >
                   {isLoading
-                    ? "Processing..."
+                    ? "Authenticating..."
                     : step === 5
                     ? "Submit Application"
-                    : "Continue"}
-                  {!isLoading && <ChevronRight className="ml-1 w-5 h-5" />}
+                    : "Next Phase"}
+                  {!isLoading && isStepValid() && (
+                    <ChevronRight className="ml-2" />
+                  )}
+                  {!isLoading && !isStepValid() && (
+                    <Lock className="ml-2 w-4 h-4 opacity-30" />
+                  )}
                 </Button>
               </div>
-            </Card>
-          </div>
-        ) : (
-          /* SUCCESS STATE */
-          <div className="text-center py-10 animate-in zoom-in-95 duration-700">
-            <div className="mx-auto w-24 h-24 bg-emerald-500/10 rounded-[2.5rem] flex items-center justify-center mb-8 border border-emerald-500/20 shadow-2xl shadow-emerald-500/10">
-              <CheckCircle2 className="h-12 w-12 text-emerald-500 animate-in spin-in-12 duration-1000" />
+              {errorMsg && (
+                <p className="text-center text-xs text-red-500 font-bold">
+                  {errorMsg}
+                </p>
+              )}
             </div>
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-white">
-              Application Received
-            </h1>
-            <p className="mt-6 text-lg text-slate-500 dark:text-zinc-400 leading-relaxed max-w-sm mx-auto">
-              Our compliance team has received your request for an account.
-            </p>
-
-            <div className="mt-10 p-6 rounded-[2rem] bg-slate-50 dark:bg-zinc-900/50 border border-slate-200/50 dark:border-zinc-800 text-sm italic text-slate-500">
-              {successData?.message ||
-                "Your application has been submitted successfully."}
-            </div>
-
-            {errorMsg && (
-              <div className="mt-6 flex items-center gap-3 rounded-xl bg-red-50 p-4 text-sm font-medium text-red-600 dark:bg-red-950/30 dark:text-red-400 animate-in fade-in zoom-in-95">
-                {errorMsg}
+          ) : (
+            /* SUCCESS VIEW */
+            <div className="text-center space-y-8 animate-in zoom-in-95 duration-700">
+              <div className="mx-auto w-28 h-28 bg-emerald-500/10 rounded-[3rem] flex items-center justify-center border border-emerald-500/20 shadow-2xl">
+                <CheckCircle2 className="h-14 w-14 text-emerald-500" />
               </div>
-            )}
+              <div className="space-y-4">
+                <h2 className="text-4xl font-black tracking-tighter">
+                  Application Logged.
+                </h2>
+                <p className="text-zinc-500 font-medium max-w-sm mx-auto">
+                  Compliance officers will review your credentials and contact
+                  you via {form.email} within 24 hours.
+                </p>
+              </div>
+              <Button
+                asChild
+                className="h-14 px-12 rounded-2xl bg-zinc-900 text-white font-bold"
+              >
+                <Link href="/">Exit Terminal</Link>
+              </Button>
+            </div>
+          )}
+        </div>
 
-            <Button
-              size="lg"
-              className="mt-12 w-full rounded-2xl shadow-xl shadow-primary/20"
-              asChild
-            >
-              <Link href="/">Return to Home</Link>
-            </Button>
+        {/* FOOTER */}
+        <div className="mt-auto border-t border-zinc-100 dark:border-zinc-900 p-8 flex justify-between items-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+          <div className="flex items-center gap-2">
+            <ShieldCheck size={14} className="text-blue-600" /> End-to-End
+            Secure
           </div>
-        )}
+          <div>
+            Portal ID: {Math.random().toString(36).substring(7).toUpperCase()}
+          </div>
+        </div>
       </main>
     </div>
   );

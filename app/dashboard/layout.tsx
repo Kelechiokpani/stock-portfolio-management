@@ -5,6 +5,7 @@ import Header from "@/components/Layout/User/Header";
 import { useGetMeQuery } from "../services/features/auth/authApi";
 import GlobalLoader from "@/components/GlobalLoader";
 import { useRouter } from "next/navigation";
+import SupportTerminal from "@/components/support/SupportTerminal";
 
 export default function DashboardLayout({
   children,
@@ -40,6 +41,7 @@ export default function DashboardLayout({
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           {children}
         </main>
+        <SupportTerminal />
       </div>
     </div>
   );
