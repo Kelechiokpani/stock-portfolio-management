@@ -84,7 +84,7 @@ export interface Message {
 
 export interface SendMessagePayload {
   text: string;
-  recipientId?: string;
+  id?: string;
 }
 
 export interface ChatActionResponse {
@@ -151,34 +151,31 @@ export const marketApi = baseApi.injectEndpoints({
       invalidatesTags: ["UserBalance", "Transactions", "User"],
     }),
 
-    //  Support & Ticketing
     // 1. User: Get their own chat history
     getChatHistory: builder.query<Message[], void>({
-      query: () => "/support/chat",
+      query: () => "/chat",
+      transformResponse: (response: any) => {
+        if (Array.isArray(response)) return response;
+        return response?.messages || response?.chat || [];
+      },
       providesTags: ["Messages"],
     }),
 
-    // 2. Admin: Get a specific user's chat history
-    getChatByUserId: builder.query<Message[], string>({
-      query: (userId) => `/support/admin/chat/${userId}`,
-      providesTags: (result, error, userId) => [
-        { type: "Messages" as const, id: userId },
-      ],
-    }),
-
-    // 3. Shared: Send message
+    // 3. Send Message (Universal)
     sendMessage: builder.mutation<ChatActionResponse, SendMessagePayload>({
-      query: (body) => ({
-        url: "/support/chat/send",
-        method: "POST",
-        body,
-      }),
-      // Logic: If recipientId exists, it's an admin reply; invalidate that specific user's tag.
-      // Otherwise, it's a user message; invalidate the general message tag.
-      invalidatesTags: (result, error, { recipientId }) =>
-        recipientId
-          ? [{ type: "Messages" as const, id: recipientId }]
-          : ["Messages"],
+      query: ({ text, id }) => {
+        const url = id ? `/admin/users/${id}/chat` : "/chat";
+        return {
+          url,
+          method: "POST",
+          body: { text },
+        };
+      },
+      // This is the "Magic" that refreshes the Admin Panel
+      invalidatesTags: (result, error, { id }) =>
+        id
+          ? [{ type: "Messages" as const, id: id }] // Refreshes Admin View
+          : ["Messages"], // Refreshes User View
     }),
   }),
 });
@@ -190,4 +187,7 @@ export const {
   useBuyStockMutation,
   useSellStockMutation,
   useTransferStockMutation,
+
+  useGetChatHistoryQuery,
+  useSendMessageMutation,
 } = marketApi;

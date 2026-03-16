@@ -8,23 +8,22 @@ import {
   Send,
   Headphones,
   PlusCircle,
-  Lock,
   Copy,
   ShieldCheck,
   CheckCheck,
   Paperclip,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
-  Message,
   useDepositFundsMutation,
+  useGetChatHistoryQuery,
+  useSendMessageMutation,
 } from "@/app/services/features/market/marketApi";
 import Logo from "../Layout/Logo";
 import { useGetMeQuery } from "@/app/services/features/auth/authApi";
-
-// --- TYPES ---
 
 export default function SupportTerminal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,78 +31,37 @@ export default function SupportTerminal() {
   const [isDepositFormOpen, setIsDepositFormOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { data: response, isLoading } = useGetMeQuery();
-
-  console.log(response, "User data in SupportTerminal...");
-
   // --- RTK Query Hooks ---
+  const { data: userData } = useGetMeQuery();
+  const { data: chatHistory = [], isLoading: isHistoryLoading } =
+    useGetChatHistoryQuery(undefined, {
+      skip: !isOpen, // Only fetch when terminal is open
+    });
+
+  const messagesArray = Array.isArray(chatHistory) ? chatHistory : [];
+
+  const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
   const [depositFunds, { isLoading: isDepositing }] = useDepositFundsMutation();
 
-  // --- State for Local Chat History ---
-  const [chatHistory, setChatHistory] = useState<Message[]>([
-    {
-      id: "init",
-      sender: "admin",
-      text: "Vault Terminal Connected. How can we facilitate your assets today?",
-      timestamp: "09:00 AM",
-      conversationId: "system",
-    },
-    {
-      id: "h1",
-      sender: "user",
-      text: "Hello, I was reviewing my monthly portfolio performance. I noticed a slight lag in my bond yields. Is everything on track?",
-      timestamp: "09:05 AM",
-      conversationId: "system",
-    },
-    {
-      id: "h2",
-      sender: "admin",
-      text: "Checking your account status... Yes, the lag you're seeing is due to the recent federal interest rate adjustments. Your core assets remain in the top 5% of performance benchmarks.",
-      timestamp: "09:07 AM",
-      conversationId: "system",
-    },
-    {
-      id: "h3",
-      sender: "user",
-      text: "That's reassuring. In that case, I'd like to increase my liquidity by making a new deposit. Can you help me with that?",
-      timestamp: "09:10 AM",
-      conversationId: "system",
-    },
-    {
-      id: "h4",
-      sender: "admin",
-      text: "Certainly. Please use the 'Request Deposit' action below to initialize the institutional transfer protocol.",
-      timestamp: "09:11 AM",
-      conversationId: "system",
-    },
-  ]);
+  const userId = userData?.user?.id || userData?.user?._id;
 
   // --- Auto-scroll Effect ---
   useEffect(() => {
-    if (scrollRef.current) {
+    if (scrollRef.current && isOpen) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [chatHistory, isDepositFormOpen, isOpen]);
 
   // --- Message Handler ---
-  const handleSend = async (
-    text: string,
-    sender: "user" | "admin" = "user"
-  ) => {
-    if (!text.trim()) return;
-    const newMsg: Message = {
-      id: Date.now().toString(),
-      sender,
-      text,
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      conversationId: response?.user?.id,
-    };
+  const handleSend = async (text: string) => {
+    if (!text.trim() || isSending) return;
 
-    setChatHistory((prev) => [...prev, newMsg]);
-    setMessage("");
+    try {
+      await sendMessage({ text }).unwrap();
+      setMessage("");
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to transmit message.");
+    }
   };
 
   // --- Deposit Submission Handler ---
@@ -112,39 +70,26 @@ export default function SupportTerminal() {
     const formData = new FormData(e.currentTarget);
     const amount = Number(formData.get("amount"));
     const fullName = formData.get("fullName") as string;
+    const description = formData.get("description") as string;
 
     try {
-      // Trigger API call with requested parameters
       await depositFunds({
-        userId: response?.user?.id,
+        userId,
         method: "wire_transfer",
         fullName,
         amount,
-        description: `Deposit request by ${fullName}`,
+        description,
       }).unwrap();
 
-      // UI Feedback in Chat
-      handleSend(
-        `🚀 **DEPOSIT INITIALIZED**\n**User ID:** ${
-          response?.user?.id
-        }\n**Beneficiary:** ${fullName}\n**Amount:** $${amount.toLocaleString()}`
-      );
+      // Send a confirmation message automatically to the chat
+      //  await sendMessage({
+      //    text: `🚀 **DEPOSIT INITIALIZED**\n**Beneficiary:** ${fullName}\n**Amount:** $${amount.toLocaleString()}`,
+      //  }).unwrap();
+
       setIsDepositFormOpen(false);
       toast.success("Deposit Request Sent to Compliance");
-
-      // Simulated Admin Response providing the wire details
-      setTimeout(() => {
-        handleSend(
-          `🏦 **OFFICIAL WIRE INSTRUCTIONS**\n\n**Bank:** JP Morgan Chase\n**Account:** VaultStock Institutional LLC\n**Number:** 9900112233\n**Routing:** 021000021\n**Memo:** REF-${
-            response?.user?.id
-          }-${Math.floor(1000 + Math.random() * 9000)}`,
-          "admin"
-        );
-      }, 1500);
     } catch (err: any) {
-      toast.error(
-        err?.data?.message || "Deposit protocol failed. Please contact support."
-      );
+      toast.error(err?.data?.message || "Deposit protocol failed.");
     }
   };
 
@@ -159,7 +104,6 @@ export default function SupportTerminal() {
           <MessageSquare className="text-white h-7 w-7" />
           <span className="absolute -top-1 -right-1 flex h-5 w-5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-
             <span className="relative inline-flex rounded-full h-5 w-5 bg-emerald-500 border-2 border-white dark:border-zinc-950"></span>
           </span>
         </Button>
@@ -216,59 +160,64 @@ export default function SupportTerminal() {
                 ref={scrollRef}
                 className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide"
               >
-                {chatHistory.map((msg) => {
-                  const isBankDetails = msg.text.includes("🏦");
-                  return (
-                    <div
-                      key={msg.id}
-                      className={`flex ${
-                        msg.sender === "user" ? "justify-end" : "justify-start"
-                      }`}
-                    >
-                      <div className={`max-w-[85%] space-y-1.5`}>
-                        <div
-                          className={`p-4 rounded-2xl text-[13px] font-medium leading-relaxed border ${
-                            msg.sender === "user"
-                              ? "bg-blue-600 text-white border-blue-500 rounded-tr-none shadow-lg shadow-blue-500/10"
-                              : isBankDetails
-                              ? "bg-zinc-900 text-zinc-100 border-zinc-700 rounded-tl-none shadow-xl"
-                              : "bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border-zinc-100 dark:border-zinc-800 rounded-tl-none"
-                          }`}
-                        >
-                          <pre className="whitespace-pre-wrap font-sans">
-                            {msg.text}
-                          </pre>
-                          {isBankDetails && (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="mt-4 w-full h-9 text-[10px] font-black uppercase tracking-widest bg-zinc-800 hover:bg-zinc-700"
-                              onClick={() => {
-                                navigator.clipboard.writeText(msg.text);
-                                toast.success("Wire details copied");
-                              }}
-                            >
-                              <Copy size={12} className="mr-2" /> Copy Wire
-                              Details
-                            </Button>
-                          )}
-                        </div>
-                        <div
-                          className={`flex items-center gap-2 text-[9px] font-bold text-zinc-400 uppercase tracking-widest ${
-                            msg.sender === "user"
-                              ? "justify-end"
-                              : "justify-start"
-                          }`}
-                        >
-                          {msg.timestamp}{" "}
-                          {msg.sender === "user" && (
-                            <CheckCheck size={12} className="text-blue-500" />
-                          )}
+                {isHistoryLoading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <Loader2 className="animate-spin text-zinc-300" />
+                  </div>
+                ) : (
+                  messagesArray?.map((msg: any) => {
+                    const isBankDetails = msg.text.includes("🏦");
+                    const isUser = msg.sender === "user";
+                    return (
+                      <div
+                        key={msg.id || msg._id}
+                        className={`flex ${
+                          isUser ? "justify-end" : "justify-start"
+                        }`}
+                      >
+                        <div className={`max-w-[85%] space-y-1.5`}>
+                          <div
+                            className={`p-4 rounded-2xl text-[13px] font-medium leading-relaxed border ${
+                              isUser
+                                ? "bg-blue-600 text-white border-blue-500 rounded-tr-none shadow-lg shadow-blue-500/10"
+                                : isBankDetails
+                                ? "bg-zinc-900 text-zinc-100 border-zinc-700 rounded-tl-none shadow-xl"
+                                : "bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border-zinc-100 dark:border-zinc-800 rounded-tl-none"
+                            }`}
+                          >
+                            <pre className="whitespace-pre-wrap font-sans">
+                              {msg.text}
+                            </pre>
+                            {isBankDetails && (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                className="mt-4 w-full h-9 text-[10px] font-black uppercase tracking-widest bg-zinc-800 hover:bg-zinc-700"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(msg.text);
+                                  toast.success("Wire details copied");
+                                }}
+                              >
+                                <Copy size={12} className="mr-2" /> Copy Wire
+                                Details
+                              </Button>
+                            )}
+                          </div>
+                          <div
+                            className={`flex items-center gap-2 text-[9px] font-bold text-zinc-400 uppercase tracking-widest ${
+                              isUser ? "justify-end" : "justify-start"
+                            }`}
+                          >
+                            {msg.timestamp}{" "}
+                            {isUser && (
+                              <CheckCheck size={12} className="text-blue-500" />
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
 
                 {/* Deposit Initialization Form */}
                 <AnimatePresence>
@@ -301,7 +250,7 @@ export default function SupportTerminal() {
                         />
                         <Input
                           name="description"
-                          placeholder="System description (e.g. 'Deposit for trading account')"
+                          placeholder="Description (e.g. Trading Capital)"
                           required
                           className="h-11 rounded-xl text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
                         />
@@ -366,10 +315,14 @@ export default function SupportTerminal() {
                   />
                   <Button
                     onClick={() => handleSend(message)}
-                    disabled={!message.trim()}
+                    disabled={!message.trim() || isSending}
                     className="h-11 w-11 shrink-0 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-500/20 disabled:opacity-50"
                   >
-                    <Send size={18} />
+                    {isSending ? (
+                      <Loader2 className="animate-spin" size={18} />
+                    ) : (
+                      <Send size={18} />
+                    )}
                   </Button>
                 </div>
                 <div className="mt-4 flex justify-center items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">

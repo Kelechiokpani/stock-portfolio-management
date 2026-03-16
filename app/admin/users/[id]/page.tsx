@@ -15,6 +15,8 @@ import {
   Landmark,
   Briefcase,
   Calendar,
+  ShieldAlert,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,8 +24,14 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useParams, useRouter } from "next/navigation";
-import { useGetAllUsersQuery } from "@/app/services/features/admin/adminApi";
+import {
+  useGetAllUsersQuery,
+  useGetChatByUserIdQuery,
+  useUpdateUserStatusMutation,
+} from "@/app/services/features/admin/adminApi";
 import AdminSupportDesk from "@/components/support/AdminSupportDesk";
+import { useSendMessageMutation } from "@/app/services/features/market/marketApi";
+import { toast } from "sonner";
 
 const mockSelectedUser = {
   id: "USR-9942-XQ",
@@ -37,6 +45,9 @@ export default function UserDetailsPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
+  const [updateStatus, { isLoading: isUpdating }] =
+    useUpdateUserStatusMutation();
+
   // Re-using your query or fetching single user if you have that hook
   const { data: rawResponse } = useGetAllUsersQuery({
     page: 1,
@@ -46,8 +57,24 @@ export default function UserDetailsPage() {
 
   const user = rawResponse?.users?.find((u: any) => u._id === id);
 
-  const handleOpenChat = (user: any) => {
-    setIsPanelOpen(true);
+  const handleStatusToggle = async () => {
+    const isSuspended = user?.accountStatus === "suspended";
+    const newStatus = isSuspended ? "active" : "suspended";
+
+    try {
+      await updateStatus({
+        id: user?._id,
+        status: newStatus,
+      }).unwrap();
+
+      toast.success(
+        `Account ${
+          newStatus === "suspended" ? "suspended" : "activated"
+        } successfully`
+      );
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to update account status");
+    }
   };
 
   if (!user)
@@ -92,15 +119,57 @@ export default function UserDetailsPage() {
           </div>
         </div>
 
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className={`p-2 rounded-xl ${
+                user?.accountStatus === "suspended"
+                  ? "bg-emerald-100 text-emerald-600"
+                  : "bg-red-100 text-red-600"
+              }`}
+            >
+              {user?.accountStatus === "suspended" ? (
+                <ShieldCheck size={18} />
+              ) : (
+                <ShieldAlert size={18} />
+              )}
+            </div>
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-wider text-zinc-500">
+                Security Action
+              </p>
+              <p className="text-[13px] font-bold">
+                {user?.accountStatus === "suspended"
+                  ? "Restore Access"
+                  : "Restrict Account"}
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="flex flex-wrap gap-2">
           <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 font-bold shadow-lg shadow-blue-500/20">
             Edit Profile
           </Button>
+
           <Button
             variant="outline"
-            className="rounded-xl px-6 dark:bg-slate-900 dark:border-slate-800 border-slate-200 font-bold"
+            size="sm"
+            disabled={isUpdating}
+            onClick={handleStatusToggle}
+            className={`text-[10px] font-black uppercase tracking-widest rounded-xl border-2 ${
+              user?.accountStatus === "suspended"
+                ? "border-emerald-200 hover:bg-emerald-50 text-emerald-600"
+                : "border-red-200 hover:bg-red-50 text-black dark:text-white hover:text-red-600"
+            }`}
           >
-            Suspend Account
+            {isUpdating ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : user?.accountStatus === "suspended" ? (
+              "Activate"
+            ) : (
+              "Suspend"
+            )}
           </Button>
         </div>
       </div>
@@ -324,13 +393,7 @@ export default function UserDetailsPage() {
         </div>
       </div>
 
-      {/* <AdminSupportDesk
-        user={mockSelectedUser}
-        isOpen={isPanelOpen}
-        onClose={() => setIsPanelOpen(false)}
-      /> */}
-
-      <AdminSupportDesk user={mockSelectedUser} />
+      <AdminSupportDesk user={user} />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../../../store";
+import { Message } from "../market/marketApi";
 
 interface PaginationParams {
   page: number;
@@ -24,7 +25,15 @@ export const adminApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Overview", "Users", "KYC", "Market", "Settings", "Requests"],
+  tagTypes: [
+    "Overview",
+    "Users",
+    "KYC",
+    "Market",
+    "Settings",
+    "Requests",
+    "Messages",
+  ],
 
   endpoints: (builder) => ({
     getAdminOverview: builder.query<any, void>({
@@ -36,6 +45,23 @@ export const adminApi = createApi({
     //   query: () => "/users",
     //   providesTags: ["Users"],
     // }),
+
+    updateUserStatus: builder.mutation<
+      any,
+      { id: string; status: "active" | "suspended" | "pending" | "rejected" }
+    >({
+      query: ({ id, status }) => ({
+        url: `/users/${id}`, // Endpoint: PATCH /api/admin/users/[id]
+        method: "PATCH",
+        body: { accountStatus: status },
+      }),
+      // This ensures that any list showing users or KYC status gets refetched
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Users", id },
+        "Users",
+        "KYC",
+      ],
+    }),
 
     getAllUsers: builder.query<any, PaginationParams>({
       query: ({ page, limit, total }) => ({
@@ -143,6 +169,15 @@ export const adminApi = createApi({
       }),
       invalidatesTags: ["Requests"],
     }),
+
+    // 2. Admin: Get a specific user's chat history
+    getChatByUserId: builder.query<Message[], string>({
+      query: (userId) => `/admin/users/${userId}/details`,
+      transformResponse: (response: any) => response.chat || [],
+      providesTags: (result, error, userId) => [
+        { type: "Messages" as const, id: userId },
+      ],
+    }),
   }),
 });
 
@@ -162,6 +197,10 @@ export const {
 
   useGetAccountRequestsQuery,
   useReviewRequestMutation,
+
+  useUpdateUserStatusMutation,
+
+  useGetChatByUserIdQuery,
 } = adminApi;
 
 function getState(): any {

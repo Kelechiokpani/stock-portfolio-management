@@ -58,8 +58,8 @@ export default function ProfilePage() {
         <div className="relative group">
           <div className="h-32 w-32 rounded-2xl overflow-hidden border-4 border-background shadow-2xl ring-1 ring-primary/20 transition-transform group-hover:scale-105">
             <img
-              src={user.profile.avatar}
-              alt={user.profile.firstName}
+              src={user?.profile.avatar}
+              alt={user?.profile.firstName}
               className="h-full w-full object-cover bg-slate-100 dark:bg-slate-800"
             />
           </div>
@@ -113,7 +113,6 @@ export default function ProfilePage() {
       </header>
 
       {/* 2. STATS OVERVIEW (New Section for Julian's Financials) */}
-
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* 3. PERSONAL DOSSIER */}
