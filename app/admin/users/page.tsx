@@ -61,7 +61,6 @@ export default function ManageUsersPage() {
     isFetching,
   } = useGetAllUsersQuery({ page, limit, total: 0 });
 
-  console.log("API Response:", rawResponse); // Debug log to check API response structure
 
   // --- 1. DATA NORMALIZATION ---
   const usersList = useMemo(() => {

@@ -251,7 +251,7 @@ export function TransferPortfolioModal({
                   </Label>
 
                   <Input
-                    placeholder="John"
+                    placeholder="recipient firstname"
                     value={tracking.firstName}
                     onChange={(e) =>
                       setTracking({ ...tracking, firstName: e.target.value })
@@ -266,7 +266,7 @@ export function TransferPortfolioModal({
                   </Label>
 
                   <Input
-                    placeholder="Doe"
+                    placeholder="recipient lastname"
                     value={tracking.lastName}
                     onChange={(e) =>
                       setTracking({ ...tracking, lastName: e.target.value })

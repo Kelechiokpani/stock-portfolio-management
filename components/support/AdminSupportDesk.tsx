@@ -14,11 +14,14 @@ import {
   Zap,
   LayoutDashboard,
   Loader2,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useSendMessageMutation } from "@/app/services/features/market/marketApi";
-import { useGetChatByUserIdQuery } from "@/app/services/features/admin/adminApi";
+import {
+  useGetChatHistoryQuery,
+  useSendMessageMutation,
+} from "@/app/services/features/market/marketApi";
 import { useGetMeQuery } from "@/app/services/features/auth/authApi";
 
 export default function AdminSupportDesk({ user }: any) {
@@ -29,7 +32,7 @@ export default function AdminSupportDesk({ user }: any) {
 
   // 1. Fetch real history from adminApi
   const { data: chatHistory = [], isLoading: isHistoryLoading } =
-    useGetChatByUserIdQuery(user?.id || user?._id, {
+    useGetChatHistoryQuery(user?.id || user?._id, {
       skip: !isOpen || !(user?.id || user?._id),
     });
 
@@ -46,7 +49,6 @@ export default function AdminSupportDesk({ user }: any) {
   // --- Message Handler ---
   const handleSend = async (text: string) => {
     if (!text.trim()) return;
-    console.log("Sending message:", text, user?._id);
     try {
       await sendMessage({
         text,
@@ -54,9 +56,10 @@ export default function AdminSupportDesk({ user }: any) {
       }).unwrap();
 
       setMessage("");
-      toast.success(`Message sent to ${user.fullName.split(" ")[0]}`);
+      toast.success(`Message sent to user successfully`);
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to deliver message");
+      console.log("Error sending message:", err);
+      // toast.error(err?.data?.message || "Failed to deliver message");
     }
   };
 
@@ -68,7 +71,7 @@ export default function AdminSupportDesk({ user }: any) {
           onClick={() => setIsOpen(true)}
           className="relative h-16 w-16 rounded-[2rem] bg-zinc-950 dark:bg-zinc-100 dark:text-zinc-950 text-white shadow-2xl hover:scale-110 active:scale-95 transition-all border-2 border-zinc-800 dark:border-zinc-300"
         >
-          <LayoutDashboard className="h-7 w-7" />
+          <MessageSquare className="text-white h-7 w-7" />
           {chatHistory.length > 0 && (
             <span className="absolute -top-1 -right-1 flex h-6 w-6">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>

@@ -1,28 +1,33 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { baseApi } from "@/app/services/api";
+// 1. Import the SINGLE consolidated apiSlice
+import { apiSlice } from "@/app/services/api";
 import authReducer from "@/app/services/features/auth/authSlice";
 import marketReducer from "@/app/services/features/market/marketSlice";
-import { adminApi } from "@/app/services/features/admin/adminApi";
 import adminReducer from "@/app/services/features/admin/adminSlice";
 
 export const store = configureStore({
   reducer: {
-    // API Cache (Server Data)
-    [baseApi.reducerPath]: baseApi.reducer,
+    // Single API Cache (Server Data)
+    [apiSlice.reducerPath]: apiSlice.reducer,
 
-    // Admin API (Server Data)
-    [adminApi.reducerPath]: adminApi.reducer,
-
-    // UI Slices (Local Data)
+    // UI & Local State Slices
     auth: authReducer,
     marketUI: marketReducer,
-
-    // Admin Slices
     admin: adminReducer,
   },
+  // 2. Add only the ONE apiSlice middleware
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(baseApi.middleware, adminApi.middleware),
+    getDefaultMiddleware().concat(apiSlice.middleware),
+
+  // 3. Recommended for devTools clarity
+  devTools: process.env.NODE_ENV !== "production",
 });
 
+// --- Types ---
 export type RootState = ReturnType<typeof store.getState>;
-// export type AppDispatch = typeof store.dispatch;
+export type AppDispatch = typeof store.dispatch;
+
+// 4. Custom hooks for better DX (Optional but highly recommended)
+import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

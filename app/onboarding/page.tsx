@@ -36,10 +36,7 @@ import {
 } from "@/components/data/countries";
 import { useOnboardingMutation } from "@/app/services/features/auth/authApi";
 import { toast } from "sonner";
-import {
-  useGetGendersQuery,
-  useGetLocationsQuery,
-} from "../services/features/data/referenceApi";
+
 import { Nav } from "@/components/Reuse/Nav";
 
 const steps = [
@@ -50,9 +47,6 @@ const steps = [
 ];
 
 export default function OnboardingPage() {
-  const { data: locations, isLoading: loadingLocs } = useGetLocationsQuery();
-  const { data: genders, isLoading: loadingGenders } = useGetGendersQuery();
-
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [showSettlementError, setShowSettlementError] = useState(false);
@@ -803,19 +797,17 @@ export default function OnboardingPage() {
                     </div>
 
                     {/* Displaying Account Name if user has typed a full account number */}
-                    {formData.bankInfo.accountNumber.length > 5 && (
+                    {/* {formData.bankInfo.accountNumber.length > 5 && (
                       <div className="mt-2 pt-2 border-t border-primary/10">
                         <p className="text-[10px] uppercase text-slate-400">
-                          Estimated Account Name
+                          Account Name
                         </p>
-                        <p className="text-sm italic">
-                          {formData.email
-                            .split("@")[0]
-                            .replace(".", " ")
-                            .toUpperCase()}
+                        <p className="text-sm ">
+                          {formData.nomineeName.first}{" "}
+                          {formData.nomineeName.last}
                         </p>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 )}
 
@@ -845,8 +837,26 @@ export default function OnboardingPage() {
               >
                 Terms of Service
               </h3>
-              <div className="h-32 overflow-y-auto text-[11px] text-slate-500 bg-slate-50 p-4 rounded-xl">
-                Legal agreement text here...
+              <div className="h-32 overflow-y-auto text-[11px] leading-relaxed text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner font-sans">
+                <h4 className="font-bold text-slate-900 mb-2">
+                  INVESTMENT SERVICES AGREEMENT
+                </h4>
+                <p className="mb-2">
+                  <strong>1. Acceptance:</strong> By creating an account, you
+                  agree to the terms herein...
+                </p>
+                <p className="mb-2">
+                  <strong>2. Risk Disclosure:</strong> Investments involve
+                  significant risk. Market values can decrease to zero...
+                </p>
+                <p className="mb-2">
+                  <strong>3. KYC Compliance:</strong> Account activation is
+                  contingent upon successful identity verification...
+                </p>
+                <p className="mb-2">
+                  <strong>4. Liability:</strong> we is not responsible for
+                  trading losses or market fluctuations...
+                </p>
               </div>
               <div className="flex items-start gap-3 p-3">
                 <Checkbox

@@ -34,9 +34,9 @@ export default function SupportTerminal() {
   // --- RTK Query Hooks ---
   const { data: userData } = useGetMeQuery();
   const { data: chatHistory = [], isLoading: isHistoryLoading } =
-    useGetChatHistoryQuery(undefined, {
-      skip: !isOpen, // Only fetch when terminal is open
-    });
+    useGetChatHistoryQuery();
+
+  console.log("Chat history data:", chatHistory);
 
   const messagesArray = Array.isArray(chatHistory) ? chatHistory : [];
 
@@ -57,8 +57,14 @@ export default function SupportTerminal() {
     if (!text.trim() || isSending) return;
 
     try {
-      await sendMessage({ text }).unwrap();
-      setMessage("");
+      const chat = await sendMessage({ text }).unwrap();
+      console.log("Message sent successfully:", chat);
+      if (chat?.message) {
+        toast.success("Message sent to support successfully");
+        setMessage("");
+      } else {
+        toast.error("Unexpected response from server.");
+      }
     } catch (err: any) {
       toast.error(err?.data?.message || "Failed to transmit message.");
     }

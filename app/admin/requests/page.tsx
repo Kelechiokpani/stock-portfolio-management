@@ -37,11 +37,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import GlobalLoader from "@/components/GlobalLoader";
 
+import { CustomPagination } from "@/components/Reuse/CustomPagination";
 import {
   useGetAccountRequestsQuery,
   useReviewRequestMutation,
 } from "@/app/services/features/admin/adminApi";
-import { CustomPagination } from "@/components/Reuse/CustomPagination";
 
 export default function AdminAccountRequests() {
   const [page, setPage] = useState(1);
@@ -52,9 +52,9 @@ export default function AdminAccountRequests() {
     isLoading,
     refetch,
   } = useGetAccountRequestsQuery({ page, limit, total: 0 }); // Pass total as 0 for now, it will be updated after we get the response
+
   const [reviewRequest, { isLoading: isReviewing }] =
     useReviewRequestMutation();
-
 
   const [selectedReqId, setSelectedReqId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");

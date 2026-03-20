@@ -1,61 +1,38 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RootState } from "../../../store";
+import { apiSlice } from "../../api"; // Point to your central apiSlice file
 import { Message } from "../market/marketApi";
 
 interface PaginationParams {
   page: number;
   limit: number;
-  total: number;
+  total?: number;
 }
 
-export const adminApi = createApi({
-  reducerPath: "adminApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "https://stockinvest-api.vercel.app/api/admin",
-    prepareHeaders: (headers) => {
-      // 1. Get token directly from localStorage to avoid 'getState' circular loops
-      const token =
-        typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-      if (token) {
-        // Use the exact format your backend expects (Bearer)
-        headers.set("authorization", `Bearer ${token}`);
-      }
-
-      return headers;
-    },
-  }),
-  tagTypes: [
-    "Overview",
-    "Users",
-    "KYC",
-    "Market",
-    "Settings",
-    "Requests",
-    "Messages",
-  ],
-
+export const adminApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    // 1. Overview
     getAdminOverview: builder.query<any, void>({
       query: () => "/admin/overview",
       providesTags: ["Overview"],
     }),
 
-    // getAllUsers: builder.query<any, void>({
-    //   query: () => "/users",
-    //   providesTags: ["Users"],
-    // }),
+    // 2. User Management
+    getAllUsers: builder.query<any, PaginationParams>({
+      query: ({ page, limit, total }) => ({
+        url: "/admin/users",
+        params: { page, limit, total },
+      }),
+      providesTags: ["Users"],
+    }),
 
     updateUserStatus: builder.mutation<
       any,
       { id: string; status: "active" | "suspended" | "pending" | "rejected" }
     >({
       query: ({ id, status }) => ({
-        url: `/users/${id}`, // Endpoint: PATCH /api/admin/users/[id]
+        url: `/admin/users/${id}`,
         method: "PATCH",
         body: { accountStatus: status },
       }),
-      // This ensures that any list showing users or KYC status gets refetched
       invalidatesTags: (result, error, { id }) => [
         { type: "Users", id },
         "Users",
@@ -63,19 +40,11 @@ export const adminApi = createApi({
       ],
     }),
 
-    getAllUsers: builder.query<any, PaginationParams>({
-      query: ({ page, limit, total }) => ({
-        url: "/users",
-        params: { page, limit, total }, // This automatically appends ?page=1&limit=20 to your URL
-      }),
-      providesTags: ["Users"],
-    }),
-
-    // --- MARKET DATA CONTROL ---
+    // 3. Market Data Control
     getMarketAssets: builder.query<any, void>({
-      query: () => "/market/stocks",
+      query: () => "/admin/market/stocks",
       providesTags: (result) =>
-        result
+        result?.stocks
           ? [
               ...result.stocks.map(({ _id }: any) => ({
                 type: "Market" as const,
@@ -84,16 +53,14 @@ export const adminApi = createApi({
               { type: "Market", id: "LIST" },
             ]
           : [{ type: "Market", id: "LIST" }],
-      // providesTags: ["Market"],
     }),
 
     updateMarketAsset: builder.mutation<any, { id: string; data: any }>({
       query: ({ id, data }) => ({
-        url: `/market/stocks/${id}`,
+        url: `/admin/market/stocks/${id}`,
         method: "PUT",
         body: data,
       }),
-      // This ensures the UI refetches the specific stock immediately
       invalidatesTags: (result, error, { id }) => [
         { type: "Market", id },
         "Market",
@@ -102,58 +69,48 @@ export const adminApi = createApi({
 
     deleteMarketAsset: builder.mutation<any, string>({
       query: (id) => ({
-        url: `/market/stocks/${id}`,
+        url: `/admin/market/stocks/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Market"],
     }),
 
-    // --- KYC MANAGEMENT ---
+    // 4. KYC Management
     getKycList: builder.query<any, void>({
-      query: () => "/kyc",
+      query: () => "/admin/kyc",
       transformResponse: (response: any) => response?.users || [],
       providesTags: ["KYC"],
     }),
 
-    updateKycStatus: builder.mutation<
-      any,
-      {
-        id: string;
-        status?: string;
-        field?: string;
-        kycStatus?: string;
-        kycVerified?: boolean;
-        accountStatus?: string;
-        reason?: string;
-      }
-    >({
+    updateKycStatus: builder.mutation<any, { id: string; [key: string]: any }>({
       query: ({ id, ...body }) => ({
-        url: `/kyc/${id}`,
+        url: `/admin/kyc/${id}`,
         method: "PUT",
         body,
       }),
       invalidatesTags: ["KYC"],
     }),
 
-    // --- GLOBAL SETTINGS ---
+    // 5. Global Settings
     getGlobalSettings: builder.query<any, void>({
-      query: () => "/settings",
+      query: () => "/admin/settings",
       providesTags: ["Settings"],
     }),
 
     updateGlobalSettings: builder.mutation<any, any>({
       query: (settings) => ({
-        url: "/settings",
+        url: "/admin/settings",
         method: "PUT",
         body: settings,
       }),
       invalidatesTags: ["Settings"],
     }),
 
+    // 6. Requests
     getAccountRequests: builder.query<any, PaginationParams>({
       query: ({ page, limit, total }) => ({
-        url: "/requests",
-        params: { page, limit, total }, // This automatically appends ?page=1&limit=20 to your URL
+        url: "/admin/requests",
+        params: { page, limit, total },
       }),
       providesTags: ["Requests"],
     }),
@@ -163,46 +120,83 @@ export const adminApi = createApi({
       { id: string; action: "approve" | "reject" }
     >({
       query: ({ id, action }) => ({
-        url: `/requests/${id}`,
+        url: `/admin/requests/${id}`,
         method: "PUT",
         body: { action },
       }),
       invalidatesTags: ["Requests"],
     }),
 
-    // 2. Admin: Get a specific user's chat history
-    getChatByUserId: builder.query<Message[], string>({
-      query: (userId) => `/admin/users/${userId}/details`,
-      transformResponse: (response: any) => response.chat || [],
-      providesTags: (result, error, userId) => [
-        { type: "Messages" as const, id: userId },
-      ],
+    // 7. Chat
+    // adminApi.ts
+    // getChatByUserId: builder.query<Message[], string>({
+    //   // query: (userId) => `/admin/users/${userId}/details`,
+    //   query: (id) => (id ? `/admin/users/${id}/chat` : "/chat"),
+    //   transformResponse: (response: any) => {
+    //     const messages =
+    //       response.chat || response.user?.chat || response.messages || [];
+    //     return Array.isArray(messages) ? messages : [];
+    //   },
+    //   providesTags: (result, error, userId) => [
+    //     { type: "Messages", id: userId },
+    //   ],
+    // }),
+
+    // 8. Status Updates (Transfers, Transactions, Trades)
+    updatePortfolioTransferStatus: builder.mutation<
+      any,
+      { id: string; status: "completed" | "rejected" | "cancelled" }
+    >({
+      query: ({ id, status }) => ({
+        url: `/admin/transfers/portfolio/${id}`,
+        method: "PUT",
+        body: { status },
+      }),
+      invalidatesTags: ["Users", "Transfers"],
+    }),
+
+    updateTransactionStatus: builder.mutation<
+      any,
+      { id: string; status: "completed" | "rejected" | "failed" }
+    >({
+      query: ({ id, status }) => ({
+        url: `/admin/transactions/${id}`,
+        method: "PUT",
+        body: { status },
+      }),
+      invalidatesTags: ["Users", "Transactions"],
+    }),
+
+    updateTradeStatus: builder.mutation<
+      any,
+      { id: string; status: "completed" | "rejected" | "cancelled" }
+    >({
+      query: ({ id, status }) => ({
+        url: `/admin/trades/${id}`,
+        method: "PUT",
+        body: { status },
+      }),
+      invalidatesTags: ["Users", "Trades"],
     }),
   }),
+  overrideExisting: true,
 });
 
 export const {
   useGetAdminOverviewQuery,
   useGetAllUsersQuery,
-
   useGetKycListQuery,
   useUpdateKycStatusMutation,
-
   useGetMarketAssetsQuery,
   useUpdateMarketAssetMutation,
   useDeleteMarketAssetMutation,
-
   useGetGlobalSettingsQuery,
   useUpdateGlobalSettingsMutation,
-
   useGetAccountRequestsQuery,
   useReviewRequestMutation,
-
   useUpdateUserStatusMutation,
-
-  useGetChatByUserIdQuery,
+  // useGetChatByUserIdQuery,
+  useUpdatePortfolioTransferStatusMutation,
+  useUpdateTransactionStatusMutation,
+  useUpdateTradeStatusMutation,
 } = adminApi;
-
-function getState(): any {
-  throw new Error("Function not implemented.");
-}

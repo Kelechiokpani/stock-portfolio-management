@@ -55,7 +55,6 @@ export default function MarketplacePage() {
 
   const { data, isLoading } = useGetApprovedStocksQuery();
 
-
   // Sync Summary
   useEffect(() => {
     if (data?.summary) {
@@ -63,20 +62,62 @@ export default function MarketplacePage() {
     }
   }, [data, dispatch]);
 
+  // const filteredAsset: any = useMemo(() => {
+  //   const rawStocks = (data as any)?.stocks || [];
+  //   if (rawStocks.length === 0) return [];
+
+  //   let assets = [...rawStocks];
+
+  //   // Global Category Tab Filter
+  //   if (activeCategory !== "all") {
+  //     assets = assets.filter(
+  //       (a) => a.sector?.toLowerCase() === activeCategory.toLowerCase()
+  //     );
+  //   }
+
+  //   // Sidebar Sector Filter
+  //   if (activeFilters.sectors.length > 0) {
+  //     assets = assets.filter((a) => activeFilters.sectors.includes(a.sector));
+  //   }
+
+  //   // Search Filter
+  //   if (searchQuery) {
+  //     const q = searchQuery.toLowerCase();
+  //     assets = assets.filter(
+  //       (a) =>
+  //         a.symbol.toLowerCase().includes(q) || a.name.toLowerCase().includes(q)
+  //     );
+  //   }
+
+  //   // Sidebar Sort Filter
+  //   if (activeFilters.sort === "gainers") {
+  //     assets.sort((a, b) => b.changePercent - a.changePercent);
+  //   } else if (activeFilters.sort === "losers") {
+  //     assets.sort((a, b) => a.changePercent - b.changePercent);
+  //   } else if (activeFilters.sort === "volume") {
+  //     // This assumes you've parsed your volume string elsewhere, or just sort raw
+  //     assets.sort((a, b) => b.volume.localeCompare(a.volume));
+  //   } else if (sortBy === "price") {
+  //     assets.sort((a, b) => b.price - a.price);
+  //   }
+
+  //   return assets;
+  // }, [data, searchQuery, sortBy, activeCategory, activeFilters]);
+
   const filteredAsset: any = useMemo(() => {
     const rawStocks = (data as any)?.stocks || [];
     if (rawStocks.length === 0) return [];
 
     let assets = [...rawStocks];
 
-    // Global Category Tab Filter
+    // --- FIX: Change Category Filter from 'sector' to 'market' ---
     if (activeCategory !== "all") {
       assets = assets.filter(
-        (a) => a.sector?.toLowerCase() === activeCategory.toLowerCase()
+        (a) => a.market?.toLowerCase() === activeCategory.toLowerCase()
       );
     }
 
-    // Sidebar Sector Filter
+    // Sidebar Sector Filter (Keep this as is if you still want to filter sectors within a market)
     if (activeFilters.sectors.length > 0) {
       assets = assets.filter((a) => activeFilters.sectors.includes(a.sector));
     }
@@ -89,6 +130,8 @@ export default function MarketplacePage() {
           a.symbol.toLowerCase().includes(q) || a.name.toLowerCase().includes(q)
       );
     }
+
+    // ... rest of your sorting logic ...
 
     // Sidebar Sort Filter
     if (activeFilters.sort === "gainers") {
@@ -182,13 +225,14 @@ export default function MarketplacePage() {
                  text-slate-500 hover:text-slate-700
                  data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 
                  data-[state=active]:text-slate-950 dark:data-[state=active]:text-white
-                 data-[state=active]:shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+                 data-
+                 [state=active]:shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
             >
-              Universal
+              All
             </TabsTrigger>
 
             {/* Dynamic Sector Triggers */}
-            {data?.summary?.sectors?.map((sector: string) => (
+            {data?.summary?.markets?.map((sector: string) => (
               <TabsTrigger
                 key={sector}
                 value={sector.toLowerCase()}

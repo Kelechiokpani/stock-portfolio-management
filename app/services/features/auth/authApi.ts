@@ -1,15 +1,9 @@
 import { User } from "@/components/data/data-type";
-import { baseApi } from "../../api";
+// Import the consolidated apiSlice instead of baseApi
+import { apiSlice } from "../../api";
 
-export const authApi = baseApi.injectEndpoints({
+export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation({
-      query: (credentials) => ({
-        url: "/auth/login",
-        method: "POST",
-        body: credentials,
-      }),
-    }),
     register: builder.mutation({
       query: (userData) => ({
         url: "/auth/register",
@@ -17,18 +11,27 @@ export const authApi = baseApi.injectEndpoints({
         body: userData,
       }),
     }),
+
+    login: builder.mutation({
+      query: (credentials) => ({
+        url: "/auth/login",
+        method: "POST",
+        body: credentials,
+      }),
+    }),
+
     getMe: builder.query<User, void>({
       query: () => "/auth/me",
       providesTags: ["User"],
     }),
+
     onboarding: builder.mutation({
       query: (formData) => ({
         url: `/onboarding/kyc`,
         method: "POST",
         body: formData,
-        headers: {
-          "Content-Type": undefined,
-        },
+        // When sending FormData, letting the browser set the header
+        // automatically includes the 'boundary' string.
       }),
       invalidatesTags: ["User"],
     }),
@@ -40,6 +43,7 @@ export const authApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
+
     resetPassword: builder.mutation({
       query: (data: { token: string; newPassword: any }) => ({
         url: "/auth/reset-password",
@@ -48,17 +52,30 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
 
+    changePassword: builder.mutation<
+      any,
+      { currentPassword: string; newPassword: string }
+    >({
+      query: (passwords) => ({
+        url: "/auth/change-password",
+        method: "PUT",
+        body: passwords,
+      }),
+    }),
+
     logout: builder.mutation<void, void>({
       query: () => ({
         url: "/auth/logout",
         method: "POST",
       }),
+      // This will clear the 'User' tag in the cache
       invalidatesTags: ["User"],
     }),
   }),
   overrideExisting: true,
 });
 
+// Added useLogoutMutation to the exports
 export const {
   useLoginMutation,
   useRegisterMutation,
@@ -66,4 +83,5 @@ export const {
   useOnboardingMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
+  useLogoutMutation,
 } = authApi;
