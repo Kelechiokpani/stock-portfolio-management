@@ -32,7 +32,7 @@ const slides = [
   },
   {
     image:
-      "https://images.unsplash.com/photo-1454165833767-027ffea9e77b?q=80&w=2070&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1554469384-e58fac16e23a?q=80&w=1974&auto=format&fit=crop",
     title: "Global Compliance",
     desc: "Our rigorous onboarding ensures the highest standards of portfolio security.",
   },
