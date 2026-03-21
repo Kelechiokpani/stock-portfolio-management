@@ -1,12 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, LogOut, User, Sun, Moon, ArrowLeft } from "lucide-react";
+import {
+  Menu,
+  LogOut,
+  User,
+  Sun,
+  Moon,
+  ArrowLeft,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/Layout/Logo";
 import { useTheme } from "@/lib/theme-provider";
 import { mockUsers } from "@/components/data/user-data";
 import { useLogout } from "../User/Logout";
+import { useGetMeQuery } from "@/app/services/features/auth/authApi";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -16,14 +25,28 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const { theme, toggleTheme, mounted } = useTheme();
   const handleLogout = useLogout();
 
-  // Access the current user from your data
-  const user = mockUsers[0];
-  const isAuthenticated = !!user; // If user exists, show profile; otherwise show guest nav
+  const { data, isLoading } = useGetMeQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="h-[60vh] w-full flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Early return if data or the user object isn't present
+  if (!data || !data.user) return null;
+
+  const isAuthenticated = !!data; // If user exists, show profile; otherwise show guest nav
 
   // Extract Initials (e.g., Carlos Rivera -> CR)
-  const initials = user
-    ? `${user.profile.firstName[0]}${user.profile.lastName[0]}`
+  const initials = data.user
+    ? `${data.user.firstName[0]}${data.user.lastName[0]}`
     : "";
+  // const initials = user  ? `${user.profile.firstName[0]}${user.profile.lastName[0]}`  : "";
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-card/80 backdrop-blur-md">
@@ -72,7 +95,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                   {initials}
                 </div>
                 <span className="text-sm font-semibold text-foreground hidden md:inline tracking-tight">
-                  {user.profile.firstName}
+                  {data.user.firstName} {data.user.lastName}
                 </span>
               </Link>
 
