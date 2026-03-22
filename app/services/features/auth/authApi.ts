@@ -2,8 +2,77 @@ import { User } from "@/components/data/data-type";
 // Import the consolidated apiSlice instead of baseApi
 import { apiSlice } from "../../api";
 
+// --- New Onboarding & Auth Interfaces ---
+export interface Bank {
+  id: string;
+  name: string;
+  code: string;
+}
+
+export interface BankResponse {
+  banks: Bank[];
+}
+
+export interface OnboardingBankPayload {
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+}
+
+export interface OtpSendPayload {
+  email: string;
+}
+
+export interface OtpVerifyPayload {
+  email: string;
+  otp: string;
+}
+
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    onboarding: builder.mutation({
+      query: (formData) => ({
+        url: `/onboarding/kyc`,
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["User"],
+    }),
+
+    // --- New Auth & Onboarding Endpoints ---
+    sendOtp: builder.mutation<{ message: string }, OtpSendPayload>({
+      query: (body) => ({
+        url: "/auth/otp/send",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    verifyOtp: builder.mutation<
+      { success: boolean; token?: string },
+      OtpVerifyPayload
+    >({
+      query: (body) => ({
+        url: "/auth/otp/verify",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
+
+    getBankList: builder.query<BankResponse[], void>({
+      query: () => "/onboarding/bank/list",
+    }),
+
+    submitOnboardingBank: builder.mutation<any, OnboardingBankPayload>({
+      query: (body) => ({
+        url: "/onboarding/bank",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
+
     register: builder.mutation({
       query: (userData) => ({
         url: "/auth/register",
@@ -23,17 +92,6 @@ export const authApi = apiSlice.injectEndpoints({
     getMe: builder.query<User, void>({
       query: () => "/auth/me",
       providesTags: ["User"],
-    }),
-
-    onboarding: builder.mutation({
-      query: (formData) => ({
-        url: `/onboarding/kyc`,
-        method: "POST",
-        body: formData,
-        // When sending FormData, letting the browser set the header
-        // automatically includes the 'boundary' string.
-      }),
-      invalidatesTags: ["User"],
     }),
 
     forgotPassword: builder.mutation({
@@ -77,6 +135,13 @@ export const authApi = apiSlice.injectEndpoints({
 
 // Added useLogoutMutation to the exports
 export const {
+  // New hooks
+  useSendOtpMutation,
+  useVerifyOtpMutation,
+  useGetBankListQuery,
+  useSubmitOnboardingBankMutation,
+
+  // Existing hooks
   useLoginMutation,
   useRegisterMutation,
   useGetMeQuery,

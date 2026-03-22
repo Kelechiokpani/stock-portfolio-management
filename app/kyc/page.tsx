@@ -15,6 +15,12 @@ import {
   Eye,
   EyeOff,
   UserPlus,
+  SkipForward,
+  ArrowRight,
+  Landmark,
+  Loader2,
+  SearchX,
+  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +40,11 @@ import {
   GENDER_OPTIONS,
   locationData,
 } from "@/components/data/countries";
-import { useOnboardingMutation } from "@/app/services/features/auth/authApi";
+import {
+  useGetBankListQuery,
+  useOnboardingMutation,
+  useSubmitOnboardingBankMutation,
+} from "@/app/services/features/auth/authApi";
 import { toast } from "sonner";
 
 import { Nav } from "@/components/Reuse/Nav";
@@ -43,7 +53,8 @@ const steps = [
   { id: 1, label: "Account", icon: User },
   { id: 2, label: "KYC", icon: FileText },
   { id: 3, label: "Settlement", icon: Shield },
-  { id: 4, label: "Finalize", icon: PenTool },
+  { id: 4, label: "Agreement", icon: PenTool }, // Agreement moved here
+  { id: 5, label: "Finalize", icon: Camera },
 ];
 
 export default function OnboardingPage() {
@@ -51,6 +62,19 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [showSettlementError, setShowSettlementError] = useState(false);
   const [onboarding, { isLoading }] = useOnboardingMutation();
+  // const { data: bankList, isLoading: isFetchingBanks } = useGetBankListQuery() as any;
+
+  const { data: bankData, isLoading: isFetchingBanks } =
+    useGetBankListQuery() as any;
+
+  // Create a safe reference to the array
+  const banks = bankData?.banks || [];
+
+
+  // 2. Setup the submission mutation
+  const [submitBank, { isLoading: isSubmitting }] =
+    useSubmitOnboardingBankMutation();
+
   const [successData, setSuccessData] = useState<any>(null);
 
   // Validation State
@@ -97,14 +121,19 @@ export default function OnboardingPage() {
     const newErrors: string[] = [];
 
     if (currentStep === 1) {
-      if (!formData.email) newErrors.push("email");
-      if (!formData.password) newErrors.push("password");
-      if (!formData.sex) newErrors.push("sex");
-      if (!formData.country) newErrors.push("country");
-      if (!formData.state) newErrors.push("state");
-      if (!formData.city) newErrors.push("city");
-      if (!formData.houseNumber) newErrors.push("houseNumber");
-      if (!formData.street) newErrors.push("street");
+      const required = [
+        "email",
+        "password",
+        "sex",
+        "country",
+        "state",
+        "city",
+        "houseNumber",
+        "street",
+      ];
+      required.forEach((field) => {
+        if (!formData[field]) newErrors.push(field);
+      });
     }
 
     if (currentStep === 2) {
@@ -114,14 +143,80 @@ export default function OnboardingPage() {
     }
 
     if (currentStep === 3) {
-      if (!formData.bankInfo.accountName) newErrors.push("bankAccountName");
-      if (!formData.bankInfo.accountNumber) newErrors.push("bankAccountNumber");
-      if (!formData.bankInfo.bankName) newErrors.push("bankName");
+      // Step 3 is Optional: only validate if they started filling it
+      const { bankName, accountNumber, accountName } = formData.bankInfo;
+      if (bankName || accountNumber || accountName) {
+        if (!bankName) newErrors.push("bankName");
+        if (!accountNumber) newErrors.push("bankAccountNumber");
+        if (!accountName) newErrors.push("bankAccountName");
+      }
+    }
+
+    if (currentStep === 4) {
+      // Only Agreement validation here
       if (!formData.agreementAccepted) newErrors.push("agreement");
+    }
+
+    if (currentStep === 5) {
+      // Photo check is handled in handleNext before final submit,
+      // but you can add a flag here if needed.
     }
 
     setErrors(newErrors);
     return newErrors.length === 0;
+  };
+
+  const handleNext = async () => {
+    if (!validateStep()) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    // Navigation logic for steps 1 through 4
+    if (currentStep < 5) {
+      setCurrentStep(currentStep + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    // FINAL SUBMISSION (On Step 5)
+    try {
+      const selfieFile = selfieRef.current?.files?.[0] || formData.selfie;
+      if (!selfieFile) {
+        toast.error("Please upload your selfie to complete registration.");
+        return;
+      }
+
+      const submitData = new FormData();
+
+      Object.keys(formData).forEach((key) => {
+        const value = formData[key];
+        if (value === null || value === undefined) return;
+
+        if (key === "bankInfo") {
+          // Only append bank info if it was actually provided
+          if (value.bankName && value.accountNumber) {
+            submitData.append(key, JSON.stringify(value));
+          }
+        } else if (key === "nomineeName") {
+          submitData.append(key, JSON.stringify(value));
+        } else if (value instanceof File) {
+          submitData.append(key, value);
+        } else {
+          submitData.append(key, String(value));
+        }
+      });
+
+      // Append the selfie explicitly if not already in formData
+      if (!formData.selfie && selfieFile)
+        submitData.append("selfie", selfieFile);
+
+      await onboarding(submitData).unwrap();
+      toast.success("Account created successfully!");
+      router.push("/login");
+    } catch (err: any) {
+      toast.error(err?.data?.error || "Registration failed.");
+    }
   };
 
   const handleFileChange = (
@@ -140,74 +235,36 @@ export default function OnboardingPage() {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const handleNext = async () => {
-    // 1. Validation
-    if (!validateStep()) {
-      toast.error("Please fill in all required fields.");
-      return;
-    }
+  const onContinue = async () => {
+    // If user hasn't filled anything, they might be trying to "Skip"
+    const isFormEmpty =
+      !formData.bankInfo.bankName || !formData.bankInfo.accountNumber;
 
-    // 2. Navigation
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    if (isFormEmpty) {
+      handleNext(); // User chose to skip
       return;
+    } else {
+      toast.error("Please complete all bank fields or clear them to skip.");
     }
+    // if (!formData.bankInfo.bankName || !formData.bankInfo.accountNumber) {
+    //   handleNext(); // Simply move to next step (Skip logic)
+    //   return;
+    // }
 
-    // 3. Final Submission
     try {
-      // Check for selfie before submitting
-      const selfieFile = selfieRef.current?.files?.[0] || formData.selfie;
-      if (!selfieFile) {
-        toast.error("Please upload your selfie to complete registration.");
-        return;
-      }
+      // Logic for "fails on submit" handling
+      await submitBank({
+        bankName: formData.bankInfo.bankName,
+        accountNumber: formData.bankInfo.accountNumber,
+        accountName: formData.bankInfo.accountName,
+      }).unwrap();
 
-      const submitData = new FormData();
-
-      // Iterate through formData
-      Object.keys(formData).forEach((key) => {
-        const value = formData[key];
-
-        if (value === null || value === undefined) return;
-
-        if (key === "nomineeName" || key === "bankInfo") {
-          // Only stringify if your backend is specifically coded to parse these sub-fields
-          submitData.append(key, JSON.stringify(value));
-        } else if (value instanceof File) {
-          // Explicitly handle File objects
-          submitData.append(key, value);
-        } else {
-          // Convert booleans/numbers to strings for FormData compatibility
-          submitData.append(key, String(value));
-        }
-      });
-
-      // CRITICAL FIX: Pass 'submitData' directly, do not wrap it in { data: ... }
-      const response = await onboarding(submitData).unwrap();
-
-      const successMessage =
-        response?.message || "Account created successfully!";
-      const currentKycStatus = response?.kycStatus;
-
-      toast.success(successMessage, {
-        description:
-          currentKycStatus === "pending"
-            ? "Your documents are now under review."
-            : "Registration complete!",
-      });
-
-      router.push("/login");
+      toast.success("Settlement details linked");
+      handleNext();
     } catch (err: any) {
-      console.log("Error Status:", err.status);
-      console.log("Error Data:", err.data);
-
-      const errorMessage =
-        err?.data?.error ||
-        err?.data?.message ||
-        "Registration failed. Please try again.";
-
-      toast.error(errorMessage);
+      toast.error(
+        err?.data?.message || "Failed to link bank. Please try again or skip."
+      );
     }
   };
 
@@ -282,7 +339,7 @@ export default function OnboardingPage() {
                   </Label>
                   <Input
                     type="email"
-                    placeholder="name@company.com"
+                    placeholder="email"
                     value={formData.email}
                     onChange={(e) => updateFields({ email: e.target.value })}
                     className={`h-11 rounded-xl bg-slate-50/50 focus:bg-white transition-all ${
@@ -645,7 +702,7 @@ export default function OnboardingPage() {
 
               <div className="pt-6 border-t border-slate-100 dark:border-zinc-800 space-y-4">
                 <h3 className="font-semibold text-sm uppercase tracking-wider text-slate-400">
-                  Account Nominee
+                  Account Profile
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-1 gap-3">
                   <Input
@@ -707,242 +764,275 @@ export default function OnboardingPage() {
 
         {currentStep === 3 && (
           <div className="bg-white dark:bg-zinc-900/50 border border-slate-200/60 dark:border-zinc-800 rounded-2xl p-8 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-4">
-            <h2 className="text-xl font-bold">Settlement Details</h2>
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold">Settlement Details</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleNext}
+                className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600"
+              >
+                Skip for now <SkipForward className="ml-1 w-3 h-3" />
+              </Button>
+            </div>
 
             <div className="space-y-4">
               <Label>Primary Bank Account</Label>
               <div className="grid gap-3 p-5 bg-slate-50 dark:bg-zinc-950 rounded-2xl border border-slate-100 dark:border-zinc-800">
-                {/* Step 3.1: Bank Selection based on Country */}
-                <div className="space-y-2">
-                  <Label className="text-[10px] uppercase text-slate-400">
-                    Select Your Bank
+                {/* Step 3.1: Dynamic Bank Selection */}
+                <div className="space-y-3">
+                  <Label className="text-[10px] uppercase text-slate-500 dark:text-zinc-500 font-black tracking-[0.15em] px-1">
+                    Select Your Local Bank
                   </Label>
+
                   <Select
+                    disabled={isFetchingBanks}
                     onValueChange={(bankName) => {
-                      const countryBanks =
-                        formData.country === "United Kingdom"
-                          ? BANK_LIST.UK
-                          : BANK_LIST.USA;
-                      const selectedBank = countryBanks.find(
-                        (b) => b.name === bankName
+                      const selectedBank = banks.find(
+                        (b: any) => b.name === bankName
                       );
                       updateFields({
                         bankInfo: {
                           ...formData.bankInfo,
                           bankName: selectedBank?.name,
-                          routing: selectedBank?.routing,
+                          bankCode: selectedBank?.code,
                         },
                       });
                     }}
                   >
-                    <SelectTrigger className="h-12 w-full rounded-xl border-zinc-200 bg-white px-4 text-sm font-medium transition-all hover:border-black focus:ring-0 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-white">
-                      <SelectValue placeholder="Choose a bank..." />
+                    <SelectTrigger className="h-14 w-full rounded-2xl border-slate-200 bg-white px-4 text-sm font-semibold transition-all hover:border-blue-500 hover:ring-4 hover:ring-blue-500/5 focus:ring-0 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-blue-400 dark:hover:ring-blue-400/5">
+                      <div className="flex items-center gap-3">
+                        <Landmark className="w-4 h-4 text-slate-400 dark:text-zinc-500" />
+                        <SelectValue
+                          placeholder={
+                            isFetchingBanks ? (
+                              <span className="flex items-center gap-2 italic">
+                                <Loader2 className="w-3 h-3 animate-spin" />{" "}
+                                Fetching institutions...
+                              </span>
+                            ) : (
+                              "Choose a bank..."
+                            )
+                          }
+                        />
+                      </div>
                     </SelectTrigger>
-                    <SelectContent className="z-[100] max-h-64 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-1 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950">
-                      {(formData.country === "United Kingdom"
-                        ? BANK_LIST.UK
-                        : BANK_LIST.USA
-                      ).map((bank) => (
-                        <SelectItem
-                          className="rounded-lg py-3 px-4 text-sm font-medium focus:bg-zinc-100 dark:focus:bg-zinc-800 data-[state=checked]:bg-zinc-900 data-[state=checked]:text-white dark:data-[state=checked]:bg-white dark:data-[state=checked]:text-black"
-                          key={bank.name}
-                          value={bank.name}
-                        >
-                          {bank.name}
-                        </SelectItem>
-                      ))}
+
+                    <SelectContent className="z-[100] max-h-72 overflow-y-auto rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-xl p-1 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950/90">
+                      {banks.length > 0 ? (
+                        banks.map((bank: any) => (
+                          <SelectItem
+                            key={bank.id || bank.code}
+                            value={bank.name}
+                            className="rounded-xl py-3 px-4 text-sm font-medium transition-colors focus:bg-blue-50 focus:text-blue-600 dark:focus:bg-blue-500/10 dark:focus:text-blue-400 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:bg-blue-500"
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <span>{bank.name}</span>
+                              <span className="text-[9px] opacity-50 font-mono tracking-tighter">
+                                {bank.code}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <div className="p-8 text-center space-y-2">
+                          <div className="mx-auto w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-900 flex items-center justify-center">
+                            <SearchX className="w-4 h-4 text-slate-400" />
+                          </div>
+                          <p className="text-xs text-slate-400 font-medium">
+                            No institutions found
+                          </p>
+                        </div>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
 
-                {/* Step 3.2: Account Number Entry */}
-                <Input
-                  placeholder="Account Number"
-                  value={formData.bankInfo.accountNumber}
-                  onChange={(e) =>
-                    updateFields({
-                      bankInfo: {
-                        ...formData.bankInfo,
-                        accountNumber: e.target.value,
-                      },
-                    })
-                  }
-                  className={`h-11 bg-white dark:bg-zinc-900 ${
-                    errors.includes("bankAccountNumber") ? "border-red-500" : ""
-                  }`}
-                />
+                {/* Step 3.2: Account Number */}
+                <div className="space-y-2">
+                  <Input
+                    placeholder="Account Number"
+                    maxLength={10}
+                    value={formData.bankInfo.accountNumber}
+                    onChange={(e) =>
+                      updateFields({
+                        bankInfo: {
+                          ...formData.bankInfo,
+                          accountNumber: e.target.value.replace(/\D/g, ""),
+                        },
+                      })
+                    }
+                    className="h-11 bg-white dark:bg-zinc-900 font-mono tracking-widest"
+                  />
+                </div>
 
-                {/* Step 3.3: Visual Feedback (Display Auto-filled Data) */}
-                {formData.bankInfo.bankName && (
-                  <div className="mt-2 p-3 rounded-lg bg-primary/5 border border-primary/10 animate-in zoom-in-95">
-                    <div className="flex justify-between items-center">
+                {/* Step 3.3: Account Holder Name */}
+                <div className="space-y-2">
+                  <Input
+                    placeholder="Account Holder Name"
+                    value={formData.bankInfo.accountName}
+                    onChange={(e) =>
+                      updateFields({
+                        bankInfo: {
+                          ...formData.bankInfo,
+                          accountName: e.target.value,
+                        },
+                      })
+                    }
+                    className="h-11 bg-white dark:bg-zinc-900"
+                  />
+                </div>
+
+                {/* Verification Badge */}
+                {formData.bankInfo.bankName &&
+                  formData.bankInfo.accountNumber.length === 10 && (
+                    <div className="flex items-center gap-3 p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl animate-in fade-in">
+                      <Landmark className="text-blue-600 w-5 h-5" />
                       <div>
-                        <p className="text-[10px] uppercase text-primary font-bold">
-                          Verified Bank
+                        <p className="text-[10px] font-black uppercase text-blue-600">
+                          Routing to
                         </p>
-                        <p className="text-sm font-semibold">
+                        <p className="text-xs font-bold">
                           {formData.bankInfo.bankName}
                         </p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-[10px] uppercase text-slate-400">
-                          {formData.country === "United Kingdom"
-                            ? "Sort Code"
-                            : "Routing Number"}
-                        </p>
-                        <p className="text-sm font-mono">
-                          {formData.bankInfo.routing}
-                        </p>
-                      </div>
                     </div>
-
-                    {/* Displaying Account Name if user has typed a full account number */}
-                    {/* {formData.bankInfo.accountNumber.length > 5 && (
-                      <div className="mt-2 pt-2 border-t border-primary/10">
-                        <p className="text-[10px] uppercase text-slate-400">
-                          Account Name
-                        </p>
-                        <p className="text-sm ">
-                          {formData.nomineeName.first}{" "}
-                          {formData.nomineeName.last}
-                        </p>
-                      </div>
-                    )} */}
-                  </div>
-                )}
-
-                <Input
-                  placeholder="Account Holder Name"
-                  value={formData.bankInfo.accountName}
-                  onChange={(e) =>
-                    updateFields({
-                      bankInfo: {
-                        ...formData.bankInfo,
-                        accountName: e.target.value,
-                      },
-                    })
-                  }
-                  className={`h-11 bg-white dark:bg-zinc-900 ${
-                    errors.includes("bankAccountName") ? "border-red-500" : ""
-                  }`}
-                />
-              </div>
-            </div>
-
-            <div className="pt-6 border-t border-slate-100 dark:border-zinc-800 space-y-4">
-              <h3
-                className={`font-semibold text-sm ${
-                  errors.includes("agreement") ? "text-red-500" : ""
-                }`}
-              >
-                Terms of Service
-              </h3>
-              <div className="h-32 overflow-y-auto text-[11px] leading-relaxed text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner font-sans">
-                <h4 className="font-bold text-slate-900 mb-2">
-                  INVESTMENT SERVICES AGREEMENT
-                </h4>
-                <p className="mb-2">
-                  <strong>1. Acceptance:</strong> By creating an account, you
-                  agree to the terms herein...
-                </p>
-                <p className="mb-2">
-                  <strong>2. Risk Disclosure:</strong> Investments involve
-                  significant risk. Market values can decrease to zero...
-                </p>
-                <p className="mb-2">
-                  <strong>3. KYC Compliance:</strong> Account activation is
-                  contingent upon successful identity verification...
-                </p>
-                <p className="mb-2">
-                  <strong>4. Liability:</strong> we is not responsible for
-                  trading losses or market fluctuations...
-                </p>
-              </div>
-              <div className="flex items-start gap-3 p-3">
-                <Checkbox
-                  id="agree"
-                  checked={formData.agreementAccepted}
-                  onCheckedChange={(v) =>
-                    updateFields({ agreementAccepted: !!v })
-                  }
-                />
-                <Label htmlFor="agree" className="text-xs text-slate-500">
-                  I accept the VaultStock Service Agreement.
-                </Label>
+                  )}
               </div>
             </div>
 
             <div className="flex gap-4">
               <Button
                 variant="outline"
-                className="flex-1 h-11 rounded-xl"
+                className="flex-1 h-12 rounded-xl font-bold"
                 onClick={handleBack}
               >
                 Previous
               </Button>
               <Button
-                className="flex-1 h-11 rounded-xl shadow-lg"
-                onClick={handleNext}
-                disabled={isLoading}
+                className="flex-1 h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 font-black uppercase tracking-widest text-[11px]"
+                onClick={onContinue}
+                disabled={isSubmitting}
               >
-                {isLoading ? "Processing..." : "Continue"}
+                {isSubmitting ? "Linking..." : "Continue Application"}
+                <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </div>
           </div>
         )}
 
+        {/* STEP 4: AGREEMENT */}
         {currentStep === 4 && (
-          <div className="bg-white dark:bg-zinc-900/50 border border-slate-200/60 dark:border-zinc-800 rounded-2xl p-10 shadow-sm text-center space-y-8 animate-in fade-in slide-in-from-bottom-4">
-            <h2 className="text-2xl font-bold">One last thing</h2>
-            <div className="relative mx-auto w-44 h-44 group">
-              {/* The decorative dashed border */}
-              <div className="absolute inset-0 rounded-full border-2 border-dashed border-primary/30 group-hover:border-primary/60 transition-colors" />
+          <div className="bg-white dark:bg-zinc-900/50 border border-slate-200/60 dark:border-zinc-800 rounded-2xl p-8 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-4">
+            <div className="space-y-1">
+              <h2 className="text-xl font-bold">Terms & Conditions</h2>
+              <p className="text-sm text-slate-500">
+                Please review the agreement to proceed.
+              </p>
+            </div>
 
+            <div className="h-48 overflow-y-auto rounded-xl border bg-slate-50 dark:bg-zinc-950 p-4 text-[11px] leading-relaxed text-slate-500">
+              <p className="font-bold mb-2 uppercase">User Service Agreement</p>
+              <p>
+                By checking the box below, you agree to the processing of your
+                identity data for KYC purposes... [Your Full Terms Here]
+              </p>
+            </div>
+
+            <div
+              className={`flex items-center gap-3 p-4 rounded-2xl border transition-all ${
+                formData.agreementAccepted
+                  ? "bg-blue-50/50 border-blue-200"
+                  : "bg-slate-50"
+              }`}
+            >
+              <Checkbox
+                id="terms"
+                checked={formData.agreementAccepted}
+                onCheckedChange={(v) =>
+                  updateFields({ agreementAccepted: !!v })
+                }
+              />
+              <Label
+                htmlFor="terms"
+                className="text-xs cursor-pointer select-none"
+              >
+                I confirm that I have read and accepted the service agreement.
+              </Label>
+            </div>
+
+            <div className="flex gap-4 pt-4">
+              <Button
+                variant="outline"
+                className="flex-1 h-12 rounded-xl"
+                onClick={handleBack}
+              >
+                Back
+              </Button>
+              <Button className="flex-1 h-12 rounded-xl" onClick={handleNext}>
+                Continue to Final Step
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 5: FINALIZE (SELFIE) */}
+        {currentStep === 5 && (
+          <div className="bg-white dark:bg-zinc-900/50 border border-slate-200/60 dark:border-zinc-800 rounded-2xl p-10 shadow-sm text-center space-y-8 animate-in fade-in slide-in-from-bottom-4">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold">Identity Verification</h2>
+              <p className="text-sm text-slate-500">
+                Take a live photo of yourself to secure your account.
+              </p>
+            </div>
+
+            <div className="relative mx-auto w-48 h-48 group">
+              <div className="absolute inset-0 rounded-full border-2 border-dashed border-primary/30 group-hover:border-primary/60 transition-colors animate-pulse" />
               <div
                 className="absolute inset-2 rounded-full bg-slate-50 dark:bg-zinc-900 flex flex-col items-center justify-center cursor-pointer overflow-hidden border-2 border-transparent hover:border-primary/20 transition-all"
                 onClick={() => selfieRef.current?.click()}
               >
                 {formData.selfie ? (
-                  // Show Preview if file exists
                   <img
                     src={URL.createObjectURL(formData.selfie)}
                     className="h-full w-full object-cover"
-                    alt="Selfie preview"
+                    alt="Selfie"
                   />
                 ) : (
-                  // Default Upload State
                   <>
-                    <Upload className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
-                    <span className="text-[10px] font-bold text-slate-400 mt-2 uppercase">
-                      Take Selfie
+                    <Camera className="h-10 w-10 text-primary mb-2" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">
+                      Capture Selfie
                     </span>
                   </>
                 )}
-
                 <input
                   type="file"
                   ref={selfieRef}
-                  accept="image/*"
-                  capture="user" // This triggers the front camera on mobile devices
                   hidden
+                  accept="image/*"
+                  capture="user"
                   onChange={(e) => handleFileChange(e, "selfie")}
                 />
               </div>
-
-              {/* Success Checkmark Badge */}
-              {formData.selfie && (
-                <div className="absolute bottom-2 right-2 bg-emerald-500 text-white p-1.5 rounded-full shadow-lg border-2 border-white dark:border-zinc-950">
-                  <CheckCircle2 className="h-4 w-4" />
-                </div>
-              )}
             </div>
-            <Button
-              className="w-full h-12 rounded-xl text-sm font-bold shadow-xl"
-              onClick={handleNext}
-              disabled={isLoading}
-            >
-              {isLoading ? "Creating Account..." : "Complete Registration"}
-            </Button>
+
+            <div className="flex gap-4 pt-4">
+              <Button
+                variant="outline"
+                className="flex-1 h-12 rounded-xl"
+                onClick={handleBack}
+              >
+                Back
+              </Button>
+              <Button
+                className="flex-1 h-12 rounded-xl bg-blue-600 shadow-xl shadow-blue-500/20 font-bold"
+                onClick={handleNext}
+                disabled={isLoading}
+              >
+                {isLoading ? "Synchronizing..." : "Complete Registration"}
+              </Button>
+            </div>
           </div>
         )}
 

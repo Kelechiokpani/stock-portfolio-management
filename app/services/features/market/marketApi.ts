@@ -1,6 +1,7 @@
 import { Asset } from "@/components/data/data-type";
-// 1. Point to the consolidated apiSlice
 import { apiSlice } from "../../api";
+
+
 
 // --- Existing Interfaces ---
 export interface MarketSummary {
@@ -68,7 +69,7 @@ export interface TransferPayload {
 }
 
 export interface Message {
-  _id: string; // Changed to match MongoDB standard usually found in these APIs
+  _id: string; 
   sender: "user" | "admin";
   text: string;
   timestamp: string;
@@ -170,6 +171,7 @@ export const marketApi = apiSlice.injectEndpoints({
       invalidatesTags: (result, error, { id }) =>
         id ? [{ type: "Messages", id }] : ["Messages"],
     }),
+
   }),
   overrideExisting: true,
 });
