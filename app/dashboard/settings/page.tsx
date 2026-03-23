@@ -31,10 +31,16 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import GlobalLoader from "@/components/GlobalLoader";
 // Assuming your hook path
-import { useGetMeQuery } from "@/app/services/features/auth/authApi";
+import {
+  useChangePasswordMutation,
+  useGetMeQuery,
+} from "@/app/services/features/auth/authApi";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
   const { data: response, isLoading } = useGetMeQuery();
+  const [changePassword, { isLoading: isChangingPassword }] =
+    useChangePasswordMutation();
 
   const [activeTab, setActiveTab] = useState<
     "account" | "security" | "notifications" | "preferences"
@@ -49,6 +55,11 @@ export default function SettingsPage() {
   const [profileData, setProfileData] = useState<any>(null);
   const [settingsData, setSettingsData] = useState<any>(null);
 
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+  });
+
   // Sync local state when data arrives from database
   useEffect(() => {
     if (response?.user) {
@@ -57,7 +68,6 @@ export default function SettingsPage() {
     }
   }, [response]);
 
-  
   const handleSave = () => {
     setIsSaving(true);
     // Here you would call your updateProfile mutation
@@ -66,6 +76,29 @@ export default function SettingsPage() {
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3000);
     }, 1200);
+  };
+
+  const handlePasswordChange = async () => {
+    if (!passwordData.currentPassword || !passwordData.newPassword) {
+      return alert("Please fill in both password fields.");
+    }
+
+    try {
+      await changePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      }).unwrap();
+
+      // Success Logic
+      setSavedSuccess(true);
+      setPasswordData({ currentPassword: "", newPassword: "" });
+      setTimeout(() => setSavedSuccess(false), 3000);
+    } catch (err: any) {
+      console.error("Failed to change password:", err);
+      alert(
+        err.data?.message || "Failed to update password. Please try again."
+      );
+    }
   };
 
   if (isLoading || !profileData) {
@@ -262,10 +295,18 @@ export default function SettingsPage() {
                   <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
                     Update Access Password
                   </h3>
+
                   <div className="relative">
                     <InputField
                       label="Current Password"
                       type={showPassword ? "text" : "password"}
+                      value={passwordData.currentPassword}
+                      onChange={(e: any) =>
+                        setPasswordData({
+                          ...passwordData,
+                          currentPassword: e.target.value,
+                        })
+                      }
                     />
                     <button
                       onClick={() => setShowPassword(!showPassword)}
@@ -278,15 +319,29 @@ export default function SettingsPage() {
                       )}
                     </button>
                   </div>
+
                   <InputField
                     label="New Password"
                     type={showPassword ? "text" : "password"}
+                    value={passwordData.newPassword}
+                    onChange={(e: any) =>
+                      setPasswordData({
+                        ...passwordData,
+                        newPassword: e.target.value,
+                      })
+                    }
                   />
+
                   <Button
                     className="rounded-xl w-full md:w-auto font-bold px-10"
-                    onClick={handleSave}
+                    onClick={handlePasswordChange}
+                    disabled={isChangingPassword}
                   >
-                    Renew Credentials
+                    {isChangingPassword
+                      ? "Processing..."
+                      : savedSuccess
+                      ? "Password Updated!"
+                      : "Renew Credentials"}
                   </Button>
                 </div>
               </CardContent>

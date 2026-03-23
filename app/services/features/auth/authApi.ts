@@ -148,5 +148,6 @@ export const {
   useOnboardingMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
+  useChangePasswordMutation,
   useLogoutMutation,
 } = authApi;
