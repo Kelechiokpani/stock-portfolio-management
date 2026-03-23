@@ -1,8 +1,6 @@
 import { Asset } from "@/components/data/data-type";
 import { apiSlice } from "../../api";
 
-
-
 // --- Existing Interfaces ---
 export interface MarketSummary {
   total: number;
@@ -69,7 +67,7 @@ export interface TransferPayload {
 }
 
 export interface Message {
-  _id: string; 
+  _id: string;
   sender: "user" | "admin";
   text: string;
   timestamp: string;
@@ -141,37 +139,39 @@ export const marketApi = apiSlice.injectEndpoints({
       invalidatesTags: ["UserBalance", "Transactions", "User"],
     }),
 
-    getChatHistory: builder.query<Message[], string | void>({
-      // query: (id) => `/admin/users/${id}/details`,
-      query: (id) => (id ? `/admin/users/${id}/details` : "/chat"),
+    getChatHistory: builder.query<any[], string | void>({
+      query: (id) => (id ? `/support/admin/chat/${id}` : "/support/chat"),
 
       transformResponse: (response: any) => {
-        // Navigate the response object safely
+        // Look for 'data' first, then fall back to other structures
         const messages =
-          response.chat ||
-          response.user?.chat ||
-          response.messages ||
+          response?.data || // This matches your XHR log
+          response?.chat ||
+          response?.user?.chat ||
+          response?.messages ||
           (Array.isArray(response) ? response : []);
 
         return Array.isArray(messages) ? messages : [];
       },
 
-      // 2. Fix providesTags to correctly map the ID
       providesTags: (result, error, id) =>
-        id ? [{ type: "Messages", id }] : ["Messages"],
+        id
+          ? [{ type: "Messages", id }]
+          : [{ type: "Messages", id: "SUPPORT_CHAT" }],
     }),
 
-    sendMessage: builder.mutation<ChatActionResponse, SendMessagePayload>({
+    sendMessage: builder.mutation<any, { text: string; id?: string }>({
       query: ({ text, id }) => ({
-        url: id ? `/admin/users/${id}/chat` : "/chat",
+        url: id ? `/admin/users/${id}/chat` : "/support/chat/send",
         method: "POST",
         body: { text },
       }),
-      // Dynamic invalidation for real-time feel
+      // This tells RTK Query to refetch getChatHistory immediately
       invalidatesTags: (result, error, { id }) =>
-        id ? [{ type: "Messages", id }] : ["Messages"],
+        id
+          ? [{ type: "Messages", id }]
+          : [{ type: "Messages", id: "SUPPORT_CHAT" }],
     }),
-
   }),
   overrideExisting: true,
 });

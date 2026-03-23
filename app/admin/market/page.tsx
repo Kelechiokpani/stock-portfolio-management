@@ -3,11 +3,9 @@
 import React, { useState, useMemo } from "react";
 import {
   Search,
-  Save,
   BarChart3,
   Zap,
   AlertCircle,
-  RefreshCw,
   MoreHorizontal,
   TrendingUp,
   TrendingDown,
@@ -22,8 +20,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
@@ -36,7 +32,8 @@ import {
 } from "@/app/services/features/admin/adminApi";
 
 export default function MarketVisibilityPage() {
-  const { data: rawResponse, isLoading, refetch } = useGetMarketAssetsQuery();
+  const { data: rawResponse, isLoading } = useGetMarketAssetsQuery();
+
   const [updateAsset, { isLoading: isUpdating }] =
     useUpdateMarketAssetMutation();
   const [deleteAsset, { isLoading: isDeleting }] =
@@ -46,9 +43,11 @@ export default function MarketVisibilityPage() {
 
   const stocksList = useMemo(() => rawResponse?.stocks || [], [rawResponse]);
 
+  // FIXED: Logic now pulls unique 'market' values instead of 'sector'
   const categories = useMemo(() => {
-    const sectors = stocksList.map((s: any) => s.sector);
-    return Array.from(new Set(sectors)).filter(Boolean) as string[];
+    const markets = stocksList.map((s: any) => s.market);
+    // filter(Boolean) ensures we don't have empty tabs if data is missing
+    return Array.from(new Set(markets)).filter(Boolean) as string[];
   }, [stocksList]);
 
   // --- DYNAMIC CALCULATIONS ---
@@ -57,7 +56,6 @@ export default function MarketVisibilityPage() {
       return { totalCap: "$0", bullish: "0%", bearish: "0%", count: 0 };
     }
 
-    // Helper to convert "2.82T" or "285.3B" to a raw number
     const parseCurrencyString = (str: string) => {
       if (!str) return 0;
       const multiplier = str.endsWith("T")
@@ -70,20 +68,16 @@ export default function MarketVisibilityPage() {
       return parseFloat(str.replace(/[TBM$]/g, "")) * multiplier;
     };
 
-    // Helper to format large numbers back to "14.24T"
     const formatCurrency = (num: number) => {
       if (num >= 1e12) return `$${(num / 1e12).toFixed(2)}T`;
       if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`;
       return `$${(num / 1e6).toFixed(2)}M`;
     };
 
-    // 1. Total Market Cap Sum
     const totalCapRaw = stocksList.reduce(
       (acc: number, curr: any) => acc + parseCurrencyString(curr.marketCap),
       0
     );
-
-    // 2. Sentiment Calculation (Based on change value)
     const bullishCount = stocksList.filter((s: any) => s.change > 0).length;
     const bearishCount = stocksList.filter((s: any) => s.change < 0).length;
     const total = stocksList.length;
@@ -96,11 +90,9 @@ export default function MarketVisibilityPage() {
     };
   }, [stocksList]);
 
-  // FIXED: Logic handles multiple visibility flags including isPublished
-  const handleToggle = async (stock: any, type: "web" | "published") => {
+  const handleToggle = async (stock: any, type: "published") => {
     const payload = {
-      ...stock, // Spread existing data to avoid losing price/sector/market info
-      isVisibleWeb: type === "web" ? !stock.isVisibleWeb : stock.isVisibleWeb,
+      ...stock,
       isPublished:
         type === "published" ? !stock.isPublished : stock.isPublished,
     };
@@ -141,7 +133,7 @@ export default function MarketVisibilityPage() {
               Market Visibility
             </h1>
             <p className="text-slate-500 text-sm mt-1">
-              Direct management of {stocksList.length} global equity feeds.
+              Direct management of {stocksList.length} exchange platforms.
             </p>
           </div>
         </header>
@@ -178,7 +170,7 @@ export default function MarketVisibilityPage() {
         <div className="relative w-full lg:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="Search symbol..."
+            placeholder="Search symbol or exchange..."
             className="pl-10 h-12 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-blue-500/20"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -188,48 +180,12 @@ export default function MarketVisibilityPage() {
         {/* --- DATA INTERFACE --- */}
         <Tabs defaultValue={categories[0]} className="w-full space-y-6">
           <div className="relative w-full group">
-            <TabsList
-              className="
-                      /* Layout & Background */
-                      flex h-12 w-full items-center justify-start p-1 
-                      bg-slate-200/50 dark:bg-slate-900 
-                      border border-slate-200 dark:border-slate-800 
-                      rounded-xl
-                      
-                      /* THE SCROLL MAGIC */
-                      overflow-x-auto 
-                      overflow-y-hidden 
-                      whitespace-nowrap 
-                      scrollbar-hide 
-                      /* For Chrome/Safari/Edge */
-                      [&::-webkit-scrollbar]:hidden 
-                      /* For Firefox */
-                      [scrollbar-width:none] 
-                      /* For IE/Edge */
-                      [-ms-overflow-style:none]
-                      
-                      /* Desktop behavior */
-                      sm:w-fit sm:max-w-full
-                    "
-            >
+            <TabsList className="flex h-12 w-full items-center justify-start p-1 bg-slate-200/50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-x-auto overflow-y-hidden whitespace-nowrap scrollbar-hide sm:w-fit sm:max-w-full">
               {categories.map((cat) => (
                 <TabsTrigger
                   key={cat}
                   value={cat}
-                  className="
-          /* Appearance */
-                  capitalize px-6 h-full font-bold text-sm tracking-tight
-                  transition-all duration-200
-                  
-                  /* State Styling */
-                  data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 
-                  data-[state=active]:text-slate-900 dark:data-[state=active]:text-white 
-                  data-[state=active]:shadow-md
-                  
-                  /* Prevent Shrinking in Flex */
-                  flex-shrink-0 
-                  rounded-lg
-        "
+                  className="capitalize px-6 h-full font-bold text-sm tracking-tight transition-all duration-200 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-slate-900 dark:data-[state=active]:text-white data-[state=active]:shadow-md flex-shrink-0 rounded-lg"
                 >
                   {cat}
                 </TabsTrigger>
@@ -237,10 +193,10 @@ export default function MarketVisibilityPage() {
             </TabsList>
           </div>
 
-          {categories.map((category) => (
+          {categories.map((marketName) => (
             <TabsContent
-              key={category}
-              value={category}
+              key={marketName}
+              value={marketName}
               className="outline-none"
             >
               <Card className="border-slate-200 dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900/50 backdrop-blur-sm">
@@ -248,23 +204,22 @@ export default function MarketVisibilityPage() {
                   <table className="w-full text-left min-w-[950px] lg:min-w-full">
                     <thead>
                       <tr className="bg-slate-50/50 dark:bg-slate-800/50 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-slate-800">
-                        <th className="px-6 py-4">Ticker</th>
+                        <th className="px-6 py-4">Asset</th>
                         <th className="px-6 py-4">Price / Change</th>
                         <th className="px-6 py-4 hidden md:table-cell">
                           Market Cap
                         </th>
-                        <th className="px-6 py-4 text-center">Change ($)</th>
+                        <th className="px-6 py-4 text-center">Sector</th>
                         <th className="px-6 py-4 text-center">Volume</th>
-                        <th className="px-6 py-4 text-center">
-                          Publish Stocks
-                        </th>
-                        <th className="px-6 py-4 text-right">Market Trend</th>
+                        <th className="px-6 py-4 text-center">Status</th>
+                        <th className="px-6 py-4 text-right">Trend</th>
                         <th className="px-6 py-4 text-right">Ops</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                       {stocksList
-                        .filter((s: any) => s.sector === category)
+                        // CHANGED: Filter by marketName now
+                        .filter((s: any) => s.market === marketName)
                         .filter(
                           (s: any) =>
                             s.symbol
@@ -291,7 +246,7 @@ export default function MarketVisibilityPage() {
                                     {stock.name}
                                   </p>
                                   <p className="text-[10px] font-mono text-slate-400 uppercase tracking-tighter">
-                                    {stock.symbol} • {stock.market}
+                                    {stock.symbol}
                                   </p>
                                 </div>
                               </div>
@@ -299,7 +254,7 @@ export default function MarketVisibilityPage() {
                             <td className="px-6 py-5">
                               <div className="min-w-[100px]">
                                 <p className="text-sm font-bold">
-                                  ${stock.price?.toFixed(2)}
+                                  ${stock.price?.toLocaleString()}
                                 </p>
                                 <p
                                   className={`text-[10px] font-bold ${
@@ -316,15 +271,12 @@ export default function MarketVisibilityPage() {
                             <td className="px-6 py-5 text-xs font-mono text-slate-500 hidden md:table-cell">
                               {stock.marketCap || "N/A"}
                             </td>
-                            <td className="px-6 py-5 text-center text-xs font-mono text-slate-500">
-                              {stock.change?.toFixed(2) || "0.00"}
+                            <td className="px-6 py-5 text-center text-xs font-medium text-slate-500">
+                              {stock.sector}
                             </td>
                             <td className="px-6 py-5 text-center text-xs font-mono text-slate-500">
                               {stock.volume || "0"}
                             </td>
-
-                            {/* PORTAL SWITCHES */}
-
                             <td className="px-6 py-5 text-center">
                               <Switch
                                 checked={stock.isPublished}
@@ -335,7 +287,6 @@ export default function MarketVisibilityPage() {
                                 className="data-[state=checked]:bg-blue-600"
                               />
                             </td>
-
                             <td className="px-6 py-5 text-right">
                               {stock.marketTrend === "bullish" ? (
                                 <div className="inline-flex items-center gap-1 text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded text-[10px] font-bold uppercase">
@@ -392,7 +343,8 @@ export default function MarketVisibilityPage() {
               System Log
             </p>
             <p className="text-xs text-blue-700 leading-relaxed">
-              Infrastructure synchronized. All nodes nominal.
+              Infrastructure synchronized. Exchange feeds grouping validated for{" "}
+              {categories.join(", ")}.
             </p>
           </div>
         </div>

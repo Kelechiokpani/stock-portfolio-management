@@ -22,7 +22,7 @@ import { toast } from "sonner";
 const slides = [
   {
     image:
-      "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=2070&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop",
     title: "Secure Access",
     desc: "Update your credentials through our encrypted gateway to maintain portfolio integrity.",
   },
@@ -100,17 +100,18 @@ export default function ResetPassword() {
               i === currentSlide ? "opacity-100" : "opacity-0"
             }`}
           >
-            <div className="absolute inset-0 z-10 bg-gradient-to-t from-blue-950 via-zinc-950/40 to-transparent" />
+            {/* Gradient Overlay updated to Primary color */}
+            <div className="absolute inset-0 z-10 bg-gradient-to-t from-primary/90 via-zinc-950/40 to-transparent" />
             <img
               src={slide.image}
               className="h-full w-full object-cover grayscale-[0.2]"
               alt="Security"
             />
             <div className="absolute bottom-20 left-12 z-20 max-w-sm space-y-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
                 <RefreshCcw size={28} />
               </div>
-              <h2 className="text-4xl font-black italic tracking-tighter text-white font-serif">
+              <h2 className="text-4xl font-black italic tracking-tighter text-white font-serif uppercase">
                 {slide.title}
               </h2>
               <p className="text-zinc-300 text-lg font-medium">{slide.desc}</p>
@@ -125,11 +126,11 @@ export default function ResetPassword() {
           {!isSuccess ? (
             <div className="space-y-10 animate-in fade-in slide-in-from-right-8 duration-700">
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-[10px] pt-6 font-black uppercase tracking-[0.3em] text-blue-600">
+                <div className="flex items-center gap-2 text-[10px] pt-6 font-black uppercase tracking-[0.3em] text-primary">
                   Security Terminal <ChevronRight size={12} />{" "}
                   <span className="text-zinc-400">Credential Reset</span>
                 </div>
-                <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-white">
+                <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-white uppercase italic">
                   Set New Password.
                 </h1>
                 <p className="text-zinc-500 font-medium">
@@ -147,7 +148,7 @@ export default function ResetPassword() {
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
-                      className="h-14 rounded-2xl border-zinc-200 bg-zinc-50/50 pl-12 pr-12 transition-all focus:bg-white focus:ring-4 focus:ring-blue-500/10 dark:border-zinc-800 dark:bg-zinc-900/50"
+                      className="h-14 rounded-2xl border-zinc-200 bg-zinc-50/50 pl-12 pr-12 transition-all focus:bg-white focus:ring-4 focus:ring-primary/10 dark:border-zinc-800 dark:bg-zinc-900/50 focus-visible:ring-primary"
                       value={passwords.password}
                       onChange={(e) =>
                         setPasswords({ ...passwords, password: e.target.value })
@@ -157,7 +158,7 @@ export default function ResetPassword() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-blue-500"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-primary transition-colors"
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -166,14 +167,12 @@ export default function ResetPassword() {
                     <div className="flex items-center gap-2 mt-2 ml-1">
                       <div
                         className={`h-1 flex-1 rounded-full ${
-                          isPasswordSecure ? "bg-emerald-500" : "bg-zinc-200"
+                          isPasswordSecure ? "bg-primary" : "bg-zinc-200"
                         }`}
                       />
                       <p
                         className={`text-[10px] font-bold uppercase tracking-tighter ${
-                          isPasswordSecure
-                            ? "text-emerald-500"
-                            : "text-zinc-400"
+                          isPasswordSecure ? "text-primary" : "text-zinc-400"
                         }`}
                       >
                         {isPasswordSecure
@@ -193,7 +192,7 @@ export default function ResetPassword() {
                     <Input
                       type={showConfirm ? "text" : "password"}
                       placeholder="••••••••"
-                      className="h-14 rounded-2xl border-zinc-200 bg-zinc-50/50 pl-12 pr-12 transition-all focus:bg-white focus:ring-4 focus:ring-blue-500/10 dark:border-zinc-800 dark:bg-zinc-900/50"
+                      className="h-14 rounded-2xl border-zinc-200 bg-zinc-50/50 pl-12 pr-12 transition-all focus:bg-white focus:ring-4 focus:ring-primary/10 dark:border-zinc-800 dark:bg-zinc-900/50 focus-visible:ring-primary"
                       value={passwords.confirm}
                       onChange={(e) =>
                         setPasswords({ ...passwords, confirm: e.target.value })
@@ -203,7 +202,7 @@ export default function ResetPassword() {
                     <button
                       type="button"
                       onClick={() => setShowConfirm(!showConfirm)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-blue-500"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-primary transition-colors"
                     >
                       {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -213,7 +212,7 @@ export default function ResetPassword() {
                 <Button
                   type="submit"
                   disabled={isLoading || !isPasswordSecure || !doPasswordsMatch}
-                  className="w-full h-14 rounded-2xl bg-blue-600 font-black uppercase tracking-widest text-white shadow-xl shadow-blue-500/25 transition-all hover:translate-y-[-2px]"
+                  className="w-full h-14 rounded-2xl bg-primary font-black uppercase tracking-widest text-primary-foreground shadow-xl shadow-primary/25 transition-all hover:translate-y-[-2px]"
                 >
                   {isLoading ? "Encrypting Update..." : "Update Credentials"}
                 </Button>
@@ -221,11 +220,11 @@ export default function ResetPassword() {
             </div>
           ) : (
             <div className="text-center space-y-8 animate-in zoom-in-95 duration-700">
-              <div className="mx-auto w-28 h-28 bg-emerald-500/10 rounded-[3rem] flex items-center justify-center border border-emerald-500/20 shadow-2xl">
-                <ShieldCheck className="h-14 w-14 text-emerald-500" />
+              <div className="mx-auto w-28 h-28 bg-primary/10 rounded-[3rem] flex items-center justify-center border border-primary/20 shadow-2xl">
+                <ShieldCheck className="h-14 w-14 text-primary" />
               </div>
               <div className="space-y-4">
-                <h2 className="text-4xl font-black tracking-tighter">
+                <h2 className="text-4xl font-black tracking-tighter uppercase italic">
                   Identity Verified.
                 </h2>
                 <p className="text-zinc-500 font-medium max-w-sm mx-auto">
@@ -247,7 +246,7 @@ export default function ResetPassword() {
         {/* Dynamic Footer Status */}
         <div className="mt-auto border-t border-zinc-100 dark:border-zinc-900 p-8 flex justify-between items-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
           <div className="flex items-center gap-2">
-            <Lock size={12} className="text-blue-600" /> AES-256 Protected
+            <Lock size={12} className="text-primary" /> AES-256 Protected
           </div>
           <div className="hidden sm:block">Session Status: Active</div>
         </div>

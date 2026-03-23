@@ -39,6 +39,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<
     "account" | "security" | "notifications" | "preferences"
   >("account");
+
   const [showPassword, setShowPassword] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -56,6 +57,7 @@ export default function SettingsPage() {
     }
   }, [response]);
 
+  
   const handleSave = () => {
     setIsSaving(true);
     // Here you would call your updateProfile mutation

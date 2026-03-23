@@ -54,7 +54,6 @@
 //     </HomeLayout>
 //   );
 // }
-
 "use client";
 
 import React from "react";
@@ -65,12 +64,9 @@ import {
   CheckCircle,
   Globe2,
   Zap,
-  BarChart3,
-  Clock,
   ArrowRight,
   Layers,
   Lock,
-  MousePointer2,
   Smartphone,
   Activity,
 } from "lucide-react";
@@ -78,24 +74,23 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import HomeLayout from "@/components/Layout/Layout";
 import Link from "next/link";
-import Logo from "@/components/Layout/Logo";
 import { AssetAllocation } from "@/components/Home/AssetAllocation";
+import { YieldCalculator } from "@/components/Home/YieldCalculator";
 
 export default function InvestmentLandingPage() {
   return (
     <HomeLayout>
-      <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-500/30 overflow-x-hidden">
+      <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-primary/30 overflow-x-hidden">
         {/* 1. HERO SECTION */}
         <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
-          {/* Abstract Light Background Image */}
           <div className="absolute inset-0 z-0">
             <img
-              // src="https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=2000"
               src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2000"
               className="w-full h-full object-cover opacity-10"
               alt="Hero gradient"
             />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#3b82f615,transparent)]" />
+            {/* Gradient shifted to match Primary Green hue */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.15),transparent)]" />
           </div>
 
           <div className="max-w-5xl text-center z-10">
@@ -103,12 +98,12 @@ export default function InvestmentLandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <Badge className="mb-6 px-4 py-1.5 rounded-full bg-blue-500/10 text-blue-600 border-none text-[10px] font-black uppercase tracking-[0.3em]">
+              <Badge className="mb-6 px-4 py-1.5 rounded-full bg-primary/10 text-primary border-none text-[10px] font-black uppercase tracking-[0.3em]">
                 Institutional Grade Intelligence
               </Badge>
               <h1 className="text-6xl md:text-[6rem] font-black tracking-tighter leading-[0.85] mb-8 uppercase italic">
                 Equity Flow
-                <br /> <span className="text-blue-600">Capital</span>
+                <br /> <span className="text-primary">Capital</span>
               </h1>
 
               <p className="max-w-2xl mx-auto text-slate-500 dark:text-slate-400 text-lg md:text-xl font-medium mb-10 leading-relaxed">
@@ -117,7 +112,8 @@ export default function InvestmentLandingPage() {
               </p>
               <div className="flex flex-col md:flex-row gap-4 justify-center">
                 <Link href="/request-account">
-                  <Button className="h-16 px-12 rounded-2xl bg-slate-900 dark:bg-white dark:text-slate-950 text-white font-black uppercase text-[11px] tracking-widest hover:scale-105 transition-all shadow-xl shadow-slate-200 dark:shadow-none">
+                  {/* Primary Button now uses Emerald Green */}
+                  <Button className="h-16 px-12 rounded-2xl bg-primary text-primary-foreground font-black uppercase text-[11px] tracking-widest hover:scale-105 transition-all shadow-xl shadow-primary/20">
                     Open Institutional Account
                   </Button>
                 </Link>
@@ -151,7 +147,7 @@ export default function InvestmentLandingPage() {
                 <span
                   className={`h-2 w-2 rounded-full ${
                     tick.includes("+")
-                      ? "bg-emerald-500 shadow-[0_0_8px_#10b981]"
+                      ? "bg-primary shadow-[0_0_8px_hsl(var(--primary))]"
                       : "bg-rose-500"
                   }`}
                 />{" "}
@@ -160,6 +156,8 @@ export default function InvestmentLandingPage() {
             ))}
           </div>
         </section>
+
+        <YieldCalculator />
 
         {/* 3. CORE STATS */}
         <section className="py-32 px-6 max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-12">
@@ -173,7 +171,7 @@ export default function InvestmentLandingPage() {
               key={i}
               className="group cursor-default border-l border-slate-100 dark:border-slate-800 pl-6"
             >
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2 transition-colors group-hover:text-blue-500">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2 transition-colors group-hover:text-primary">
                 {stat.label}
               </p>
               <h3 className="text-4xl md:text-5xl font-mono italic font-bold tracking-tighter">
@@ -187,7 +185,6 @@ export default function InvestmentLandingPage() {
         <section className="py-24 px-6 max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[400px]">
             <div className="md:col-span-2 rounded-[3rem] bg-slate-950 p-12 flex flex-col justify-end relative overflow-hidden group">
-              {/* Dark Professional Image */}
               <img
                 src="https://images.unsplash.com/photo-1642790106117-e829e14a795f?auto=format&fit=crop&q=80&w=1200"
                 className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700"
@@ -203,7 +200,8 @@ export default function InvestmentLandingPage() {
                 </p>
               </div>
             </div>
-            <div className="rounded-[3rem] bg-blue-600 p-12 flex flex-col justify-between text-white shadow-2xl shadow-blue-500/20 group overflow-hidden relative">
+            {/* Card Background updated to Primary Green */}
+            <div className="rounded-[3rem] bg-primary p-12 flex flex-col justify-between text-primary-foreground shadow-2xl shadow-primary/20 group overflow-hidden relative">
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-125 transition-transform">
                 <ShieldCheck size={120} />
               </div>
@@ -212,7 +210,7 @@ export default function InvestmentLandingPage() {
                 <h4 className="text-2xl font-bold tracking-tighter uppercase italic mb-2">
                   Vault-Grade <br /> Custody
                 </h4>
-                <p className="text-blue-100 text-xs">
+                <p className="opacity-80 text-xs font-bold">
                   Multi-sig institutional cold storage.
                 </p>
               </div>
@@ -240,9 +238,9 @@ export default function InvestmentLandingPage() {
                 ].map((item) => (
                   <div
                     key={item}
-                    className="flex items-center gap-4 p-5 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 group hover:border-blue-500 transition-colors"
+                    className="flex items-center gap-4 p-5 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 group hover:border-primary transition-colors"
                   >
-                    <CheckCircle className="text-blue-600 h-5 w-5" />
+                    <CheckCircle className="text-primary h-5 w-5" />
                     <span className="text-[11px] font-black uppercase tracking-widest">
                       {item}
                     </span>
@@ -257,7 +255,7 @@ export default function InvestmentLandingPage() {
                 alt="Data Chart"
               />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <div className="bg-blue-600 p-6 rounded-full text-white shadow-2xl animate-bounce">
+                <div className="bg-primary p-6 rounded-full text-primary-foreground shadow-2xl animate-bounce">
                   <Activity size={32} />
                 </div>
               </div>
@@ -265,9 +263,11 @@ export default function InvestmentLandingPage() {
           </div>
         </section>
 
+        <AssetAllocation />
+
         {/* 6. ANALYTICS (DARK BREAK) */}
         <section className="py-32 px-6 bg-slate-950 text-white rounded-[5rem] mx-4 my-16 overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/20 blur-[120px] rounded-full" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 blur-[120px] rounded-full" />
           <div className="max-w-4xl mx-auto text-center relative z-10">
             <h3 className="text-4xl font-bold tracking-tighter italic mb-12 uppercase">
               Deep Intelligence
@@ -282,7 +282,7 @@ export default function InvestmentLandingPage() {
                   key={i}
                   className="p-10 border border-slate-800 rounded-[2.5rem] hover:bg-white/5 transition-colors group"
                 >
-                  <div className="text-blue-500 mb-6 flex justify-center group-hover:scale-110 transition-transform">
+                  <div className="text-primary mb-6 flex justify-center group-hover:scale-110 transition-transform">
                     {box.icon}
                   </div>
                   <p className="text-[10px] font-black uppercase tracking-[0.2em]">
@@ -302,7 +302,7 @@ export default function InvestmentLandingPage() {
               alt="Map"
             />
           </div>
-          <Globe2 className="h-16 w-16 mx-auto text-blue-600 opacity-40 animate-pulse" />
+          <Globe2 className="h-16 w-16 mx-auto text-primary opacity-40 animate-pulse" />
           <h2 className="text-5xl font-black uppercase tracking-tighter italic relative z-10">
             Global Reach. <br /> Local Safety.
           </h2>
@@ -318,7 +318,7 @@ export default function InvestmentLandingPage() {
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
             <div className="w-full md:w-1/2 flex justify-center order-2 md:order-1">
               <div className="relative group">
-                <div className="absolute -inset-4 bg-blue-500/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute -inset-4 bg-primary/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="w-72 h-[580px] bg-slate-900 rounded-[3.5rem] border-[12px] border-slate-800 shadow-[0_0_80px_rgba(0,0,0,0.1)] relative overflow-hidden">
                   <img
                     src="https://images.unsplash.com/photo-1642790106117-e829e14a795f?auto=format&fit=crop&q=80&w=1200"
@@ -348,11 +348,8 @@ export default function InvestmentLandingPage() {
           </div>
         </section>
 
-        <AssetAllocation />
-
         {/* 10. FINAL CTA */}
-        <section className="py-40 px-6 text-center bg-blue-600 text-white relative overflow-hidden">
-          {/* Abstract Pattern Overlay */}
+        <section className="py-40 px-6 text-center bg-primary text-primary-foreground relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none" />
 
           <div className="relative z-10">
@@ -360,7 +357,7 @@ export default function InvestmentLandingPage() {
               Begin Your <br /> Legacy
             </h2>
             <Link href="/request-account">
-              <Button className="h-14 px-20 rounded-full bg-white text-blue-600 font-black uppercase tracking-[0.2em] text-sm hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-black/20">
+              <Button className="h-14 px-20 rounded-full bg-white text-primary font-black uppercase tracking-[0.2em] text-sm hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-black/20">
                 Open Account Now
               </Button>
             </Link>

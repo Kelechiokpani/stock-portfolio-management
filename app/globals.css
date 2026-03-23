@@ -59,43 +59,49 @@ body {
     -moz-appearance: textfield;
   }
 }
+
 @layer base {
   :root {
     /* PROFESSIONAL LIGHT THEME */
-    --background: 222 20% 97%; /* soft off-white with hint of dark blue */
-    --foreground: 222 10% 15%; /* dark slate for text */
-    --card: 222 18% 95%; /* subtle card background */
+    --background: 222 20% 97%;
+    --foreground: 222 10% 15%;
+    --card: 0 0% 100%; /* Pure white for better contrast in light mode */
     --card-foreground: 222 10% 15%;
-    --primary: 200 90% 50%; /* accent color */
-    --secondary: 222 12% 88%; /* secondary muted areas */
-    --muted: 222 15% 80%; /* lighter muted areas */
-    --border: 222 15% 85%; /* subtle border */
-    --radius: 0.5rem;
+
+    /* PRIMARY: Professional Emerald Green (Jade) */
+    /* HSL: 162 84% 35% - Rich, stable, and authoritative */
+    --primary: 162 84% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 222 12% 92%;
+    --muted: 222 15% 85%;
+    --border: 222 15% 90%;
+    --radius: 0.75rem; /* Slightly softer for a modern UI feel */
   }
 
   .dark {
-    /* DARK THEME (your preferred color) */
-    --background: 222 40% 6%; /* bg-[#0b0f17] equivalent */
-    --foreground: 0 0% 98%;
-    --card: 222 35% 10%;
-    --card-foreground: 0 0% 98%;
-    --primary: 200 100% 50%;
-    --secondary: 222 20% 18%;
-    --muted: 222 20% 25%;
-    --border: 222 20% 20%;
+    /* DARK THEME (Sophisticated Midnight) */
+    --background: 222 47% 4%; /* Deepest slate/navy mix */
+    --foreground: 210 20% 98%;
+    --card: 222 47% 7%;
+    --card-foreground: 210 20% 98%;
+
+    /* PRIMARY: Vibrant Emerald for Dark Mode */
+    /* HSL: 160 84% 45% - Slightly brighter to "pop" against the dark bg */
+    --primary: 160 84% 45%;
+    --primary-foreground: 162 40% 6%;
+
+    --secondary: 222 30% 12%;
+    --muted: 222 20% 18%;
+    --border: 222 20% 15%;
   }
 }
 
-@layer base {
-  body {
-    @apply bg-background text-foreground;
-  }
-}
 @layer base {
   * {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased; /* Added antialiased for cleaner typography */
   }
 }

@@ -29,7 +29,7 @@ const slides = [
   },
   {
     image:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop",
     title: "Global Reach",
     desc: "Direct access to over 150 global exchanges and private equity flows.",
   },
@@ -80,17 +80,18 @@ export default function LoginPage() {
               i === currentSlide ? "opacity-100" : "opacity-0"
             }`}
           >
-            <div className="absolute inset-0 z-10 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
+            {/* Gradient Overlay using Primary Green tint */}
+            <div className="absolute inset-0 z-10 bg-gradient-to-t from-primary/90 via-zinc-950/20 to-transparent" />
             <img
               src={slide.image}
               alt="Banking"
-              className="h-full w-full object-cover grayscale-[0.3]"
+              className="h-full w-full object-cover grayscale-[0.5]"
             />
             <div className="absolute bottom-20 left-16 z-20 max-w-md space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-600/20 text-blue-400 rounded-full border border-blue-500/30 text-[10px] font-black uppercase tracking-[0.2em]">
-                <Star size={12} fill="currentColor" /> VaultStock Elite
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/20 text-primary-foreground rounded-full border border-primary/30 text-[10px] font-black uppercase tracking-[0.2em]">
+                <Star size={12} fill="currentColor" /> Equity Flow Elite
               </div>
-              <h2 className="text-5xl font-black italic tracking-tighter text-white font-serif leading-tight">
+              <h2 className="text-5xl font-black italic tracking-tighter text-white font-serif leading-tight uppercase">
                 {slide.title}
               </h2>
               <p className="text-zinc-300 text-lg leading-relaxed font-medium">
@@ -106,7 +107,7 @@ export default function LoginPage() {
         <div className="w-full max-w-[440px] space-y-10">
           <div className="flex flex-col items-center lg:items-start">
             <Logo />
-            <h1 className="mt-6 text-4xl font-black tracking-tighter text-zinc-900 dark:text-white">
+            <h1 className="mt-6 text-4xl font-black tracking-tighter text-zinc-900 dark:text-white uppercase italic">
               Welcome back.
             </h1>
             <p className="mt-2 font-medium text-zinc-500 dark:text-zinc-400">
@@ -118,16 +119,16 @@ export default function LoginPage() {
             <div className="space-y-2">
               <Label
                 htmlFor="email"
-                className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-1"
+                className="text-[11px] font-black uppercase tracking-widest text-zinc-400 ml-1"
               >
-                Email Address
+                Institutional Email
               </Label>
               <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
+                <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 group-focus-within:text-primary transition-colors" />
                 <Input
                   id="email"
                   type="email"
-                  className="h-14 rounded-2xl border-zinc-200 bg-zinc-50/50 pl-12 transition-all focus:bg-white focus:ring-4 focus:ring-blue-500/10 dark:border-zinc-800 dark:bg-zinc-900/50"
+                  className="h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 pl-12 transition-all focus:bg-white focus:ring-4 focus:ring-primary/10 dark:border-zinc-800 dark:bg-zinc-900/50 focus-visible:ring-primary"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
@@ -138,16 +139,16 @@ export default function LoginPage() {
             <div className="space-y-2">
               <Label
                 htmlFor="password"
-                className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-1"
+                className="text-[11px] font-black uppercase tracking-widest text-zinc-400 ml-1"
               >
-                Password
+                Access Key
               </Label>
               <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
+                <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 group-focus-within:text-primary transition-colors" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  className="h-14 rounded-2xl border-zinc-200 bg-zinc-50/50 pl-12 pr-12 transition-all focus:bg-white focus:ring-4 focus:ring-blue-500/10 dark:border-zinc-800 dark:bg-zinc-900/50"
+                  className="h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 pl-12 pr-12 transition-all focus:bg-white focus:ring-4 focus:ring-primary/10 dark:border-zinc-800 dark:bg-zinc-900/50 focus-visible:ring-primary"
                   value={form.password}
                   onChange={(e) =>
                     setForm({ ...form, password: e.target.value })
@@ -157,7 +158,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-primary transition-colors"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -166,10 +167,10 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="h-14 w-full rounded-2xl bg-blue-600 text-[13px] font-black uppercase tracking-widest text-white shadow-xl shadow-blue-500/25 hover:bg-blue-700 hover:translate-y-[-2px] transition-all"
+              className="h-14 w-full rounded-2xl bg-primary text-[13px] font-black uppercase tracking-widest text-primary-foreground shadow-xl shadow-primary/25 hover:opacity-90 hover:translate-y-[-2px] transition-all"
               disabled={isLoading}
             >
-              {isLoading ? "Verifying..." : "Sign In to Terminal"}
+              {isLoading ? "Verifying Access..." : "Sign In to Terminal"}
             </Button>
           </form>
 
@@ -182,13 +183,13 @@ export default function LoginPage() {
           <div className="flex justify-between pt-4">
             <Link
               href="/request-account"
-              className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-blue-500 transition-colors"
+              className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-primary transition-colors"
             >
               Request New Account
             </Link>
             <Link
               href="/forgot-password"
-              className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-blue-500 transition-colors"
+              className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-primary transition-colors"
             >
               Reset Password
             </Link>
@@ -196,11 +197,11 @@ export default function LoginPage() {
 
           <div className="flex items-center gap-4 pt-10 border-t border-zinc-100 dark:border-zinc-900">
             <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-tight">
-              <ShieldCheck size={14} className="text-emerald-500" /> AES-256
+              <ShieldCheck size={14} className="text-primary" /> AES-256
               Encryption
             </div>
             <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-tight ml-auto">
-              System Status: <span className="text-emerald-500">Optimal</span>
+              System Status: <span className="text-primary">Optimal</span>
             </div>
           </div>
         </div>

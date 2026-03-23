@@ -59,7 +59,6 @@ export default function AdminSupportDesk({ user }: any) {
       toast.success(`Message sent to user successfully`);
     } catch (err: any) {
       console.log("Error sending message:", err);
-      // toast.error(err?.data?.message || "Failed to deliver message");
     }
   };
 
@@ -69,13 +68,13 @@ export default function AdminSupportDesk({ user }: any) {
       <div className="fixed bottom-8 right-8 z-[100]">
         <Button
           onClick={() => setIsOpen(true)}
-          className="relative h-16 w-16 rounded-[2rem] bg-zinc-950 dark:bg-zinc-100 dark:text-zinc-950 text-white shadow-2xl hover:scale-110 active:scale-95 transition-all border-2 border-zinc-800 dark:border-zinc-300"
+          className="relative h-16 w-16 rounded-[2rem] bg-zinc-950 dark:bg-primary text-white shadow-2xl hover:scale-110 active:scale-95 transition-all border-2 border-zinc-800 dark:border-primary/20"
         >
           <MessageSquare className="text-white h-7 w-7" />
           {chatHistory.length > 0 && (
             <span className="absolute -top-1 -right-1 flex h-6 w-6">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-6 w-6 bg-blue-600 items-center justify-center text-[10px] font-bold text-white border-2 border-white dark:border-zinc-950">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-6 w-6 bg-primary items-center justify-center text-[10px] font-black text-primary-foreground border-2 border-white dark:border-zinc-950">
                 {chatHistory.length}
               </span>
             </span>
@@ -104,18 +103,17 @@ export default function AdminSupportDesk({ user }: any) {
               {/* Header */}
               <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-900/50">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-950 flex items-center justify-center shadow-lg border border-zinc-700">
-                    <User size={24} />
+                  <div className="h-12 w-12 rounded-2xl bg-zinc-900 dark:bg-primary flex items-center justify-center shadow-lg border border-zinc-700 dark:border-primary/30">
+                    <User size={24} className="text-white" />
                   </div>
                   <div>
-                    <h4 className="font-black text-sm tracking-tight">
+                    <h4 className="font-black text-sm tracking-tight uppercase italic">
                       {user.fullName}
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                      <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                       <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
                         ADMIN_SESSION: {response?.user?.firstName}
-                        {/* {response?.user?.lastName} */}
                       </span>
                     </div>
                   </div>
@@ -137,8 +135,8 @@ export default function AdminSupportDesk({ user }: any) {
               >
                 {isHistoryLoading ? (
                   <div className="flex flex-col items-center justify-center h-full gap-2 text-zinc-400">
-                    <Loader2 className="animate-spin" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">
+                    <Loader2 className="animate-spin text-primary" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">
                       Decrypting Messages...
                     </span>
                   </div>
@@ -154,7 +152,7 @@ export default function AdminSupportDesk({ user }: any) {
                         <div
                           className={`p-4 rounded-2xl text-[13px] font-medium leading-relaxed border ${
                             msg.sender === "admin"
-                              ? "bg-zinc-900 dark:bg-blue-600 text-white border-zinc-800 dark:border-blue-500 rounded-tr-none shadow-lg shadow-blue-500/10"
+                              ? "bg-zinc-900 dark:bg-primary text-white border-zinc-800 dark:border-primary/50 rounded-tr-none shadow-lg shadow-primary/10"
                               : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border-zinc-100 dark:border-zinc-800 rounded-tl-none shadow-sm"
                           }`}
                         >
@@ -171,7 +169,7 @@ export default function AdminSupportDesk({ user }: any) {
                         >
                           <Clock size={10} /> {msg.timestamp}
                           {msg.sender === "admin" && (
-                            <CheckCheck size={12} className="text-blue-500" />
+                            <CheckCheck size={12} className="text-primary" />
                           )}
                         </div>
                       </div>
@@ -191,10 +189,9 @@ export default function AdminSupportDesk({ user }: any) {
                         ).substring(0, 6)}`
                       )
                     }
-                    className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+                    className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all"
                   >
-                    <Banknote size={14} className="text-emerald-500" /> Wire
-                    Info
+                    <Banknote size={14} className="text-primary" /> Wire Info
                   </button>
                   <button
                     onClick={() =>
@@ -202,17 +199,17 @@ export default function AdminSupportDesk({ user }: any) {
                         "✅ Your deposit has been verified. The funds are now active in your portfolio."
                       )
                     }
-                    className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+                    className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all"
                   >
                     <Zap size={14} className="text-amber-500" /> Confirm Deposit
                   </button>
                 </div>
 
-                <div className="flex items-end gap-3 bg-zinc-100/50 dark:bg-zinc-900/80 p-2 rounded-3xl border border-zinc-200 dark:border-zinc-800 focus-within:ring-2 ring-blue-500/20 transition-all">
+                <div className="flex items-end gap-3 bg-zinc-100/50 dark:bg-zinc-900/80 p-2 rounded-3xl border border-zinc-200 dark:border-zinc-800 focus-within:ring-2 ring-primary/20 transition-all">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-11 w-11 shrink-0 text-zinc-400 hover:text-blue-500"
+                    className="h-11 w-11 shrink-0 text-zinc-400 hover:text-primary"
                   >
                     <Paperclip size={20} />
                   </Button>
@@ -228,12 +225,12 @@ export default function AdminSupportDesk({ user }: any) {
                     placeholder={`Reply to ${
                       user?.firstName?.split(" ")[0]
                     }...`}
-                    className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] py-3 px-4 rounded-lg resize-none max-h-32"
+                    className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] py-3 px-4 rounded-lg resize-none max-h-32 dark:text-zinc-100"
                   />
                   <Button
                     onClick={() => handleSend(message)}
                     disabled={!message.trim() || isSending}
-                    className="h-11 w-11 shrink-0 bg-zinc-900 dark:bg-blue-600 text-white rounded-2xl shadow-lg shadow-zinc-500/20 disabled:opacity-50"
+                    className="h-11 w-11 shrink-0 bg-zinc-900 dark:bg-primary text-white rounded-2xl shadow-lg shadow-zinc-500/20 disabled:opacity-50 transition-all"
                   >
                     {isSending ? (
                       <Loader2 size={18} className="animate-spin" />
@@ -243,8 +240,8 @@ export default function AdminSupportDesk({ user }: any) {
                   </Button>
                 </div>
 
-                <div className="mt-4 flex justify-center items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">
-                  <ShieldCheck size={12} className="text-blue-500" /> Restricted
+                <div className="mt-4 flex justify-center items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+                  <ShieldCheck size={12} className="text-primary" /> Restricted
                   Admin Access
                 </div>
               </div>

@@ -13,7 +13,20 @@ export const AssetAllocation = () => {
     <section className="bg-white dark:bg-black py-24 border-b border-border/40">
       <div className="max-w-[1536px] mx-auto px-6 md:px-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <div className="space-y-6">
+        
+
+          <div className="relative flex justify-center items-center">
+             {/* Decorative Ring Design */}
+            <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-full border-[20px] border-muted dark:border-zinc-900 flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total AUM</p>
+                    <p className="text-2xl font-mono font-black">$1.2T</p>
+                </div>
+                {/* Visual "Slices" representation using absolute positioning or SVG could go here */}
+            </div>
+          </div>
+
+            <div className="space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded text-[10px] font-black uppercase tracking-widest">
               <Target size={14} /> Portfolio Strategy
             </div>
@@ -34,17 +47,6 @@ export const AssetAllocation = () => {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-
-          <div className="relative flex justify-center items-center">
-             {/* Decorative Ring Design */}
-            <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-full border-[20px] border-muted dark:border-zinc-900 flex items-center justify-center">
-                <div className="text-center">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total AUM</p>
-                    <p className="text-2xl font-mono font-black">$1.2T</p>
-                </div>
-                {/* Visual "Slices" representation using absolute positioning or SVG could go here */}
             </div>
           </div>
         </div>

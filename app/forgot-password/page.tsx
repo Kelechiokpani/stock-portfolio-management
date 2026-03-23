@@ -79,17 +79,18 @@ export default function ForgotPasswordPage() {
               i === currentSlide ? "opacity-100" : "opacity-0"
             }`}
           >
-            <div className="absolute inset-0 z-10 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+            {/* Gradient Overlay using Primary color */}
+            <div className="absolute inset-0 z-10 bg-gradient-to-t from-primary/90 via-zinc-950/40 to-transparent" />
             <img
               src={slide.image}
               alt="Security"
               className="h-full w-full object-cover grayscale-[0.4]"
             />
             <div className="absolute bottom-20 left-12 z-20 max-w-sm space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full border border-amber-500/30 text-[10px] font-black uppercase tracking-[0.2em]">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/20 text-primary-foreground rounded-full border border-primary/30 text-[10px] font-black uppercase tracking-[0.2em]">
                 <ShieldAlert size={12} fill="currentColor" /> System Protocol
               </div>
-              <h2 className="text-4xl font-black italic tracking-tighter text-white font-serif leading-tight">
+              <h2 className="text-4xl font-black italic tracking-tighter text-white font-serif leading-tight uppercase">
                 {slide.title}
               </h2>
               <p className="text-zinc-300 text-lg font-medium leading-relaxed">
@@ -106,10 +107,11 @@ export default function ForgotPasswordPage() {
           {!isSubmitted ? (
             <>
               <div className="flex flex-col items-center lg:items-start">
-                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-900 shadow-xl shadow-zinc-500/20 dark:bg-blue-600">
+                {/* Lock icon container now uses Primary green in dark mode */}
+                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-900 shadow-xl shadow-zinc-500/10 dark:bg-primary">
                   <Lock className="h-7 w-7 text-white" />
                 </div>
-                <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-white">
+                <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-white uppercase italic">
                   Reset Credentials.
                 </h1>
                 <p className="mt-2 font-medium text-zinc-500 dark:text-zinc-400 text-center lg:text-left">
@@ -122,17 +124,17 @@ export default function ForgotPasswordPage() {
                 <div className="space-y-2">
                   <Label
                     htmlFor="email"
-                    className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-1"
+                    className="text-[11px] font-black uppercase tracking-widest text-zinc-400 ml-1"
                   >
                     Institutional Email
                   </Label>
                   <div className="relative group">
-                    <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 group-focus-within:text-blue-500 transition-colors" />
+                    <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 group-focus-within:text-primary transition-colors" />
                     <Input
                       id="email"
                       type="email"
                       placeholder="name@company.com"
-                      className="h-14 rounded-2xl border-zinc-200 bg-zinc-50/50 pl-12 transition-all focus:bg-white focus:ring-4 focus:ring-blue-500/10 dark:border-zinc-800 dark:bg-zinc-900/50"
+                      className="h-14 rounded-2xl border-zinc-100 bg-zinc-50/50 pl-12 transition-all focus:bg-white focus:ring-4 focus:ring-primary/10 dark:border-zinc-800 dark:bg-zinc-900/50 focus-visible:ring-primary"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
@@ -142,7 +144,7 @@ export default function ForgotPasswordPage() {
 
                 <Button
                   disabled={isLoading}
-                  className="h-14 w-full rounded-2xl bg-blue-600 text-[13px] font-black uppercase tracking-widest text-white shadow-xl shadow-blue-500/25 hover:bg-blue-700 hover:translate-y-[-2px] transition-all"
+                  className="h-14 w-full rounded-2xl bg-primary text-[13px] font-black uppercase tracking-widest text-primary-foreground shadow-xl shadow-primary/25 hover:opacity-90 hover:translate-y-[-2px] transition-all"
                 >
                   {isLoading
                     ? "Dispatched Security Link..."
@@ -151,7 +153,7 @@ export default function ForgotPasswordPage() {
 
                 <Link
                   href="/login"
-                  className="flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-blue-500 transition-colors pt-2"
+                  className="flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-primary transition-colors pt-2"
                 >
                   <ArrowLeft className="h-3 w-3" /> Back to Terminal
                 </Link>
@@ -159,11 +161,11 @@ export default function ForgotPasswordPage() {
             </>
           ) : (
             <div className="text-center space-y-8 animate-in zoom-in-95 duration-700">
-              <div className="mx-auto w-24 h-24 bg-emerald-500/10 rounded-[2.5rem] flex items-center justify-center border border-emerald-500/20 shadow-2xl">
-                <CheckCircle2 className="h-12 w-12 text-emerald-500" />
+              <div className="mx-auto w-24 h-24 bg-primary/10 rounded-[2.5rem] flex items-center justify-center border border-primary/20 shadow-2xl">
+                <CheckCircle2 className="h-12 w-12 text-primary" />
               </div>
               <div className="space-y-4">
-                <h2 className="text-4xl font-black tracking-tighter">
+                <h2 className="text-4xl font-black tracking-tighter uppercase italic">
                   Check Inbox.
                 </h2>
                 <p className="text-zinc-500 font-medium max-w-xs mx-auto">
@@ -177,7 +179,7 @@ export default function ForgotPasswordPage() {
               <Link href="/login" className="block w-full">
                 <Button
                   variant="outline"
-                  className="h-14 w-full rounded-2xl border-2 font-bold uppercase tracking-widest text-[11px]"
+                  className="h-14 w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-800 font-black uppercase tracking-widest text-[11px] hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-all"
                 >
                   Return to Login
                 </Button>
@@ -193,9 +195,9 @@ export default function ForgotPasswordPage() {
         </div>
 
         {/* Dynamic Security Footer */}
-        <div className="absolute bottom-8 right-8 hidden lg:flex items-center gap-6 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+        <div className="absolute bottom-8 right-8 hidden lg:flex items-center gap-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest">
           <div className="flex items-center gap-2">
-            <TrendingUp size={14} className="text-blue-600" /> System: Online
+            <TrendingUp size={14} className="text-primary" /> System: Online
           </div>
           <div className="flex items-center gap-2">
             <Star size={14} className="text-amber-500" /> Vault-Grade Security
