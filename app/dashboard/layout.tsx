@@ -26,8 +26,6 @@ export default function DashboardLayout({
     return <GlobalLoader />;
   }
 
-  console.log(data, "User data in DashboardLayout...");
-
   return (
     <div className="h-screen flex overflow-hidden bg-background ">
       {/* Sidebar (fixed height, no scroll with page) */}

@@ -58,8 +58,9 @@ export default function ForgotPasswordPage() {
     }
 
     try {
-      await forgotPassword({ email }).unwrap();
+      const data = await forgotPassword({ email }).unwrap();
       setIsSubmitted(true);
+      console.log(data, "data...");
       toast.success("Security link dispatched.");
     } catch (err: any) {
       setErrorMsg(

@@ -31,8 +31,6 @@ export default function FundsPage() {
 
   const { data: response, isLoading } = useGetMeQuery();
 
-  console.log("User Data:", response?.user);
-
   const user = response?.user;
 
   // Financial Calculations
@@ -137,7 +135,7 @@ export default function FundsPage() {
       </div>
 
       {/* 3. MOVEMENTS & NODES */}
-      <div className="grid gap-10 lg:grid-cols-2">
+      {/* <div className="grid gap-10 lg:grid-cols-2">
         <div className="space-y-8">
           <div className="flex items-center gap-3 mb-6">
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
@@ -164,7 +162,7 @@ export default function FundsPage() {
             currency={currency}
           />
         </div>
-      </div>
+      </div> */}
 
       <DepositModal
         isOpen={showDepositModal}
@@ -177,7 +175,6 @@ export default function FundsPage() {
         isOpen={showWithdrawalModal}
         onClose={() => setShowWithdrawalModal(false)}
         availableBalance={user.availableCash}
-        connectedAccounts={user.connectedAccounts}
       />
     </div>
   );

@@ -24,13 +24,13 @@ export interface FundPayload {
   description?: string;
 }
 
-export interface WithdrawalPayload extends FundPayload {
-  bankDetails: {
-    bankName: string;
-    accountName: string;
-    accountNumber: string;
-  };
-  method: "moniepoint" | "gtbank" | string;
+export interface WithdrawalPayload {
+ accountNumber: string;
+  routingNumber: string;
+  amount: number;
+  narration: string;
+  // If your backend TRULY requires 'method', add it back as an optional:
+  method?: string;
 }
 
 export interface BuyPayload {

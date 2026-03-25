@@ -49,7 +49,7 @@ export const authApi = apiSlice.injectEndpoints({
     }),
 
     verifyOtp: builder.mutation<
-      { success: boolean; token?: string },
+      { verified: boolean; token?: string },
       OtpVerifyPayload
     >({
       query: (body) => ({
@@ -103,7 +103,7 @@ export const authApi = apiSlice.injectEndpoints({
     }),
 
     resetPassword: builder.mutation({
-      query: (data: { token: string; newPassword: any }) => ({
+      query: (data: { token: any; newPassword: any }) => ({
         url: "/auth/reset-password",
         method: "POST",
         body: data,

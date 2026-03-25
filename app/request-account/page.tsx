@@ -154,13 +154,14 @@ export default function RequestAccountPage() {
   };
 
   const handleVerifyOtp = async () => {
-    if (otpValue.length < 4) return toast.error("Enter full verification code");
+    if (otpValue.length < 6) return toast.error("Enter full verification code");
     try {
       const res = await verifyOtp({
         email: form.email,
         otp: otpValue,
       }).unwrap();
-      if (res.success) {
+      console.log(res, "response...");
+      if (res?.verified === true) {
         setIsEmailVerified(true);
         toast.success("Identity Authenticated");
       }
@@ -505,7 +506,7 @@ export default function RequestAccountPage() {
               </div>
               <Button
                 asChild
-                className="h-14 px-12 rounded-2xl bg-zinc-900 text-white font-black uppercase tracking-widest"
+                className="h-14 px-12 rounded-2xl text-white font-black uppercase tracking-widest"
               >
                 <Link href="/">Exit Terminal</Link>
               </Button>
