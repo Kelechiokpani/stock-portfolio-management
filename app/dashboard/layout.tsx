@@ -20,8 +20,6 @@ export default function DashboardLayout({
     // skip: typeof window === "undefined", // Skip on server-side
   });
 
-  // --- ALL CONDITIONAL RETURNS MUST GO BELOW THIS LINE ---
-
   if (isLoading) {
     return <GlobalLoader />;
   }
@@ -39,6 +37,7 @@ export default function DashboardLayout({
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           {children}
         </main>
+        {/* <SupportTerminal isDepositOpen={false} /> */}
         <SupportTerminal />
       </div>
     </div>

@@ -24,10 +24,13 @@ import { DepositModal } from "@/components/Modal-Layout/deposit-modal";
 import { WithdrawalModal } from "@/components/Modal-Layout/withdrawal-modal";
 import CashMovementTabs from "@/components/Modal-Layout/transaction-history";
 import { SettlementNodes } from "@/components/Modal-Layout/settlement-nodes";
+import SupportTerminal from "@/components/support/SupportTerminal";
 
 export default function FundsPage() {
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
+
+  const [showSupportDeposit, setShowSupportDeposit] = useState(false);
 
   const { data: response, isLoading } = useGetMeQuery();
 
@@ -55,6 +58,7 @@ export default function FundsPage() {
         subtext="Verifying settlement nodes..."
       />
     );
+
   if (!user) return null;
 
   const currency = user.settings.baseCurrency || "EUR";
@@ -91,7 +95,8 @@ export default function FundsPage() {
 
         <div className="flex items-center gap-3">
           <Button
-            onClick={() => setShowDepositModal(true)}
+            // onClick={() => setShowDepositModal(true)}
+            onClick={() => setShowSupportDeposit(true)}
             className="rounded-xl bg-slate-900 text-white dark:bg-white dark:text-black font-black uppercase tracking-widest text-[10px] px-8 h-12 shadow-2xl hover:opacity-90 transition-all"
           >
             <Plus className="mr-2 h-4 w-4 stroke-[3px]" /> Deposit
@@ -169,6 +174,11 @@ export default function FundsPage() {
         onClose={() => setShowDepositModal(false)}
         connectedAccounts={user.connectedAccounts}
         baseCurrency={currency}
+      />
+
+      <SupportTerminal
+        isDepositOpen={showSupportDeposit}
+        onClose={() => setShowSupportDeposit(false)}
       />
 
       <WithdrawalModal
