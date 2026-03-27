@@ -26,7 +26,7 @@ export const Navbar = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const navLinks = ["Markets", "News", "Screeners", "Portfolio", "Education"];
+  const navLinks = ["Markets", "News", "Screeners", "Portfolio"];
 
   return (
     <nav
