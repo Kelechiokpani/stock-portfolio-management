@@ -137,15 +137,19 @@ export const Navbar = () => {
           </div>
 
           <div className="flex flex-col gap-3 mt-auto mb-10 sm:hidden">
-            <Button
-              variant="outline"
-              className="w-full font-bold uppercase tracking-widest text-xs h-12 border-border text-foreground"
-            >
-              Log In
-            </Button>
-            <Button className="w-full font-bold uppercase tracking-widest text-xs h-12 bg-primary text-primary-foreground">
-              Join Now
-            </Button>
+            <Link href="/login">
+              <Button
+                variant="outline"
+                className="w-full font-bold uppercase tracking-widest text-xs h-12 border-border text-foreground"
+              >
+                Log In
+              </Button>
+            </Link>
+            <Link href="/request-account">
+              <Button className="w-full font-bold uppercase tracking-widest text-xs h-12 bg-primary text-primary-foreground">
+                Join Now
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
