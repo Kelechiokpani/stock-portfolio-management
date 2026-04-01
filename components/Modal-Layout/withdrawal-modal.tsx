@@ -55,6 +55,7 @@ export function WithdrawalModal({
   const [amount, setAmount] = useState("");
   const [narration, setNarration] = useState("Capital Withdrawal");
   const [selectedAccountId, setSelectedAccountId] = useState("");
+  const [withdrawalResult, setWithdrawalResult] = useState<any | null>(null);
 
   // RTK Query Mutation
   const [withdrawFunds, { isLoading: isSubmitting }] =
@@ -76,9 +77,8 @@ export function WithdrawalModal({
         narration: narration,
         method: "bank_transfer",
       }).unwrap();
-
+      setWithdrawalResult(result);
       console.log("Withdrawal result:", result);
-
       setStep("success");
     } catch (error: any) {
       console.log("Withdrawal error:", error);
@@ -90,6 +90,7 @@ export function WithdrawalModal({
     setStep("amount");
     setAmount("");
     setNarration("Capital Withdrawal");
+    setWithdrawalResult(null);
     onClose();
   };
 
@@ -358,25 +359,79 @@ export function WithdrawalModal({
           )}
 
           {/* STEP 4: SUCCESS */}
-          {step === "success" && (
-            <div className="space-y-6 py-4 animate-in zoom-in duration-500 text-center">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-rose-500/10 border border-rose-500/20">
-                <CheckCircle2 className="h-10 w-10 text-rose-500" />
+          {step === "success" && withdrawalResult && (
+            <div className="space-y-6 py-6 px-6 animate-in zoom-in duration-500 text-center">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <CheckCircle2 className="h-10 w-10 text-emerald-500" />
               </div>
+
               <div className="space-y-2">
-                <h2 className="text-2xl font-serif font-bold">
-                  Withdrawal Initiated
+                <h2 className="text-2xl font-serif font-bold text-foreground">
+                  Request Submitted
                 </h2>
-                <p className="text-muted-foreground text-sm">
-                  Transfer of{" "}
-                  <span className="text-foreground font-bold">
-                    {baseCurrency === "EUR" ? "€" : "$"}
-                    {parseFloat(amount).toLocaleString()}
-                  </span>{" "}
-                  is processing.
+                <p className="text-muted-foreground text-sm leading-relaxed px-4">
+                  {withdrawalResult.message}
                 </p>
               </div>
-              <Button onClick={handleClose} className="w-full h-12 rounded-xl">
+
+              {/* Detailed Receipt Card */}
+              <div className="bg-secondary/40 rounded-2xl p-5 text-left space-y-4 border border-border/40">
+                <div className="flex justify-between items-center border-b border-border/50 pb-3">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Amount Locked
+                  </span>
+                  <span className="font-serif font-bold text-lg">
+                    {baseCurrency === "EUR" ? "€" : "$"}
+                    {withdrawalResult.cashMovement.amount.toLocaleString(
+                      undefined,
+                      { minimumFractionDigits: 2 }
+                    )}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-y-3">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                      Destination Bank
+                    </p>
+                    <p className="text-xs font-bold truncate">
+                      {withdrawalResult.settlementAccount.bankName}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                      Account Holder
+                    </p>
+                    <p className="text-xs font-bold truncate">
+                      {withdrawalResult.settlementAccount.accountName}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                      Account Number
+                    </p>
+                    <p className="text-xs font-mono font-bold">
+                      ****
+                      {withdrawalResult.settlementAccount.accountNumber.slice(
+                        -4
+                      )}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                      Status
+                    </p>
+                    <p className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full inline-block">
+                      Pending Approval
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleClose}
+                className="w-full h-12 rounded-xl bg-foreground text-background hover:bg-foreground/90 transition-all font-bold"
+              >
                 Return to Dashboard
               </Button>
             </div>

@@ -7,7 +7,13 @@ import {
   useGetBanksQuery,
   useGetResettlementAccountsQuery,
 } from "@/app/services/features/market/marketApi";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -145,6 +151,13 @@ export function ResettlementModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden border-border bg-card shadow-2xl">
         {/* Header */}
+        <DialogHeader className="sr-only">
+          <DialogTitle>Withdraw Funds</DialogTitle>
+          <DialogDescription>
+            Withdrawal process to move funds to your settlement account.
+          </DialogDescription>
+        </DialogHeader>
+
         <div className="px-8 py-6 border-b bg-muted/30 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
@@ -241,7 +254,7 @@ export function ResettlementModal({
                               value={bank.name}
                               className="focus:bg-primary/10 focus:text-primary py-3"
                             >
-                              <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-3 pt-2">
                                 <div className="flex h-6 w-8 items-center justify-center rounded bg-muted text-[10px] font-mono text-muted-foreground">
                                   {bank.code ||
                                     bank.name.substring(0, 2).toUpperCase()}
