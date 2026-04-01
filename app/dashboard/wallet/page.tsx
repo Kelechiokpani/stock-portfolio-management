@@ -106,14 +106,14 @@ export default function WalletPage() {
           <Button
             // onClick={() => setShowDepositModal(true)}
             onClick={() => setShowSupportDeposit(true)}
-            className="rounded-xl bg-green-600 text-white dark:bg-white dark:text-black font-black uppercase tracking-widest text-[10px] px-8 h-12 shadow-2xl hover:opacity-90 transition-all"
+            className="rounded-xl bg-emerald-500 text-white dark:bg-white dark:text-black font-black uppercase tracking-widest text-[10px] px-8 h-12 shadow-2xl hover:opacity-90 transition-all"
           >
             <Plus className="mr-2 h-4 w-4 stroke-[3px]" /> Deposit
           </Button>
           <Button
             onClick={() => setShowResettlementModal(true)}
             variant="outline"
-            className="rounded-xl border-slate-200 dark:border-slate-800 font-black uppercase tracking-widest text-[10px] px-8 h-12 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+            className="rounded-xl border-slate-500 dark:border-slate-800 font-black uppercase tracking-widest text-[10px] px-8 h-12 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
           >
             <Minus className="mr-2 h-4 w-4 stroke-[3px]" /> Add Withdrawal
             Account
@@ -164,14 +164,16 @@ export default function WalletPage() {
               </p>
             </div>
           </div>
-          <Button
-            onClick={() => setShowWithdrawalModal(true)}
-            variant="outline"
-            className="rounded-xl border-slate-200 dark:border-slate-800 font-black uppercase tracking-widest text-[10px] px-8 h-12 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
-          >
-            <Minus className="mr-2 h-4 w-4 stroke-[3px]" />
-            Withdrawal
-          </Button>
+          {user?.settlementAccounts?.length >= 1 && (
+            <Button
+              onClick={() => setShowWithdrawalModal(true)}
+              variant="outline"
+              className="rounded-xl border-slate-500 dark:border-slate-800 font-black uppercase tracking-widest text-[10px] px-8 h-12 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+            >
+              <Minus className="mr-2 h-4 w-4 stroke-[3px]" />
+              Withdrawal
+            </Button>
+          )}
         </div>
 
         <ResettlementNodes accounts={user.settlementAccounts} />
