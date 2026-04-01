@@ -13,9 +13,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const { data, isLoading, isError } = useGetMeQuery(undefined, {
     // skip: typeof window === "undefined", // Skip on server-side
   });

@@ -12,6 +12,7 @@ import {
   Clock,
   AlertCircle,
   Activity,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,14 +26,22 @@ import { WithdrawalModal } from "@/components/Modal-Layout/withdrawal-modal";
 import CashMovementTabs from "@/components/Modal-Layout/transaction-history";
 import { SettlementNodes } from "@/components/Modal-Layout/settlement-nodes";
 import SupportTerminal from "@/components/support/SupportTerminal";
+import { ResettlementModal } from "@/components/Modal-Layout/Resettlement-modal";
+import { useGetResettlementAccountsQuery } from "@/app/services/features/market/marketApi";
+import { ResettlementNodes } from "@/components/market/wallet/resettlementNodes";
 
-export default function FundsPage() {
+export default function WalletPage() {
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
-
+  const [showResettlementModal, setShowResettlementModal] = useState(false);
   const [showSupportDeposit, setShowSupportDeposit] = useState(false);
 
   const { data: response, isLoading } = useGetMeQuery();
+  const { data: resettlementAccounts } = useGetResettlementAccountsQuery();
+
+  // console.log("User data response:", response);
+
+  // console.log("User resettlementAccounts:", resettlementAccounts);
 
   const user = response?.user;
 
@@ -97,16 +106,17 @@ export default function FundsPage() {
           <Button
             // onClick={() => setShowDepositModal(true)}
             onClick={() => setShowSupportDeposit(true)}
-            className="rounded-xl bg-slate-900 text-white dark:bg-white dark:text-black font-black uppercase tracking-widest text-[10px] px-8 h-12 shadow-2xl hover:opacity-90 transition-all"
+            className="rounded-xl bg-green-600 text-white dark:bg-white dark:text-black font-black uppercase tracking-widest text-[10px] px-8 h-12 shadow-2xl hover:opacity-90 transition-all"
           >
             <Plus className="mr-2 h-4 w-4 stroke-[3px]" /> Deposit
           </Button>
           <Button
-            onClick={() => setShowWithdrawalModal(true)}
+            onClick={() => setShowResettlementModal(true)}
             variant="outline"
             className="rounded-xl border-slate-200 dark:border-slate-800 font-black uppercase tracking-widest text-[10px] px-8 h-12 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
           >
-            <Minus className="mr-2 h-4 w-4 stroke-[3px]" /> Withdraw
+            <Minus className="mr-2 h-4 w-4 stroke-[3px]" /> Add Withdrawal
+            Account
           </Button>
         </div>
       </header>
@@ -139,6 +149,34 @@ export default function FundsPage() {
         />
       </div>
 
+      <section>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-xl font-serif font-black italic tracking-tight text-foreground">
+                Resettlement / Withdrawal Accounts
+              </h2>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-bold">
+                Verified Liquidity Accounts
+              </p>
+            </div>
+          </div>
+          <Button
+            onClick={() => setShowWithdrawalModal(true)}
+            variant="outline"
+            className="rounded-xl border-slate-200 dark:border-slate-800 font-black uppercase tracking-widest text-[10px] px-8 h-12 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+          >
+            <Minus className="mr-2 h-4 w-4 stroke-[3px]" />
+            Withdrawal
+          </Button>
+        </div>
+
+        <ResettlementNodes accounts={user.settlementAccounts} />
+      </section>
+
       {/* 3. MOVEMENTS & NODES */}
       {/* <div className="grid gap-10 lg:grid-cols-2">
         <div className="space-y-8">
@@ -169,22 +207,28 @@ export default function FundsPage() {
         </div>
       </div> */}
 
-      <DepositModal
+      {/* <DepositModal
         isOpen={showDepositModal}
         onClose={() => setShowDepositModal(false)}
         connectedAccounts={user.connectedAccounts}
         baseCurrency={currency}
-      />
+      /> */}
 
       <SupportTerminal
         isDepositOpen={showSupportDeposit}
         onClose={() => setShowSupportDeposit(false)}
       />
 
+      <ResettlementModal
+        isOpen={showResettlementModal}
+        onClose={() => setShowResettlementModal(false)}
+      />
+
       <WithdrawalModal
         isOpen={showWithdrawalModal}
         onClose={() => setShowWithdrawalModal(false)}
         availableBalance={user.availableCash}
+        settlementAccounts={user?.settlementAccounts}
       />
     </div>
   );

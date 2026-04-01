@@ -80,17 +80,11 @@ export default function SupportTerminal({ isDepositOpen, onClose }: any) {
     }
   };
 
-  console.log(userData?.user?.profile, " profile...");
-
   console.log(
     `${userData?.user?.profile?.firstName} ${userData?.user?.profile?.lastName} `,
     "profile..."
   );
-
   const username = `${userData?.user?.profile?.firstName} ${userData?.user?.profile?.lastName} `;
-
-  console.log(userData, "userData...");
-
   const handleDepositSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);

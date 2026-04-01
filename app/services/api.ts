@@ -54,6 +54,7 @@ export const apiSlice = createApi({
     "Transactions",
     "UserBalance",
     "Messages",
+    "Resettlement",
 
     // ADD THESE NEW ADMIN TAGS:
     "Overview",

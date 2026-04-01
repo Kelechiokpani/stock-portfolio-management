@@ -23,8 +23,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import GlobalLoader from "@/components/GlobalLoader";
-
-// Assuming this is your API hook path
 import { useGetMeQuery } from "@/app/services/features/auth/authApi";
 
 export default function ProfilePage() {

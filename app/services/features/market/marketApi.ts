@@ -23,9 +23,21 @@ export interface FundPayload {
   method: string;
   description?: string;
 }
+export interface ResettlementAccount {
+  _id?: string;
+  accountName: string;
+  accountNumber: string;
+  bankName: string;
+  bankAddress?: string;
+  routingNumber?: string;
+  iban?: string;
+  swiftBic?: string;
+  currency?: string;
+  createdAt?: string;
+}
 
 export interface WithdrawalPayload {
- accountNumber: string;
+  accountNumber: string;
   routingNumber: string;
   amount: number;
   narration: string;
@@ -129,6 +141,35 @@ export const marketApi = apiSlice.injectEndpoints({
       invalidatesTags: ["UserBalance", "Transactions"],
     }),
 
+    // --- Added Onboarding Bank List ---
+    getBanks: builder.query<any[], void>({
+      query: () => "/onboarding/bank/list",
+      providesTags: ["Resettlement"],
+      transformResponse: (response: any) => {
+        return (
+          response?.data ||
+          response?.banks ||
+          (Array.isArray(response) ? response : [])
+        );
+      },
+    }),
+
+    // --- Resettlement Endpoints ---
+    getResettlementAccounts: builder.query<ResettlementAccount[], void>({
+      query: () => "/funds/resettlement",
+      providesTags: ["Resettlement"],
+      transformResponse: (response: any) => response?.data || response || [],
+    }),
+
+    addResettlementAccount: builder.mutation<any, ResettlementAccount>({
+      query: (body) => ({
+        url: "/funds/resettlement",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Resettlement"],
+    }),
+
     withdrawFunds: builder.mutation<any, WithdrawalPayload>({
       query: (body) => ({
         url: "/funds/withdrawal",
@@ -179,6 +220,11 @@ export const marketApi = apiSlice.injectEndpoints({
 export const {
   useGetApprovedStocksQuery,
   useDepositFundsMutation,
+
+  useGetBanksQuery,
+  useGetResettlementAccountsQuery,
+  useAddResettlementAccountMutation,
+
   useWithdrawFundsMutation,
   useBuyStockMutation,
   useSellStockMutation,
