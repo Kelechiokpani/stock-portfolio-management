@@ -61,7 +61,6 @@ export default function ManageUsersPage() {
     isFetching,
   } = useGetAllUsersQuery({ page, limit, total: 0 });
 
-
   // --- 1. DATA NORMALIZATION ---
   const usersList = useMemo(() => {
     if (!rawResponse) return [];
@@ -341,11 +340,11 @@ function UserRow({ user }: { user: any }) {
             className={`
             text-[9px] py-0 px-2 border-none shadow-none font-black tracking-widest
             ${
-              user.accountStatus === "approved"
+              user.accountStatus === "active"
                 ? "bg-emerald-500/10 text-emerald-600"
                 : user.accountStatus === "pending"
                 ? "bg-amber-500/10 text-amber-600"
-                : "bg-green-500/10 text-green-600"
+                : "bg-red-500/10 text-red-600"
             }
           `}
           >

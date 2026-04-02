@@ -30,6 +30,7 @@ import {
   useUpdateGlobalSettingsMutation,
 } from "@/app/services/features/admin/adminApi";
 import GlobalLoader from "@/components/GlobalLoader";
+import { console } from "inspector";
 
 export default function GeneralAdminSettings() {
   const {
@@ -38,8 +39,10 @@ export default function GeneralAdminSettings() {
     refetch,
   } = useGetGlobalSettingsQuery();
 
+  console.log("Fetched Global Settings:", remoteSettings);
 
-  const [updateSettings, { isLoading: isUpdating }] =  useUpdateGlobalSettingsMutation();
+  const [updateSettings, { isLoading: isUpdating }] =
+    useUpdateGlobalSettingsMutation();
   const [formData, setFormData] = useState<any>(null);
 
   useEffect(() => {
@@ -170,7 +173,9 @@ export default function GeneralAdminSettings() {
             sub="Public sign-ups"
             icon={Globe}
             checked={formData?.allowedRegistrations}
-            onChange={(val:any) => handleInputChange("allowedRegistrations", val)}
+            onChange={(val: any) =>
+              handleInputChange("allowedRegistrations", val)
+            }
             colorClass="bg-emerald-500"
           />
 
@@ -180,7 +185,7 @@ export default function GeneralAdminSettings() {
             sub="Instant verification"
             icon={UserCheck}
             checked={formData?.kycAutoApproval}
-            onChange={(val:any) => handleInputChange("kycAutoApproval", val)}
+            onChange={(val: any) => handleInputChange("kycAutoApproval", val)}
             colorClass="bg-blue-600"
           />
         </div>

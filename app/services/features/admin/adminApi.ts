@@ -97,6 +97,7 @@ export const adminApi = apiSlice.injectEndpoints({
       providesTags: ["Settings"],
     }),
 
+  
     updateGlobalSettings: builder.mutation<any, any>({
       query: (settings) => ({
         url: "/admin/settings",
@@ -127,22 +128,7 @@ export const adminApi = apiSlice.injectEndpoints({
       invalidatesTags: ["Requests"],
     }),
 
-    // 7. Chat
-    // adminApi.ts
-    // getChatByUserId: builder.query<Message[], string>({
-    //   // query: (userId) => `/admin/users/${userId}/details`,
-    //   query: (id) => (id ? `/admin/users/${id}/chat` : "/chat"),
-    //   transformResponse: (response: any) => {
-    //     const messages =
-    //       response.chat || response.user?.chat || response.messages || [];
-    //     return Array.isArray(messages) ? messages : [];
-    //   },
-    //   providesTags: (result, error, userId) => [
-    //     { type: "Messages", id: userId },
-    //   ],
-    // }),
 
-    // 8. Status Updates (Transfers, Transactions, Trades)
     updatePortfolioTransferStatus: builder.mutation<
       any,
       { id: string; status: "completed" | "rejected" | "cancelled" }
@@ -190,13 +176,18 @@ export const {
   useGetMarketAssetsQuery,
   useUpdateMarketAssetMutation,
   useDeleteMarketAssetMutation,
+
   useGetGlobalSettingsQuery,
   useUpdateGlobalSettingsMutation,
+
   useGetAccountRequestsQuery,
   useReviewRequestMutation,
   useUpdateUserStatusMutation,
+
   // useGetChatByUserIdQuery,
   useUpdatePortfolioTransferStatusMutation,
   useUpdateTransactionStatusMutation,
   useUpdateTradeStatusMutation,
+
+ 
 } = adminApi;
