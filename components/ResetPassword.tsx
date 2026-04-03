@@ -6,12 +6,11 @@ import {
   Lock,
   Eye,
   EyeOff,
-  CheckCircle2,
   ShieldCheck,
   ChevronRight,
-  TrendingUp,
-  Star,
   RefreshCcw,
+  Star,
+  Hash, // Added for OTP icon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,15 +36,18 @@ const slides = [
 export default function ResetPassword() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
 
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [passwords, setPasswords] = useState({ password: "", confirm: "" });
+  const [otp, setOtp] = useState("") as any;
+  const [passwords, setPasswords] = useState({
+    password: "",
+    confirm: "",
+  }) as any;
   const [isSuccess, setIsSuccess] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState(null) as any;
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -60,31 +62,36 @@ export default function ResetPassword() {
   const isPasswordSecure = passwords.password.length >= 8;
   const doPasswordsMatch =
     passwords.password === passwords.confirm && passwords.password !== "";
+  const isOtpValid = otp.length >= 4; // Basic check for OTP length
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: any) {
     e.preventDefault();
     setErrorMsg(null);
+
+    if (!isOtpValid) {
+      setErrorMsg("Security Protocol: Please enter a valid OTP code.");
+      return;
+    }
 
     if (!doPasswordsMatch) {
       setErrorMsg("Security confirmation: Passwords do not match.");
       return;
     }
 
-    if (!token) {
-      setErrorMsg(
-        "Authentication token expired or missing. Please re-initiate recovery."
-      );
-      return;
-    }
-
     try {
-      await resetPassword({ token, newPassword: passwords.password }).unwrap();
+      // Sending OTP, Token (from URL), and New Password to your API
+      (await resetPassword({
+        otp: otp as any,
+        newPassword: passwords.password,
+      }).unwrap()) as any;
+
       setIsSuccess(true);
       toast.success("Credentials updated successfully.");
       setTimeout(() => router.push("/login"), 3000);
     } catch (err: any) {
       setErrorMsg(
-        err?.data?.message || "Protocol error: Failed to reset credentials."
+        err?.data?.message ||
+          "Protocol error: Failed to reset credentials. Verify your OTP."
       );
     }
   }
@@ -100,7 +107,6 @@ export default function ResetPassword() {
               i === currentSlide ? "opacity-100" : "opacity-0"
             }`}
           >
-            {/* Gradient Overlay updated to Primary color */}
             <div className="absolute inset-0 z-10 bg-gradient-to-t from-primary/90 via-zinc-950/40 to-transparent" />
             <img
               src={slide.image}
@@ -121,7 +127,7 @@ export default function ResetPassword() {
       </div>
 
       {/* Right: Reset Form */}
-      <main className="flex w-full flex-col lg:w-[80%] justify-center pt-8">
+      <main className="flex w-full flex-col lg:w-[60%] justify-center pt-8">
         <div className="mx-auto w-full max-w-lg px-8 py-12">
           {!isSuccess ? (
             <div className="space-y-10 animate-in fade-in slide-in-from-right-8 duration-700">
@@ -131,19 +137,37 @@ export default function ResetPassword() {
                   <span className="text-zinc-400">Credential Reset</span>
                 </div>
                 <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-white uppercase italic">
-                  Set New Password.
+                  Verify & Reset.
                 </h1>
-                <p className="text-zinc-500 font-medium">
-                  Define a new high-entropy password for your account.
-                </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6 pt-6">
+                {/* OTP Input Section */}
+                <div className="space-y-2">
+                  <Label className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-1">
+                    Authorization Code (OTP)
+                  </Label>
+                  <div className="relative">
+                    <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 h-4 w-4" />
+                    <Input
+                      type="text"
+                      placeholder="Enter 6-digit code"
+                      maxLength={6}
+                      className="h-14 rounded-2xl border-zinc-200 bg-zinc-50/50 pl-12 transition-all focus:bg-white focus:ring-4 focus:ring-primary/10 dark:border-zinc-800 dark:bg-zinc-900/50 focus-visible:ring-primary font-mono text-lg tracking-[0.3em]"
+                      value={otp}
+                      onChange={(e) =>
+                        setOtp(e.target.value.replace(/\D/g, ""))
+                      } // Only numbers
+                      required
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-1">
                     New Password
                   </Label>
-                  <div className="relative mt-4">
+                  <div className="relative mt-2">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 h-4 w-4" />
                     <Input
                       type={showPassword ? "text" : "password"}
@@ -163,24 +187,6 @@ export default function ResetPassword() {
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-                  {passwords.password && (
-                    <div className="flex items-center gap-2 mt-2 ml-1">
-                      <div
-                        className={`h-1 flex-1 rounded-full ${
-                          isPasswordSecure ? "bg-primary" : "bg-zinc-200"
-                        }`}
-                      />
-                      <p
-                        className={`text-[10px] font-bold uppercase tracking-tighter ${
-                          isPasswordSecure ? "text-primary" : "text-zinc-400"
-                        }`}
-                      >
-                        {isPasswordSecure
-                          ? "Secure Entropy"
-                          : "Min 8 Characters"}
-                      </p>
-                    </div>
-                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -211,10 +217,15 @@ export default function ResetPassword() {
 
                 <Button
                   type="submit"
-                  disabled={isLoading || !isPasswordSecure || !doPasswordsMatch}
+                  disabled={
+                    isLoading ||
+                    !isPasswordSecure ||
+                    !doPasswordsMatch ||
+                    !isOtpValid
+                  }
                   className="w-full h-14 rounded-2xl bg-primary font-black uppercase tracking-widest text-primary-foreground shadow-xl shadow-primary/25 transition-all hover:translate-y-[-2px]"
                 >
-                  {isLoading ? "Encrypting Update..." : "Update Credentials"}
+                  {isLoading ? "Validating Protocol..." : "Update Credentials"}
                 </Button>
               </form>
             </div>
@@ -243,12 +254,10 @@ export default function ResetPassword() {
           )}
         </div>
 
-        {/* Dynamic Footer Status */}
         <div className="mt-auto border-t border-zinc-100 dark:border-zinc-900 p-8 flex justify-between items-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
           <div className="flex items-center gap-2">
             <Lock size={12} className="text-primary" /> AES-256 Protected
           </div>
-          <div className="hidden sm:block">Session Status: Active</div>
         </div>
       </main>
     </div>

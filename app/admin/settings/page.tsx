@@ -30,7 +30,6 @@ import {
   useUpdateGlobalSettingsMutation,
 } from "@/app/services/features/admin/adminApi";
 import GlobalLoader from "@/components/GlobalLoader";
-import { console } from "inspector";
 
 export default function GeneralAdminSettings() {
   const {

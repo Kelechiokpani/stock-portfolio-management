@@ -24,8 +24,8 @@ export interface OtpSendPayload {
 }
 
 export interface OtpVerifyPayload {
-  email: string;
-  otp: string;
+  email: any;
+  otp: any;
 }
 
 export const authApi = apiSlice.injectEndpoints({

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   TrendingUp,
   ArrowLeft,
@@ -17,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForgotPasswordMutation } from "@/app/services/features/auth/authApi";
 import { toast } from "sonner";
+import { routerServerGlobal } from "next/dist/server/lib/router-utils/router-server-context";
 
 const slides = [
   {
@@ -39,6 +41,7 @@ export default function ForgotPasswordPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -61,6 +64,7 @@ export default function ForgotPasswordPage() {
       const data = await forgotPassword({ email }).unwrap();
       setIsSubmitted(true);
       console.log(data, "data...");
+      router.push("/reset-password");
       toast.success("Security link dispatched.");
     } catch (err: any) {
       setErrorMsg(
